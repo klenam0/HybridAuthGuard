@@ -36,9 +36,23 @@ class AnomalyDetector:
         self.user_encoder = LabelEncoder()
         self.ip_encoder   = LabelEncoder()
 
-        # Extended encoders (only for RBA-trained model)
+        # Extended encoders (only for RBA-trained model, legacy raw-ID scheme)
         self.country_encoder = None
         self.device_encoder  = None
+
+        # Reviewer-revision fix (M6): raw LabelEncoder IDs let the model
+        # substantially memorise specific identities rather than learn
+        # generalisable behaviour (confirmed: ROC-AUC collapsed to chance
+        # level, 0.511, under a strict held-out-user test). Replaced with
+        # training-set frequency for any model trained after this fix,
+        # which recovered ROC-AUC to 0.755. encoding_scheme distinguishes
+        # which payload shape was loaded; legacy raw-ID models still work
+        # via the untouched code path above.
+        self.encoding_scheme = "raw_id"   # or "frequency", set by load_model()
+        self.ip_freq_map      = {}
+        self.user_freq_map    = {}
+        self.country_freq_map = {}
+        self.device_freq_map  = {}
 
         self.is_trained    = False
         self.scaler        = None
@@ -197,6 +211,54 @@ class AnomalyDetector:
             is_new_ip, is_new_country
         ]], dtype=np.float64)
 
+    def _extract_features_v2_frequency(self, log_event):
+        """
+        Frequency-encoded counterpart to _extract_features_v2(). Same 10
+        feature slots, same order, same causal failed_rate semantics;
+        only ip_enc/user_enc/country_enc/device_enc are replaced with
+        training-set frequency lookups. An entity absent from training
+        correctly gets 0.0, not a special case, since rarity itself is
+        the informative signal (see M6 / MASTER_SUMMARY_all_changes.md).
+        """
+        from datetime import datetime as dt
+        import numpy as np
+
+        try:
+            ts = dt.strptime(log_event["timestamp"], "%Y-%m-%d %H:%M:%S")
+            hour = ts.hour
+        except Exception:
+            hour = 12
+        hour_sin = np.sin(2 * np.pi * hour / 24)
+        hour_cos = np.cos(2 * np.pi * hour / 24)
+
+        is_failed = 1 if log_event.get("status", "SUCCESS") == "FAILED" else 0
+
+        ip      = str(log_event.get("ip", "0.0.0.0")).strip()
+        user    = str(log_event.get("user", "unknown")).strip()
+        country = str(log_event.get("country", "XX")).strip()
+        device  = str(log_event.get("device_type", "Unknown")).strip()
+
+        total = self.ip_total_counts[ip]
+        failed = self.ip_failure_counts.get(ip, 0)
+        failed_rate = failed / total if total > 0 else 0.0
+
+        ip_freq      = self.ip_freq_map.get(ip, 0.0)
+        user_freq    = self.user_freq_map.get(user, 0.0)
+        country_freq = self.country_freq_map.get(country, 0.0)
+        device_freq  = self.device_freq_map.get(device, 0.0)
+
+        is_new_ip = int(ip not in self.known_ips_set)
+        is_new_country = int(country not in self.known_countries_set)
+
+        return np.array([[
+            hour_sin, hour_cos,
+            is_failed,
+            ip_freq, user_freq,
+            failed_rate,
+            country_freq, device_freq,
+            is_new_ip, is_new_country
+        ]], dtype=np.float64)
+
     # ── Offline Training (Synthetic Fallback) ─────────────────────────────
 
     def train(self, training_file):
@@ -267,12 +329,46 @@ class AnomalyDetector:
             self.model        = payload["model"]
             self.scaler       = payload.get("scaler", None)
             self.explainer = AlertExplainer(self.scaler) if self.scaler is not None else None
+            self.contamination = payload.get("contamination", 0.05)
 
+            # Detect encoding scheme FIRST: frequency-encoded payloads carry
+            # no ip_encoder/user_encoder at all, so those must not be read
+            # unconditionally before this check.
+            if payload.get("encoding_scheme") == "frequency":
+                self.encoding_scheme    = "frequency"
+                self.ip_freq_map        = payload.get("ip_freq_map", {})
+                self.user_freq_map      = payload.get("user_freq_map", {})
+                self.country_freq_map   = payload.get("country_freq_map", {})
+                self.device_freq_map    = payload.get("device_freq_map", {})
+                self.known_ips_set       = payload.get("known_ips_set", set())
+                self.known_countries_set = payload.get("known_countries_set", set())
+                self.known_ips    = payload.get("known_ips", list(self.ip_freq_map.keys()))
+                self.known_users  = payload.get("known_users", list(self.user_freq_map.keys()))
+                self.known_countries = payload.get("known_countries", list(self.country_freq_map.keys()))
+                self.known_devices   = payload.get("known_devices", list(self.device_freq_map.keys()))
+                self.feature_count   = payload.get("feature_count", 10)
+
+                trained_on = payload.get("trained_on", "RBA Dataset")
+                metrics    = payload.get("metrics", {})
+                print(f"✅ RBA-trained model loaded from {model_path} (frequency encoding)")
+                print(f"   Training data: {trained_on}")
+                print(f"   Known IPs: {len(self.known_ips):,} | "
+                      f"Users: {len(self.known_users):,} | "
+                      f"Countries: {len(self.known_countries)} | "
+                      f"Devices: {len(self.known_devices)}")
+                if metrics:
+                    print(f"   Evaluation - Precision: {metrics.get('precision',0):.1%} | "
+                          f"Recall: {metrics.get('recall',0):.1%} | "
+                          f"F1: {metrics.get('f1',0):.1%}")
+
+                self.is_trained = True
+                return True
+
+            # Legacy raw-ID path: these keys only exist on pre-fix payloads.
             self.ip_encoder   = payload["ip_encoder"]
             self.user_encoder = payload["user_encoder"]
             self.known_ips    = payload.get("known_ips",   [])
             self.known_users  = payload.get("known_users", [])
-            self.contamination = payload.get("contamination", 0.05)
             self.feature_count = payload.get("feature_count", 5)
 
             # Detect if this is an RBA-trained model (has country/device encoders)
@@ -340,9 +436,13 @@ class AnomalyDetector:
             self.ip_failure_counts[ip] += 1
 
         try:
-            # Use the 10‑feature extraction if we have the required attributes,
-            # otherwise fall back to legacy extraction for 5/7‑feature models.
-            if self.feature_count >= 10 and hasattr(self, "known_ips_set"):
+            # Use frequency encoding if that's the loaded model's scheme,
+            # the legacy raw-ID 10-feature extraction if it's an older RBA
+            # model, otherwise fall back to legacy extraction for 5/7-feature
+            # synthetic models.
+            if self.encoding_scheme == "frequency":
+                features = self._extract_features_v2_frequency(log_event)
+            elif self.feature_count >= 10 and hasattr(self, "known_ips_set"):
                 features = self._extract_features_v2(log_event)
             else:
                 # For 5 or 7 features, we need a list of one event
@@ -383,7 +483,9 @@ class AnomalyDetector:
             return None
 
         try:
-            if self.feature_count >= 10:
+            if self.encoding_scheme == "frequency":
+                raw_features = self._extract_features_v2_frequency(log_event)
+            elif self.feature_count >= 10:
                 raw_features = self._extract_features_v2(log_event)
             else:
                 raw_features = self._extract_features([log_event])
