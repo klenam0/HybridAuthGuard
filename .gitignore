@@ -26,9 +26,12 @@ backend/data/live_queue.jsonl.cursor
 backend/data/training_logs.json
 backend/data/training_sample.csv
 backend/data/eval_sample.csv
+# RBA Dataset CSV (download separately, see docs/SETUP.md)
+backend/data/rba-dataset.csv
+backend/data/*.csv
 backend/data/*.lock
 
-# model.pkl is 468MB — too large for direct commit or Git LFS's free
+# model.pkl is about 390 MB — too large for direct commit or Git LFS's free
 # bandwidth quota. Distributed via GitHub Releases instead — see
 # docs/SETUP.md for the download link. model_metrics.json IS tracked
 # (small, just evaluation numbers).
@@ -48,3 +51,8 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
+
+# ── Local AI/editor tooling ─────────────────────────────────────────────
+.claude/
+frontend/.claude/
+frontend/skills-lock.json
