@@ -26,6 +26,8 @@ This document captures the significant design decisions made during development,
 
 ### ADR-3: Isolation Forest hyperparameters - `contamination=0.15` with `StandardScaler`
 
+> **Status: Superseded by [ADR-13](#adr-13-contamination-04-selected-on-the-validation-split-only).** `contamination=0.15` was selected by evaluating against the same data later reported as the held-out test set, so the reported figures were optimistically biased. Kept here for the record.
+
 **Context:** The `contamination` parameter sets the expected anomaly rate and directly affects the model's decision boundary.
 
 **Decision:** `contamination=0.15`, selected empirically.
@@ -96,6 +98,8 @@ This document captures the significant design decisions made during development,
 
 ### ADR-10: RBA Dataset scale - 630,000 training rows
 
+> **Status: Superseded by [ADR-14](#adr-14-user-disjoint-split-with-a-561464-event-training-partition).** The 630,000-row training set came from a random split in which the same users and IPs appeared in both training and evaluation. Kept here for the record.
+
 **Context:** Model quality was evaluated across different training set sizes.
 
 **Decision:** Train on 630,000 normal login events rather than a smaller subset.
@@ -121,3 +125,71 @@ This document captures the significant design decisions made during development,
 **Decision:** Uncommented the instantiation and added the corresponding import. This required a full pipeline re-run, since previously generated alerts had `feature_explanation: None` baked in.
 
 **Consequences:** All post-fix alerts now carry a genuine per-feature standard-deviation breakdown rather than a null field. Any results or screenshots referencing feature explainability must be drawn from the corrected, post-fix run.
+
+---
+
+### ADR-13: Contamination 0.4, selected on the validation split only
+
+**Context:** ADR-3's `contamination=0.15` was chosen by repeatedly evaluating candidate values against the same data later reported as held-out. Tuning a hyperparameter on the test set leaks test information into the model choice, so the reported precision, recall and F1 were optimistically biased.
+
+**Decision:** Separate train, validation and test splits. Sweep `contamination` on the validation split only, and touch the test split once, for the reported figures. The sweep selected `contamination=0.4`.
+
+**Consequences:** The reported figures are lower but honest: on the test split, precision 53.8%, recall 77.9%, F1 63.7% and ROC-AUC 0.755 (10-seed mean); the single deployed model shows 53.5% / 77.9% / 63.4% / 0.750. All earlier figures computed with test-set tuning are withdrawn. Supersedes ADR-3.
+
+---
+
+### ADR-14: User-disjoint split with a 561,464-event training partition
+
+**Context:** ADR-10's training set came from a single random train/evaluation division with no user separation, so the same users and IPs appeared on both sides. A model can then score well by recognising individuals it has already seen, which says nothing about unseen users.
+
+**Decision:** Sample 700,000 normal and 70,000 attack events and split them user-disjoint, holding out 30% of users entirely. Training uses 561,464 normal events from 174,107 users; validation and test hold 104,268 events each.
+
+**Consequences:** Every test user is unseen at training time, which matches deployment. The training set is smaller than ADR-10's 630,000 rows, but the measured figures now reflect generalisation rather than recall of known identities. Supersedes ADR-10.
+
+---
+
+### ADR-15: Frequency encoding instead of raw label-encoder IDs
+
+**Context:** IP, user, country and device were fed to the model as raw `LabelEncoder` integer IDs. These IDs are arbitrary, so the model could learn "this specific identity is normal" rather than generalisable behaviour. Under a strict held-out-user test, ROC-AUC fell to chance level (0.511), confirming that the model had been memorising identities.
+
+**Decision:** Replace each ID with its training-set frequency (the share of training logins with that value). A value never seen in training encodes as 0, so rarity itself becomes the signal. Model files are tagged `encoding_scheme: "frequency"`; `anomaly_model.py` checks for this tag first and still loads older raw-ID files through a legacy path.
+
+**Consequences:** ROC-AUC recovered to 0.755 on the user-disjoint test split. The explainer now describes these features as a share of training logins instead of an encoded ID. The original raw-ID feature extraction is kept verbatim in `backend/ml/legacy_features.py`, used only to reproduce the Batch 1 baseline.
+
+---
+
+### ADR-16: Separate rule and ML block state
+
+**Context:** The rule-based and ML detectors shared a single blocked-IP set. When the ML detector blocked an IP on a flagged `SUCCESS` event, every later `FAILED` event from that IP was skipped, so the rule detectors never accumulated the evidence they needed to fire. A separate defect appended each failure timestamp twice, so Slow Brute Force fired at roughly half its documented threshold.
+
+**Decision:** Track `rule_blocked_ips` and `ml_blocked_ips` separately. Only `rule_blocked_ips` gates the `FAILED`-event rule checks. Record each failure timestamp once per event.
+
+**Consequences:** An ML block on a `SUCCESS` event no longer suppresses rule evidence on later `FAILED` events, which refines ADR-6. Slow Brute Force now fires at its documented threshold (4+ failures over 5+ minutes).
+
+---
+
+### ADR-17: ML re-alert cooldown of 0 s and internal-IP guard disabled by default
+
+**Context:** The ML detector alerted at most once per IP on `FAILED` events, ever. Separately, an internal-IP guard skipped ML scoring for `192.168.`, `10.0.` and `172.16.` addresses, a rule built for this project's own office network rather than for the benchmark data.
+
+**Decision:** Replace the once-only throttle with a configurable cooldown, `ML_REALERT_COOLDOWN_SECONDS`, set to 0. Gate the internal-IP guard behind `INTERNAL_IP_GUARD_ENABLED`, set to `False`. Both values were chosen on the validation split.
+
+**Consequences:** Shorter cooldowns improved detection in the validation sweep, and 0 performed best. Disabling the guard recovers attacking IPs it had been hiding. Re-enable the guard only after confirming it suits the network where the system is deployed.
+
+---
+
+### ADR-18: Corrected MITRE ATT&CK technique mappings
+
+**Context:** Three alert types were mapped to techniques that do not describe the observed behaviour.
+
+**Decision:** Each mapping was checked against MITRE's published technique definitions and corrected:
+
+| Alert type            | Was       | Now                                  |
+| --------------------- | --------- | ------------------------------------ |
+| Slow Brute Force      | T1110.003 | T1110.001 (Password Guessing)        |
+| Suspicious Login Time | T1078.001 | T1078 (Valid Accounts, Persistence)  |
+| ML Anomaly Detected   | T1190     | T1078 (Valid Accounts, Persistence)  |
+
+Unchanged: Brute Force T1110.001; Credential Stuffing T1110.004; Multiple IP Login T1078 (Defense Evasion / Persistence).
+
+**Consequences:** Slow, low-rate guessing against one account is Password Guessing, not Password Spraying. Neither an off-hours login nor an ML-flagged login is evidence of a default account or of an exploited public-facing application; both are best described as use of valid accounts. The mapping has been reviewed by one rater only (see README Limitations).

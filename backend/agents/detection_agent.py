@@ -5,8 +5,9 @@ from datetime import datetime
 
 class DetectionAgent:
     """
-    Reviewer-revision fixes applied here (see MASTER_SUMMARY_all_changes.md
-    for the full rationale and test evidence behind each):
+    Reviewer-revision fixes applied here (see docs/DECISIONS.md, ADR-16 on
+    the block-state split for Fixes A-B and ADR-17 on cooldown and the
+    internal-IP guard for Fixes C-D):
 
       Fix A: removed a duplicate timestamp append that made Slow Brute
              Force fire at ~2 real failures instead of its documented 4+.

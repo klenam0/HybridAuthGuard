@@ -2,8 +2,9 @@
 """
 RBA Dataset training — reviewer-revision corrected version.
 
-WHAT CHANGED FROM THE ORIGINAL, AND WHY (see MASTER_SUMMARY_all_changes.md
-for the full evidence trail; this is the short version):
+WHAT CHANGED FROM THE ORIGINAL, AND WHY (see docs/DECISIONS.md, ADR-13 on
+contamination, ADR-14 on the user-disjoint split and ADR-15 on frequency
+encoding; this is the short version):
 
   - CONTAMINATION was 0.15, selected by repeatedly evaluating against the
     same data later reported as held-out, genuine test-set leakage. A

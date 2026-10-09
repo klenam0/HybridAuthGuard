@@ -31,6 +31,8 @@ def get_or_train_model(base):
     model_path    = os.path.join(base, "data", "model.pkl")
     training_path = os.path.join(base, "data", "training_logs.json")
 
+    # Fallback only: used if backend/data/model.pkl is missing, to train a small synthetic model.
+    # The deployed RBA model is loaded from model.pkl with its own contamination (0.4); see ADR-13.
     detector = AnomalyDetector(contamination=0.15)
 
     if os.path.exists(model_path):

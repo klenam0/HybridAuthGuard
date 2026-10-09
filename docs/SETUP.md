@@ -7,11 +7,11 @@
 - [Ollama](https://ollama.com/) installed locally, with the `phi3:mini` model pulled
 - (Optional, for retraining) the [RBA Dataset](https://github.com/vs-uulm/2021-RBA-Dataset) CSV
 
-A pre-trained model is distributed as a [GitHub Release asset](https://github.com/klenam0/Autonomous-Cyber-Threat-Monitoring-and-Response-System-Using-Agentic-AI/releases/tag/v1.0.0-model) rather than committed directly (it's ~470MB, driven mainly by the full IP/user label-encoder vocabularies from 630,000 training rows). Download it and place it at `backend/data/model.pkl` before running the pipeline - see "Getting the pre-trained model" below.
+A pre-trained model is distributed as a [GitHub Release asset](https://github.com/klenam0/HybridAuthGuard/releases/tag/v2.0.0-model) rather than committed directly (it's about 390 MB). Download it and place it at `backend/data/model.pkl` before running the pipeline - see "Getting the pre-trained model" below.
 
 ### Getting the pre-trained model
 
-The trained Isolation Forest (`backend/data/model.pkl`, ~470MB) is distributed as a [GitHub Release asset](https://github.com/klenam0/Autonomous-Cyber-Threat-Monitoring-and-Response-System-Using-Agentic-AI/releases/tag/v1.0.0-model) rather than committed to the repository.
+The trained Isolation Forest (`backend/data/model.pkl`, about 390 MB) is distributed as a [GitHub Release asset](https://github.com/klenam0/HybridAuthGuard/releases/tag/v2.0.0-model) rather than committed to the repository.
 This model was trained and pickled under `scikit-learn==1.8.0`. Loading it with a substantially different scikit-learn version may produce warnings or, in rare cases, fail to unpickle - install from `requirements.txt` exactly, or retrain locally if you need a different version.
 
 **Download it and place it at `backend/data/model.pkl` before running `main.py`.** If this file is absent, the system will not error out - it silently falls back to training a weaker synthetic 5-feature model instead of loading the RBA-trained 10-feature one, which will not reproduce the reported precision/recall/F1 figures.
@@ -19,8 +19,8 @@ This model was trained and pickled under `scikit-learn==1.8.0`. Loading it with 
 ## 1. Clone and enter the repo
 
 ```bash
-git clone https://github.com/klenam0/Autonomous-Cyber-Threat-Monitoring-and-Response-System-Using-Agentic-AI.git
-cd Autonomous-Cyber-Threat-Monitoring-and-Response-System-Using-Agentic-AI
+git clone https://github.com/klenam0/HybridAuthGuard.git
+cd HybridAuthGuard
 ```
 
 ## 2. Backend setup
@@ -36,6 +36,8 @@ cp .env.example .env
 # Edit .env with your own values - see "Environment Variables" below
 ```
 
+`.env` is never committed. If you delete or lose it, restore it from the template with `cp .env.example .env` and fill the values in again.
+
 ### Environment Variables (`backend/.env`)
 
 | Variable         | Required    | Purpose                                                                                |
@@ -43,6 +45,7 @@ cp .env.example .env
 | `EMAIL_SENDER`   | No          | Gmail address used to send HIGH-severity alert emails                                  |
 | `EMAIL_PASSWORD` | No          | Gmail **app password** (not your account password)                                     |
 | `EMAIL_RECEIVER` | No          | Where alert emails are sent                                                            |
+| `RBA_DATASET_PATH` | No        | Path to the RBA Dataset CSV; only needed to retrain. Defaults to `backend/data/rba-dataset.csv` |
 | `CLEAR_TOKEN`    | Recommended | Bearer token required to clear alerts / the live queue via the API. Generate one with: |
 
 ```bash
@@ -75,10 +78,12 @@ python live_simulator.py --rate 1.0 --attack-interval 60
 **Retraining the ML model** (optional - requires the RBA Dataset CSV):
 
 ```bash
-# Set RBA_DATASET_PATH in your .env, or edit the default path in
-# ml/train_from_dataset.py, to point at your local copy
+# Set RBA_DATASET_PATH in backend/.env to point at your local copy,
+# or place the CSV at backend/data/rba-dataset.csv (the default)
 python ml/train_from_dataset.py
 ```
+
+The experiment scripts (`ml/train_from_dataset_v*.py`, `ml/evaluate_*.py`) read the same variable and write their results to `backend/results/` - see `backend/results/README.md`.
 
 ## 3. Frontend setup
 
@@ -89,7 +94,9 @@ cp .env.example .env
 npm start
 ```
 
-The dashboard runs at `http://localhost:3000` and expects the API at `http://localhost:5000` by default (see `frontend/.env.example`).
+The dashboard runs at `http://localhost:3000` and expects the API at `http://localhost:5000/api` (set in `frontend/src/config/api.js`).
+
+`frontend/.env` holds one variable, `REACT_APP_CLEAR_TOKEN`, which must match `CLEAR_TOKEN` in `backend/.env`. Without it the Settings page's **Clear Alerts** button stays disabled. As with the backend, restore a lost `frontend/.env` with `cp .env.example .env`.
 
 ## 4. Verifying everything works
 

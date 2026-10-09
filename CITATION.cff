@@ -4,9 +4,9 @@ title: "Autonomous Cyber Threat Monitoring and Response System Using Agentic AI"
 authors:
   - family-names: "Deegbe"
     given-names: "Cephas Dotse Klenam"
-date-released: "2026-01-01"
-version: "1.0.0"
-repository-code: "https://github.com/klenam0/Autonomous-Cyber-Threat-Monitoring-and-Response-System-Using-Agentic-AI"
+date-released: "2026-10-09"
+version: "2.0.0"
+repository-code: "https://github.com/klenam0/HybridAuthGuard"
 license: MIT
 type: software
 keywords:
@@ -20,5 +20,5 @@ abstract: >
   A multi-agent intrusion detection system combining rule-based logic,
   Isolation Forest machine learning, and LLM-based alert enrichment,
   applied to risk-based authentication threat detection. Developed as a
-  final-year BSc Computer Science research project at the University of
+  final-year BSc Information Technology research project at the University of
   Ghana.

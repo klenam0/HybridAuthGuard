@@ -218,7 +218,7 @@ class AnomalyDetector:
         only ip_enc/user_enc/country_enc/device_enc are replaced with
         training-set frequency lookups. An entity absent from training
         correctly gets 0.0, not a special case, since rarity itself is
-        the informative signal (see M6 / MASTER_SUMMARY_all_changes.md).
+        the informative signal (see docs/DECISIONS.md, ADR-15 on frequency encoding).
         """
         from datetime import datetime as dt
         import numpy as np

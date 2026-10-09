@@ -52,6 +52,16 @@ The ordering in step 3 is not cosmetic. Slow brute force and credential stuffing
 
 The ML detector treats `FAILED` and `SUCCESS` events differently: a flagged `FAILED` event triggers an alert but does **not** block the IP, so the rule-based detectors downstream can still accumulate the failure count they need to fire; a flagged `SUCCESS` event blocks immediately, since no rule-based detector covers a suspicious successful login (e.g., account takeover from an unrecognized IP). See Decision 6.
 
+Block state is kept in two separate sets so the two paradigms cannot interfere with each other (ADR-16):
+
+- **`rule_blocked_ips`** - IPs blocked by a rule-based detector. Only this set gates the `FAILED`-event rule checks.
+- **`ml_blocked_ips`** - IPs blocked by the ML detector on a `SUCCESS` event. An ML block therefore no longer suppresses rule evidence from later `FAILED` events from the same IP.
+
+Two further settings were chosen on the validation split (ADR-17):
+
+- **ML re-alert cooldown: 0 s** (`ML_REALERT_COOLDOWN_SECONDS`). A flagged `FAILED` event may raise a new ML alert every time, rather than once per IP.
+- **Internal-IP guard: disabled** (`INTERNAL_IP_GUARD_ENABLED = False`). When enabled, it skips ML scoring for `192.168.`, `10.0.` and `172.16.` addresses; it cost detection coverage on the RBA benchmark, so it is off by default.
+
 ### Analysis Agent
 
 Enriches a raw detector output with:
@@ -74,15 +84,17 @@ Maps severity to a simulated action:
 
 ```mermaid
 flowchart TD
-    A[RBA Dataset<br/>630k normal login events] --> B[Feature Extraction<br/>10 features]
+    A[RBA Dataset<br/>561,464 normal login events<br/>user-disjoint training partition] --> B[Feature Extraction<br/>10 features, frequency-encoded]
     B --> C[StandardScaler]
-    C --> D[Isolation Forest<br/>contamination=0.15, 200 trees]
+    C --> D[Isolation Forest<br/>contamination=0.4, 200 trees]
     D --> E[model.pkl]
     E --> F[Runtime: score_event]
     F --> G{Anomalous?}
     G -->|Yes| H[AlertExplainer<br/>per-feature std-dev breakdown]
     G -->|No| I[No alert]
 ```
+
+`contamination=0.4` was chosen on the validation split only; the test split is used once, for the reported figures (ADR-13). The training partition is user-disjoint: 30% of users are held out entirely for validation and test (ADR-14).
 
 The model is trained **offline only** - `train_from_dataset.py` is a separate, one-time (or periodically re-run) process. At runtime, `AnomalyDetector` loads the saved `model.pkl` and performs inference exclusively; it never retrains on live data. This two-phase design mirrors how production SIEM platforms operate and avoids the circular-validation problem of testing a model on the same live data it's being updated from.
 
@@ -93,13 +105,15 @@ The model is trained **offline only** - `train_from_dataset.py` is a separate, o
 | 0   | `hour_sin`       | Cyclic encoding of login hour (sine component)               |
 | 1   | `hour_cos`       | Cyclic encoding of login hour (cosine component)             |
 | 2   | `is_failed`      | 1 if login failed                                            |
-| 3   | `ip_enc`         | Label-encoded source IP                                      |
-| 4   | `user_enc`       | Label-encoded username                                       |
+| 3   | `ip_freq`        | Share of training logins from this source IP (0 if unseen)   |
+| 4   | `user_freq`      | Share of training logins by this username (0 if unseen)      |
 | 5   | `failed_rate`    | Cumulative per-IP failure ratio (inclusive of current event) |
-| 6   | `country_enc`    | Label-encoded country                                        |
-| 7   | `device_enc`     | Label-encoded device type                                    |
+| 6   | `country_freq`   | Share of training logins from this country (0 if unseen)     |
+| 7   | `device_freq`    | Share of training logins from this device type (0 if unseen) |
 | 8   | `is_new_ip`      | 1 if this IP was never seen during training                  |
 | 9   | `is_new_country` | 1 if this country was never seen during training             |
+
+IP, user, country and device are **frequency-encoded**: each is replaced by how common that value was in training, not by an arbitrary ID. Raw label-encoder IDs let the model memorise specific identities rather than learn behaviour (ADR-15). `AnomalyDetector` still loads older raw-ID model files through a legacy path.
 
 Cyclic hour encoding (rather than a raw 0–23 integer) avoids a discontinuity at the 23:00/00:00 boundary, which a linear encoding would otherwise treat as maximally distant.
 
