@@ -1,0 +1,41 @@
+{
+  "guard_on": {
+    "TP": 8650,
+    "FP": 17139,
+    "TN": 52129,
+    "FN": 26350,
+    "precision": 0.3354,
+    "recall": 0.2471,
+    "f1": 0.2846,
+    "fpr": 0.2474,
+    "alerts_per_1000_events": 247.33,
+    "campaign_level_recall": 0.5156,
+    "campaign_ips_seen": 5425,
+    "campaign_ips_caught": 2797,
+    "median_attack_events_before_first_alert": 0.0,
+    "share_attack_events_after_first_alert": 0.7287,
+    "precision_at_5pct_prevalence": 0.0499,
+    "precision_at_1pct_prevalence": 0.01,
+    "false_alerts_per_1000_logins_at_1pct_prevalence": 244.9
+  },
+  "guard_off": {
+    "TP": 9955,
+    "FP": 18430,
+    "TN": 50838,
+    "FN": 25045,
+    "precision": 0.3507,
+    "recall": 0.2844,
+    "f1": 0.3141,
+    "fpr": 0.2661,
+    "alerts_per_1000_events": 272.23,
+    "campaign_level_recall": 0.5998,
+    "campaign_ips_seen": 5425,
+    "campaign_ips_caught": 3254,
+    "median_attack_events_before_first_alert": 0.0,
+    "share_attack_events_after_first_alert": 0.7603,
+    "precision_at_5pct_prevalence": 0.0533,
+    "precision_at_1pct_prevalence": 0.0107,
+    "false_alerts_per_1000_logins_at_1pct_prevalence": 263.4
+  },
+  "campaigns_recovered": 457
+}

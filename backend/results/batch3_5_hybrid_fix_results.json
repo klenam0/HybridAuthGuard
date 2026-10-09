@@ -1,0 +1,58 @@
+{
+  "rules_only": {
+    "TP": 2857,
+    "FP": 3786,
+    "TN": 65482,
+    "FN": 32143,
+    "precision": 0.4301,
+    "recall": 0.0816,
+    "f1": 0.1372,
+    "fpr": 0.0547,
+    "alerts_per_1000_events": 63.71,
+    "alert_type_counts": {
+      "Slow Brute Force": 128,
+      "Brute Force Attack": 830,
+      "Multiple IP Login": 94,
+      "Credential Stuffing": 468,
+      "Suspicious Login Time": 5123
+    }
+  },
+  "hybrid_original": {
+    "TP": 4989,
+    "FP": 13931,
+    "TN": 55337,
+    "FN": 30011,
+    "precision": 0.2637,
+    "recall": 0.1425,
+    "f1": 0.1851,
+    "fpr": 0.2011,
+    "alerts_per_1000_events": 181.46,
+    "alert_type_counts": {
+      "ML Anomaly Detected": 13068,
+      "Slow Brute Force": 104,
+      "Multiple IP Login": 94,
+      "Brute Force Attack": 465,
+      "Credential Stuffing": 66,
+      "Suspicious Login Time": 5123
+    }
+  },
+  "hybrid_fixed": {
+    "TP": 6273,
+    "FP": 14939,
+    "TN": 54329,
+    "FN": 28727,
+    "precision": 0.2957,
+    "recall": 0.1792,
+    "f1": 0.2232,
+    "fpr": 0.2157,
+    "alerts_per_1000_events": 203.44,
+    "alert_type_counts": {
+      "ML Anomaly Detected": 14569,
+      "Slow Brute Force": 128,
+      "Brute Force Attack": 830,
+      "Multiple IP Login": 94,
+      "Credential Stuffing": 468,
+      "Suspicious Login Time": 5123
+    }
+  }
+}

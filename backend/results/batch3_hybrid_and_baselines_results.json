@@ -1,0 +1,102 @@
+{
+  "rules_only_default_order": {
+    "TP": 2857,
+    "FP": 3786,
+    "TN": 65482,
+    "FN": 32143,
+    "precision": 0.4301,
+    "recall": 0.0816,
+    "f1": 0.1372,
+    "fpr": 0.0547,
+    "alerts_per_1000_events": 63.71,
+    "alert_type_counts": {
+      "Slow Brute Force": 128,
+      "Brute Force Attack": 830,
+      "Multiple IP Login": 94,
+      "Credential Stuffing": 468,
+      "Suspicious Login Time": 5123
+    }
+  },
+  "rules_only_ablation_order": {
+    "TP": 2857,
+    "FP": 3786,
+    "TN": 65482,
+    "FN": 32143,
+    "precision": 0.4301,
+    "recall": 0.0816,
+    "f1": 0.1372,
+    "fpr": 0.0547,
+    "alerts_per_1000_events": 63.71,
+    "alert_type_counts": {
+      "Slow Brute Force": 128,
+      "Brute Force Attack": 1298,
+      "Multiple IP Login": 94,
+      "Suspicious Login Time": 5123
+    }
+  },
+  "ml_only": {
+    "TP": 27258,
+    "FP": 23686,
+    "TN": 45582,
+    "FN": 7742,
+    "precision": 0.5351,
+    "recall": 0.7788,
+    "f1": 0.6343,
+    "fpr": 0.3419,
+    "alerts_per_1000_events": 488.59
+  },
+  "hybrid": {
+    "TP": 4989,
+    "FP": 13931,
+    "TN": 55337,
+    "FN": 30011,
+    "precision": 0.2637,
+    "recall": 0.1425,
+    "f1": 0.1851,
+    "fpr": 0.2011,
+    "alerts_per_1000_events": 181.46,
+    "alert_type_counts": {
+      "ML Anomaly Detected": 13068,
+      "Slow Brute Force": 104,
+      "Multiple IP Login": 94,
+      "Brute Force Attack": 465,
+      "Credential Stuffing": 66,
+      "Suspicious Login Time": 5123
+    }
+  },
+  "baseline_lof": {
+    "TP": 32832,
+    "FP": 65045,
+    "TN": 4223,
+    "FN": 2168,
+    "precision": 0.3354,
+    "recall": 0.9381,
+    "f1": 0.4942,
+    "fpr": 0.939,
+    "alerts_per_1000_events": 938.71,
+    "best_contamination": 0.4
+  },
+  "baseline_autoencoder": {
+    "TP": 16801,
+    "FP": 34104,
+    "TN": 35164,
+    "FN": 18199,
+    "precision": 0.33,
+    "recall": 0.48,
+    "f1": 0.3912,
+    "fpr": 0.4923,
+    "alerts_per_1000_events": 488.21,
+    "best_train_percentile": 70
+  },
+  "baseline_supervised_rf": {
+    "TP": 26251,
+    "FP": 51747,
+    "TN": 17521,
+    "FN": 8749,
+    "precision": 0.3366,
+    "recall": 0.75,
+    "f1": 0.4646,
+    "fpr": 0.7471,
+    "alerts_per_1000_events": 748.05
+  }
+}
