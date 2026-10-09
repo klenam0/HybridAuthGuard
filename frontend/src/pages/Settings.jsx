@@ -72,15 +72,18 @@ export default function Settings({ data }) {
   const [clearing, setClearing] = useState(false);
   const [exporting, setExporting] = useState(false);
 
+  // No fallback: without a token the backend rejects the request anyway.
+  const clearToken = process.env.REACT_APP_CLEAR_TOKEN;
+
   const handleClearAlerts = async () => {
+    if (!clearToken) return;
     if (!window.confirm("Clear all alerts? This cannot be undone.")) return;
     setClearing(true);
     try {
       await fetch(`${API}/clear-alerts`, {
         method: "POST",
         headers: {
-          "X-Clear-Token":
-            process.env.REACT_APP_CLEAR_TOKEN || "soc-clear-2026",
+          "X-Clear-Token": clearToken,
         },
       });
     } catch {}
@@ -381,14 +384,23 @@ export default function Settings({ data }) {
                     Permanently delete all saved alerts
                   </p>
                 </div>
-                <button
-                  onClick={handleClearAlerts}
-                  disabled={clearing}
-                  className="flex items-center gap-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                {/* Tooltip on a wrapper: disabled buttons get no hover events in some browsers */}
+                <span
+                  title={
+                    clearToken
+                      ? undefined
+                      : "Set REACT_APP_CLEAR_TOKEN in frontend/.env to enable."
+                  }
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  {clearing ? "Clearing..." : "Clear Alerts"}
-                </button>
+                  <button
+                    onClick={handleClearAlerts}
+                    disabled={clearing || !clearToken}
+                    className="flex items-center gap-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    {clearing ? "Clearing..." : "Clear Alerts"}
+                  </button>
+                </span>
               </div>
             </div>
           </SectionCard>
