@@ -4,17 +4,48 @@ from datetime import datetime
 
 
 class DetectionAgent:
+    """
+    Reviewer-revision fixes applied here (see MASTER_SUMMARY_all_changes.md
+    for the full rationale and test evidence behind each):
+
+      Fix A: removed a duplicate timestamp append that made Slow Brute
+             Force fire at ~2 real failures instead of its documented 4+.
+      Fix B: rule-confirmed blocks (rule_blocked_ips) and ML-flagged-once
+             markers (ml_blocked_ips) are now tracked separately. Only
+             rule_blocked_ips gates the FAILED-event block, so an ML
+             alert on a SUCCESS event no longer silently stops rule-based
+             failure counting for that same IP.
+      Fix C: the ML re-alert throttle for FAILED events is now a
+             configurable cooldown (ML_REALERT_COOLDOWN_SECONDS, default
+             0 = always allowed to re-alert) instead of a permanent
+             "once, ever" block. A validation-only sweep found shorter
+             cooldowns strictly improve detection; 0 won outright.
+      Fix D: the internal-IP guard (skip ML scoring for 192.168.x/
+             10.0.x/172.16.x) is now gated by INTERNAL_IP_GUARD_ENABLED,
+             default False. Testing found the guard, built for this
+             project's own office network, costs real detection coverage
+             (457 missed attacking IPs in testing) for no offsetting
+             benefit against the RBA benchmark. Re-enable only after
+             confirming it fits wherever this is actually deployed.
+    """
+
+    # Settled after reviewer-revision testing. Change these, not the
+    # logic below, if a future revision needs different behaviour.
+    ML_REALERT_COOLDOWN_SECONDS = 0
+    INTERNAL_IP_GUARD_ENABLED = False
+
     def __init__(self, threshold=5, anomaly_detector=None):
         self.failed_attempts = defaultdict(int)
         self.threshold = threshold
-        self.blocked_ips = set()
+        self.rule_blocked_ips = set()   # Fix B: rule-confirmed blocks only
+        self.ml_blocked_ips = set()     # Fix B: ML SUCCESS-event blocks, kept separate
         self.user_last_login = {}
         self.ip_attempt_times = defaultdict(list)
         self.anomaly_detector = anomaly_detector
         self.ip_users_tried = defaultdict(set)
         self.internal_ip_prefixes = ("192.168.", "10.0.", "172.16.")
         self.suspicious_last_fired = {}  # ip → last datetime it triggered suspicious time
-        self.ml_alerted_ips = set()  # IPs that triggered ML alert but aren't blocked
+        self.ml_last_alerted = {}        # Fix C: ip → timestamp of last FAILED-event ML alert
 
     def analyze_event(self, log_event):
         ip        = log_event["ip"]
@@ -76,22 +107,26 @@ class DetectionAgent:
            
 
         # ── 3, 4, 5 all inside one FAILED block ───────────────────────────
-        # ── FAILED event processing - ORDER MATTERS ────────────────────────
+        # ── FAILED event processing — ORDER MATTERS ────────────────────────
         # Detectors run in this specific sequence:
-        #   1. Slow Brute Force  - checked BEFORE fast brute force
+        #   1. Slow Brute Force  — checked BEFORE fast brute force
         #      (needs time_spread_minutes >= 5 to distinguish from fast)
-        #   2. Credential Stuffing - checked BEFORE fast brute force
+        #   2. Credential Stuffing — checked BEFORE fast brute force
         #      (needs unique_users >= 5 to distinguish from single-account BF)
-        #   3. Fast Brute Force - catches anything remaining above threshold
+        #   3. Fast Brute Force — catches anything remaining above threshold
         #
         # Changing this order will cause misclassification:
         #   - Credential stuffing will be caught as brute force
         #   - Slow brute force will fire on rapid attacks
         if log_event["status"] == "FAILED":
-            if ip in self.blocked_ips:
+            # Fix B: gate only on rule-confirmed blocks, not ML's.
+            if ip in self.rule_blocked_ips:
                 return None
 
-            # Track failure timestamps for slow brute force
+            # Fix A: track failure timestamps ONCE per event (this used to
+            # append twice, once here and once more a few lines below,
+            # making Slow Brute Force fire at ~2 real failures instead of
+            # its documented 4+; the second append has been removed).
             self.ip_attempt_times[ip].append(timestamp)
             self.failed_attempts[ip] += 1
             unique_users = len(self.ip_users_tried[ip])
@@ -100,8 +135,6 @@ class DetectionAgent:
            # ── 3. Slow Brute Force ────────────────────────────────────────
             # Checked BEFORE fast brute force and credential stuffing guards
             # unique_users_for_ip < 3 prevents misfiring on credential stuffing
-            self.ip_attempt_times[ip].append(timestamp)
-
             recent_failures = [
                 t for t in self.ip_attempt_times[ip]
                 if abs((timestamp - t).total_seconds()) <= 3600
@@ -119,14 +152,14 @@ class DetectionAgent:
                 and time_spread_minutes >= 5
                 and unique_users_for_ip < 3
             ):
-                self.blocked_ips.add(ip)
+                self.rule_blocked_ips.add(ip)
                 return {
                     "type": "Slow Brute Force",
                     "ip":   ip,
                     "user": user,
                     "description": (
                         f"{len(recent_failures)} failed attempts from {ip} "
-                        f"spread over {int(time_spread_minutes)} minutes - "
+                        f"spread over {int(time_spread_minutes)} minutes — "
                         f"evasive brute force pattern"
                     ),
                     "trigger_details": {
@@ -146,7 +179,7 @@ class DetectionAgent:
             # ── 4. Credential Stuffing ─────────────────────────────────────
             # Many different usernames from one IP
             if unique_users >= 5 and self.failed_attempts[ip] >= 5:
-                self.blocked_ips.add(ip)
+                self.rule_blocked_ips.add(ip)
                 total_ip  = self.failed_attempts[ip]
                 fail_rate = round(total_ip / max(total_ip, 1), 2)
                 return {
@@ -154,7 +187,7 @@ class DetectionAgent:
                     "ip": ip,
                     "user": user,
                     "description": (
-                        f"IP {ip} attempted {unique_users} different usernames - "
+                        f"IP {ip} attempted {unique_users} different usernames — "
                         f"consistent with automated credential stuffing"
                     ),
                     "trigger_details": {
@@ -171,7 +204,7 @@ class DetectionAgent:
 
             # ── 5. Fast Brute Force ────────────────────────────────────────
             if self.failed_attempts[ip] >= self.threshold:
-                self.blocked_ips.add(ip)
+                self.rule_blocked_ips.add(ip)
                 return {
                     "type": "Brute Force Attack",
                     "ip": ip,
@@ -194,29 +227,40 @@ class DetectionAgent:
 
         # ── 6. ML Anomaly ─────────────────────────────────────────────────
         if self.anomaly_detector:
-            is_internal = ip.startswith(self.internal_ip_prefixes)
+            # Fix D: guard disabled by default (INTERNAL_IP_GUARD_ENABLED =
+            # False). Re-enable only after confirming these address ranges
+            # mean "trusted" wherever this is actually deployed.
+            is_internal = self.INTERNAL_IP_GUARD_ENABLED and ip.startswith(self.internal_ip_prefixes)
             if not is_internal:
                 result = self.anomaly_detector.score_event(log_event)
                 if result and result["is_anomaly"]:
                     is_failed_event = log_event.get("status") == "FAILED"
 
                     if is_failed_event:
-                        # FAILED events: alert once but DO NOT block.
-                        # Blocking would prevent rule-based detectors from
-                        # accumulating the failure count they need to fire.
-                        # ml_alerted_ips prevents duplicate ML alerts from
-                        # the same IP while still letting rules run.
-                        if ip in self.ml_alerted_ips:
-                            return None   # already alerted, let rules handle it
-                        self.ml_alerted_ips.add(ip)
-                        # Note: NOT adding to blocked_ips here
-                    else:
-                        # SUCCESS events: block immediately.
-                        # No rule-based detector covers suspicious SUCCESS logins
-                        # (account takeover from unknown IP).
-                        if ip in self.blocked_ips:
+                        # FAILED events: alert once per cooldown window but
+                        # DO NOT block via rule_blocked_ips. Blocking would
+                        # prevent rule-based detectors from accumulating the
+                        # failure count they need to fire (Fix B).
+                        # Fix C: ML_REALERT_COOLDOWN_SECONDS replaces the old
+                        # permanent "alert once, ever" throttle. At the
+                        # settled value of 0, this never suppresses a
+                        # re-alert; raise it to reintroduce a cooldown.
+                        last_alerted = self.ml_last_alerted.get(ip)
+                        if (last_alerted is not None
+                                and (timestamp - last_alerted).total_seconds()
+                                < self.ML_REALERT_COOLDOWN_SECONDS):
                             return None
-                        self.blocked_ips.add(ip)
+                        self.ml_last_alerted[ip] = timestamp
+                        # Note: NOT adding to rule_blocked_ips here
+                    else:
+                        # SUCCESS events: block immediately via ml_blocked_ips
+                        # (Fix B: kept separate from rule_blocked_ips, so this
+                        # never silences the FAILED-event rule checks above).
+                        # No rule-based detector covers suspicious SUCCESS
+                        # logins (account takeover from unknown IP).
+                        if ip in self.rule_blocked_ips or ip in self.ml_blocked_ips:
+                            return None
+                        self.ml_blocked_ips.add(ip)
 
                     feature_explanation = None
                     if hasattr(self.anomaly_detector, "explain_event"):
@@ -243,9 +287,9 @@ class DetectionAgent:
                         ),
                         "trigger_details": {
                             "rule": (
-                                "Isolation Forest - FAILED event, IP not blocked (rules still accumulate)"
+                                "Isolation Forest — FAILED event, IP not blocked (rules still accumulate)"
                                 if is_failed_event else
-                                "Isolation Forest - SUCCESS event from suspicious IP, blocked immediately"
+                                "Isolation Forest — SUCCESS event from suspicious IP, blocked immediately"
                             ),
                             "threshold": "Score < -0.10 = High, < -0.02 = Medium confidence",
                             "actual":    f"Score {result['anomaly_score']} ({result['confidence']} confidence)",
