@@ -2,12 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Mail, CheckCircle, Clock, AlertTriangle } from "lucide-react";
-
-const SEVERITY_BADGE = {
-  HIGH: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  MEDIUM: "bg-amber-500/20  text-amber-400  border-amber-500/30",
-  LOW: "bg-blue-500/20   text-blue-400   border-blue-500/30",
-};
+import PageHeader from "../components/PageHeader";
+import SeverityBadge from "../components/SeverityBadge";
 
 const TYPE_ICONS = {
   "Brute Force Attack": "",
@@ -80,14 +76,7 @@ export default function EmailAlerts({ data }) {
 
   return (
     <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <p className="ui-kicker">Email Alerts</p>
-          <p className="ui-caption mt-1">
-            Real-time email notifications sent for HIGH severity detections
-          </p>
-        </div>
+      <PageHeader routeId="email-alerts">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-4 py-2 text-center">
             <p className="text-2xl font-semibold text-green-700 leading-none">
@@ -108,7 +97,7 @@ export default function EmailAlerts({ data }) {
             <p className="ui-caption mt-1">Success</p>
           </div>
         </div>
-      </div>
+      </PageHeader>
 
       {/* SMTP status bar */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-xl px-4 py-3">
@@ -246,11 +235,7 @@ export default function EmailAlerts({ data }) {
 
                 {/* Severity */}
                 <div className="sm:col-span-2 pl-6 sm:pl-0">
-                  <span
-                    className={`text-xs font-semibold px-2 py-0.5 rounded border ${SEVERITY_BADGE[alert.severity] || SEVERITY_BADGE.LOW}`}
-                  >
-                    {alert.severity}
-                  </span>
+                  <SeverityBadge severity={alert.severity} size="md" />
                 </div>
 
                 {/* IP */}

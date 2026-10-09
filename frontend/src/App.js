@@ -14,8 +14,25 @@ import AlertLog from "./pages/AlertLog";
 import DetectionEngine from "./pages/DetectionEngine";
 import ThreatAnalytics from "./pages/ThreatAnalytics";
 import Settings from "./pages/Settings";
+import ConnectionBanner from "./components/ConnectionBanner";
+import { API, POLLED_ENDPOINTS } from "./config/api";
 
-const API = "http://localhost:5000/api";
+const POLL_INTERVAL_MS = 2000;
+const REQUEST_TIMEOUT_MS = 5000;
+
+async function fetchJson(path) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const started = performance.now();
+  try {
+    const res = await fetch(`${API}/${path}`, { signal: controller.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return { data, ms: Math.round(performance.now() - started) };
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 const PAGES = [
   "dashboard",
@@ -45,7 +62,17 @@ export default function App() {
     level: "NORMAL",
     color: "green",
   });
+  const [enrichment, setEnrichment] = useState(null);
   const [running, setRunning] = useState(false);
+  // "connecting" until the first poll completes, then "online" (all
+  // endpoints OK), "degraded" (some failing) or "offline" (none reachable).
+  const [connection, setConnection] = useState({
+    status: "connecting",
+    lastSuccess: null,
+    lastAttempt: null,
+    endpoints: {},
+  });
+  const pollInFlight = useRef(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
 
@@ -123,49 +150,77 @@ export default function App() {
   }, []);
 
   const fetchAll = useCallback(async () => {
+    // Skip a tick rather than stacking requests when the backend is slow.
+    if (pollInFlight.current) return;
+    pollInFlight.current = true;
+
     try {
-      const [aR, sR, stR, tR, mR, agR, dR, psR, tlR] = await Promise.all([
-        fetch(`${API}/alerts`),
-        fetch(`${API}/stats`),
-        fetch(`${API}/status`),
-        fetch(`${API}/timeline`),
-        fetch(`${API}/model-info`),
-        fetch(`${API}/agents`),
-        fetch(`${API}/detectors`),
-        fetch(`${API}/pipeline-stats`),
-        fetch(`${API}/threat-level`),
-      ]);
+      const results = await Promise.allSettled(
+        POLLED_ENDPOINTS.map((path) => fetchJson(path)),
+      );
+      const now = Date.now();
+      const endpoints = {};
+      const data = {};
 
-      const [aD, sD, stD, tD, mD, agD, dD, psD, tlD] = await Promise.all([
-        aR.json(),
-        sR.json(),
-        stR.json(),
-        tR.json(),
-        mR.json(),
-        agR.json(),
-        dR.json(),
-        psR.json(),
-        tlR.json(),
-      ]);
+      results.forEach((result, i) => {
+        const path = POLLED_ENDPOINTS[i];
+        if (result.status === "fulfilled") {
+          endpoints[path] = { ok: true, ms: result.value.ms, checkedAt: now };
+          data[path] = result.value.data;
+        } else {
+          endpoints[path] = {
+            ok: false,
+            ms: null,
+            checkedAt: now,
+            error:
+              result.reason?.name === "AbortError"
+                ? "Timed out"
+                : result.reason?.message || "Request failed",
+          };
+        }
+      });
 
-      setAlerts([...aD].reverse());
-      setStats(sD);
-      setStatus(stD);
-      setTimeline(tD);
-      setModelInfo(mD);
-      setAgentsData(agD);
-      setDetectors(dD);
-      setPipelineStats(psD);
-      setThreatLevel(tlD);
-      setRunning(stD?.running || false);
-    } catch (e) {
-      console.error("API error:", e);
+      // Only replace state for endpoints that answered; the rest keep the
+      // last data received.
+      if ("alerts" in data)
+        setAlerts(Array.isArray(data.alerts) ? [...data.alerts].reverse() : []);
+      if ("stats" in data) setStats(data.stats);
+      if ("status" in data) {
+        setStatus(data.status);
+        setRunning(data.status?.running || false);
+      }
+      if ("timeline" in data) setTimeline(data.timeline);
+      if ("model-info" in data) setModelInfo(data["model-info"]);
+      if ("agents" in data) setAgentsData(data.agents);
+      if ("detectors" in data) setDetectors(data.detectors);
+      if ("pipeline-stats" in data) setPipelineStats(data["pipeline-stats"]);
+      if ("threat-level" in data) setThreatLevel(data["threat-level"]);
+      if ("enrichment-status" in data)
+        setEnrichment(data["enrichment-status"]);
+
+      const okCount = Object.keys(data).length;
+      if (okCount < POLLED_ENDPOINTS.length) {
+        console.error("API error:", endpoints);
+      }
+      setConnection((prev) => ({
+        status:
+          okCount === POLLED_ENDPOINTS.length
+            ? "online"
+            : okCount === 0
+              ? "offline"
+              : "degraded",
+        lastAttempt: now,
+        lastSuccess: okCount > 0 ? now : prev.lastSuccess,
+        endpoints,
+      }));
+    } finally {
+      pollInFlight.current = false;
     }
   }, []);
 
   useEffect(() => {
     fetchAll();
-    const id = setInterval(fetchAll, 2000);
+    const id = setInterval(fetchAll, POLL_INTERVAL_MS);
     return () => clearInterval(id);
   }, [fetchAll]);
 
@@ -304,6 +359,8 @@ export default function App() {
     detectors,
     pipelineStats,
     threatLevel,
+    enrichment,
+    connection,
     running,
     handleRun,
     targetAlertId,
@@ -323,12 +380,14 @@ export default function App() {
         onToggleCollapsed={() => setSidebarCollapsed((v) => !v)}
         mobileOpen={sidebarMobileOpen}
         onCloseMobile={() => setSidebarMobileOpen(false)}
+        connection={connection}
       />
       <div className="flex flex-col flex-1 overflow-hidden min-w-0">
         <Navbar
           running={running}
           handleRun={handleRun}
           threatLevel={threatLevel}
+          connection={connection}
           notifications={notifications}
           unreadCount={unreadCount}
           markAllRead={markAllRead}
@@ -341,6 +400,7 @@ export default function App() {
           }
           onOpenMobileSidebar={() => setSidebarMobileOpen(true)}
         />
+        <ConnectionBanner connection={connection} apiBase={API} />
         <main className="flex-1 overflow-y-auto">
           {page === "dashboard" && <Dashboard data={d} />}
           {page === "live-alerts" && <LiveAlerts data={d} />}

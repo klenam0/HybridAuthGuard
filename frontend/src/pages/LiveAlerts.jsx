@@ -2,13 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import { ShieldX, Bell, FileText } from "lucide-react";
-
-const SEVERITY_BADGE = {
-  HIGH: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  MEDIUM: "bg-amber-500/20  text-amber-400  border-amber-500/30",
-  LOW: "bg-blue-500/20   text-blue-400   border-blue-500/30",
-  CRITICAL: "bg-red-500/20    text-red-400    border-red-500/30",
-};
+import PageHeader from "../components/PageHeader";
+import SeverityBadge from "../components/SeverityBadge";
+import { FILTER_ACTIVE } from "../config/severity";
 
 const ACTIONS = {
   HIGH: { Icon: ShieldX, color: "text-red-400", label: "IP Blocked" },
@@ -18,14 +14,6 @@ const ACTIONS = {
 };
 
 const FILTERS = ["ALL", "HIGH", "MEDIUM", "LOW"];
-
-const FILTER_ACTIVE = {
-  ALL: "bg-slate-700 text-white",
-  CRITICAL: "bg-red-500/20 text-red-400",
-  HIGH: "bg-orange-500/20 text-orange-400",
-  MEDIUM: "bg-amber-500/20 text-amber-400",
-  LOW: "bg-blue-500/20 text-blue-400",
-};
 
 export default function LiveAlerts({ data }) {
   const { alerts, stats, markAlertPageRead } = data;
@@ -84,10 +72,9 @@ export default function LiveAlerts({ data }) {
   }, [filtered, markAlertPageRead]);
 
   return (
-    <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-5 lg:h-full lg:flex lg:flex-col">
       {/* Header + filter tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <p className="ui-kicker">Live Alert Feed</p>
+      <PageHeader routeId="live-alerts">
         <div className="flex items-center gap-1 bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg p-1.5 overflow-x-auto">
           {FILTERS.map((f) => (
             <button
@@ -103,12 +90,12 @@ export default function LiveAlerts({ data }) {
             </button>
           ))}
         </div>
-      </div>
+      </PageHeader>
 
       {/* Alert table */}
       <div
         id="live-alerts-feed"
-        className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-xl overflow-hidden"
+        className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-xl overflow-hidden lg:flex-1 lg:min-h-64 lg:flex lg:flex-col"
       >
         {/* Table head - hidden on mobile, rows are stacked instead */}
         <div className="hidden sm:grid sm:grid-cols-12 gap-3 px-5 py-3 border-b border-[color:var(--border)] bg-[color:var(--bg-elevated)]">
@@ -119,7 +106,7 @@ export default function LiveAlerts({ data }) {
         </div>
 
         {/* Table body */}
-        <div className="divide-y divide-[color:var(--border)] max-h-96 overflow-y-auto">
+        <div className="divide-y divide-[color:var(--border)] max-h-96 lg:max-h-none lg:flex-1 lg:min-h-0 overflow-y-auto">
           {filtered.length === 0 ? (
             <div className="py-14 text-center">
               <p className="ui-body text-[color:var(--text-secondary)]">
@@ -131,8 +118,6 @@ export default function LiveAlerts({ data }) {
             filtered.map((alert, i) => {
               const action = ACTIONS[alert.severity] || ACTIONS.LOW;
               const ActionIcon = action.Icon;
-              const badgeClass =
-                SEVERITY_BADGE[alert.severity] || SEVERITY_BADGE.LOW;
 
               return (
                 <div
@@ -153,11 +138,7 @@ export default function LiveAlerts({ data }) {
                 >
                   {/* Alert */}
                   <div className="sm:col-span-5 flex items-start gap-2 min-w-0">
-                    <span
-                      className={`text-xs font-semibold px-2 py-0.5 rounded border flex-shrink-0 ${badgeClass}`}
-                    >
-                      {alert.severity}
-                    </span>
+                    <SeverityBadge severity={alert.severity} size="md" />
                     <div className="min-w-0">
                       <p className="ui-body font-medium text-[color:var(--text-primary)] truncate">
                         {alert.type}
@@ -216,7 +197,7 @@ export default function LiveAlerts({ data }) {
       {/* Bottom panels */}
       <div
         id="live-alerts-actions"
-        className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:flex-shrink-0"
       >
         {/* Recent Automated Actions */}
         <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-xl p-4 sm:p-5">

@@ -14,8 +14,22 @@ import {
   Bar,
 } from "recharts";
 import { Activity } from "lucide-react";
+import PageHeader from "../components/PageHeader";
+import SeverityBadge from "../components/SeverityBadge";
+import {
+  axisTick,
+  barCursor,
+  chartTooltip,
+  formatHour,
+  lineCursor,
+} from "../config/chartTheme";
+import { SEVERITY } from "../config/severity";
 
-const SEVERITY_COLORS = { HIGH: "#f97316", MEDIUM: "#f59e0b", LOW: "#3b82f6" };
+const SEVERITY_COLORS = {
+  HIGH: SEVERITY.HIGH.chart,
+  MEDIUM: SEVERITY.MEDIUM.chart,
+  LOW: SEVERITY.LOW.chart,
+};
 const TYPE_COLORS = [
   "#f97316",
   "#8b5cf6",
@@ -24,16 +38,6 @@ const TYPE_COLORS = [
   "#ec4899",
   "#f59e0b",
 ];
-
-const CHART_TOOLTIP = {
-  contentStyle: {
-    background: "var(--bg-card)",
-    border: "1px solid var(--border)",
-    borderRadius: "8px",
-    color: "var(--text-primary)",
-    fontSize: 11,
-  },
-};
 
 function CardWrap({ children, className = "" }) {
   return (
@@ -153,6 +157,7 @@ export default function ResponseActions({ data }) {
 
   return (
     <div id="response-timeline" className="p-3 sm:p-6 space-y-5 sm:space-y-6">
+      <PageHeader routeId="response-actions" />
       {alerts.filter((a) => a.severity === "HIGH").length > 0 && (
         <div>
           <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-3">
@@ -178,10 +183,8 @@ export default function ResponseActions({ data }) {
                   >
                     <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-bold px-2 py-0.5 rounded border bg-orange-500/20 text-orange-400 border-orange-500/30">
-                          {alert.severity}
-                        </span>
-                        <span className="text-[12px] font-semibold text-white">
+                        <SeverityBadge severity={alert.severity} />
+                        <span className="text-[12px] font-semibold text-[color:var(--text-primary)]">
                           {alert.type}
                         </span>
                       </div>
@@ -232,14 +235,14 @@ export default function ResponseActions({ data }) {
               </div>
               <div>
                 <p className="ui-label text-[color:var(--text-primary)]">
-                  Response Agent
+                  Response Stage
                 </p>
                 <p className="ui-caption">Automated Response</p>
               </div>
             </div>
             <div className="flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 rounded-full px-2 py-0.5">
               <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-xs text-green-700 font-semibold">
+              <span className="text-xs text-green-400 font-semibold">
                 Active
               </span>
             </div>
@@ -251,13 +254,13 @@ export default function ResponseActions({ data }) {
                 value: total,
                 color: "text-[color:var(--text-primary)]",
               },
-              { label: "HIGH Alerts", value: high, color: "text-orange-700" },
+              { label: "HIGH Alerts", value: high, color: "text-orange-400" },
               {
                 label: "Queue",
                 value: 0,
                 color: "text-[color:var(--text-primary)]",
               },
-              { label: "Success", value: successRate, color: "text-green-700" },
+              { label: "Success", value: successRate, color: "text-green-400" },
             ].map(({ label, value, color }) => (
               <div key={label}>
                 <p className="ui-caption">{label}</p>
@@ -273,7 +276,7 @@ export default function ResponseActions({ data }) {
         <CardWrap>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-5 h-5 rounded bg-cyan-500/20 grid place-items-center">
-              <span className="text-cyan-600 text-sm">ⓘ</span>
+              <span className="text-cyan-400 text-sm">ⓘ</span>
             </div>
             <p className="ui-kicker">ML Intelligence - Isolation Forest</p>
           </div>
@@ -293,7 +296,7 @@ export default function ResponseActions({ data }) {
               {
                 label: "Inference",
                 value: "Runtime only",
-                color: "text-cyan-600",
+                color: "text-cyan-400",
               },
               {
                 label: "Trained",
@@ -303,10 +306,10 @@ export default function ResponseActions({ data }) {
               {
                 label: "Precision",
                 value: `${precision}%`,
-                color: "text-green-700",
+                color: "text-green-400",
               },
-              { label: "Recall", value: `${recall}%`, color: "text-amber-700" },
-              { label: "F1-Score", value: `${f1}%`, color: "text-cyan-600" },
+              { label: "Recall", value: `${recall}%`, color: "text-amber-400" },
+              { label: "F1-Score", value: `${f1}%`, color: "text-cyan-400" },
               {
                 label: "Avg Event",
                 value: avgMs ? `${avgMs}ms` : "-",
@@ -371,7 +374,7 @@ export default function ResponseActions({ data }) {
         {/* Row 1 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           <CardWrap>
-            <CardTitle>Alerts Over Time - 24h</CardTitle>
+            <CardTitle>Alerts by Hour of Day</CardTitle>
             <ResponsiveContainer width="100%" height={140}>
               <AreaChart
                 data={timeline}
@@ -379,39 +382,39 @@ export default function ResponseActions({ data }) {
               >
                 <defs>
                   <linearGradient id="gH" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                    <stop offset="5%" stopColor={SEVERITY_COLORS.HIGH} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={SEVERITY_COLORS.HIGH} stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="gM" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                    <stop offset="5%" stopColor={SEVERITY_COLORS.MEDIUM} stopOpacity={0.2} />
+                    <stop offset="95%" stopColor={SEVERITY_COLORS.MEDIUM} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis
                   dataKey="hour"
-                  tick={{ fill: "#64748b", fontSize: 11 }}
-                  tickFormatter={(h) => `${h}:00`}
+                  tick={axisTick}
+                  tickFormatter={formatHour}
                   interval={5}
                 />
-                <YAxis
-                  tick={{ fill: "#64748b", fontSize: 11 }}
-                  allowDecimals={false}
-                />
+                <YAxis tick={axisTick} allowDecimals={false} />
                 <Tooltip
-                  {...CHART_TOOLTIP}
-                  labelFormatter={(h) => `${h}:00 – ${h + 1}:00`}
+                  {...chartTooltip}
+                  cursor={lineCursor}
+                  labelFormatter={(h) =>
+                    `${formatHour(h)}–${formatHour((h + 1) % 24)}`
+                  }
                 />
                 <Area
                   type="monotone"
                   dataKey="HIGH"
-                  stroke="#f97316"
+                  stroke={SEVERITY_COLORS.HIGH}
                   strokeWidth={1.5}
                   fill="url(#gH)"
                 />
                 <Area
                   type="monotone"
                   dataKey="MEDIUM"
-                  stroke="#f59e0b"
+                  stroke={SEVERITY_COLORS.MEDIUM}
                   strokeWidth={1}
                   fill="url(#gM)"
                   strokeDasharray="3 3"
@@ -444,7 +447,7 @@ export default function ResponseActions({ data }) {
                     ).map((e, i) => (
                       <Cell
                         key={i}
-                        fill={SEVERITY_COLORS[e.name] || "#1e2a3d"}
+                        fill={SEVERITY_COLORS[e.name] || "var(--border)"}
                       />
                     ))}
                   </Pie>
@@ -489,15 +492,15 @@ export default function ResponseActions({ data }) {
                 >
                   <XAxis
                     dataKey="short"
-                    tick={{ fill: "#64748b", fontSize: 11 }}
+                    tick={axisTick}
                     angle={-30}
                     textAnchor="end"
                   />
                   <YAxis
-                    tick={{ fill: "#64748b", fontSize: 11 }}
+                    tick={axisTick}
                     allowDecimals={false}
                   />
-                  <Tooltip {...CHART_TOOLTIP} />
+                  <Tooltip {...chartTooltip} cursor={barCursor} />
                   <Bar dataKey="count" radius={[3, 3, 0, 0]}>
                     {typeData.map((_, i) => (
                       <Cell
@@ -521,7 +524,7 @@ export default function ResponseActions({ data }) {
               <div className="space-y-2.5">
                 {mitreData.map(({ id, count }) => (
                   <div key={id} className="flex items-center gap-2">
-                    <span className="text-sm text-cyan-600 font-mono w-16 sm:w-20 flex-shrink-0">
+                    <span className="text-sm text-cyan-400 font-mono w-16 sm:w-20 flex-shrink-0">
                       {id}
                     </span>
                     <div className="flex-1 bg-[color:var(--border)] rounded-full h-1.5">
@@ -551,14 +554,14 @@ export default function ResponseActions({ data }) {
             </div>
             <div className="flex items-center justify-around pt-4 border-t border-[color:var(--border)]">
               <div className="text-center">
-                <p className="text-2xl font-semibold leading-none text-green-700">
+                <p className="text-2xl font-semibold leading-none text-green-400">
                   {successRate}
                 </p>
                 <p className="ui-caption mt-1">Success Rate</p>
               </div>
               <div className="w-px h-8 bg-[color:var(--border)]" />
               <div className="text-center">
-                <p className="text-2xl font-semibold leading-none text-cyan-600">
+                <p className="text-2xl font-semibold leading-none text-cyan-400">
                   {avgSec}s
                 </p>
                 <p className="ui-caption mt-1">Avg Event Time</p>

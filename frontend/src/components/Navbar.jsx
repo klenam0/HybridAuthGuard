@@ -10,11 +10,15 @@ import {
   SunMedium,
   X,
   CheckCheck,
-  AlertTriangle,
   Cpu,
+  Play,
+  LoaderCircle,
 } from "lucide-react";
 import { searchableIndex } from "../config/appRoutes";
+import { getSeverity, getThreatLevel } from "../config/severity";
 import { highlightMatch, searchIndex } from "../utils/globalSearch";
+import { formatUtcTime, timeAgo } from "../utils/time";
+import SeverityBadge from "./SeverityBadge";
 
 const PIPELINE = [
   { label: "Monitoring", color: "bg-blue-400" },
@@ -23,26 +27,24 @@ const PIPELINE = [
   { label: "Response", color: "bg-green-400" },
 ];
 
-const THREAT_STYLES = {
-  HIGH: "bg-orange-500/15 border-orange-500/30 text-orange-400",
-  MEDIUM: "bg-amber-500/15 border-amber-500/30 text-amber-400",
-  LOW: "bg-blue-500/15 border-blue-500/30 text-blue-400",
-  NORMAL: "bg-green-500/15 border-green-500/30 text-green-400",
+const CONNECTION_STYLES = {
+  online: { label: "Live", dot: "bg-green-400", text: "text-green-400" },
+  degraded: { label: "Degraded", dot: "bg-amber-400", text: "text-amber-400" },
+  offline: { label: "Offline", dot: "bg-red-400", text: "text-red-400" },
+  connecting: {
+    label: "Connecting",
+    dot: "bg-slate-400",
+    text: "text-[color:var(--text-secondary)]",
+  },
 };
 
-function timeAgo(ts) {
-  if (!ts) return "";
-  try {
-    const diff = (Date.now() - new Date(ts.replace(" ", "T")).getTime()) / 1000;
-    if (diff < 0) return "just now";
-    if (diff < 60) return `${Math.floor(diff)}s ago`;
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return ts.split(" ")[0];
-  } catch {
-    return "";
-  }
-}
+// The Ctrl/Cmd+K handler below accepts either key; label it for the platform.
+const IS_APPLE_PLATFORM =
+  typeof navigator !== "undefined" &&
+  /Mac|iPhone|iPad|iPod/i.test(
+    navigator.userAgentData?.platform || navigator.platform || "",
+  );
+const SEARCH_SHORTCUT = IS_APPLE_PLATFORM ? "⌘K" : "Ctrl K";
 
 function NotificationIcon({ type, severity }) {
   if (type === "enriched") {
@@ -52,13 +54,12 @@ function NotificationIcon({ type, severity }) {
       </div>
     );
   }
-  const color = severity === "HIGH" ? "bg-orange-500/20" : "bg-amber-500/20";
-  const iconColor = severity === "HIGH" ? "text-orange-400" : "text-amber-400";
+  const { Icon, badge } = getSeverity(severity);
   return (
     <div
-      className={`w-8 h-8 rounded-lg ${color} grid place-items-center flex-shrink-0`}
+      className={`w-8 h-8 rounded-lg ${badge} grid place-items-center flex-shrink-0`}
     >
-      <AlertTriangle className={`w-4 h-4 ${iconColor}`} />
+      <Icon className="w-4 h-4" />
     </div>
   );
 }
@@ -67,6 +68,7 @@ export default function Navbar({
   running,
   handleRun,
   threatLevel,
+  connection,
   notifications = [],
   unreadCount = 0,
   markAllRead,
@@ -102,7 +104,10 @@ export default function Navbar({
   useEffect(() => {
     const tick = () =>
       setTime(
-        new Date().toLocaleTimeString("en-GB", { hour12: false }) + " UTC",
+        new Date().toLocaleTimeString("en-GB", {
+          hour12: false,
+          timeZone: "UTC",
+        }) + " UTC",
       );
     tick();
     const id = setInterval(tick, 1000);
@@ -222,9 +227,14 @@ export default function Navbar({
     );
   };
 
-  const level = threatLevel?.level || "NORMAL";
-  const badgeStyle = THREAT_STYLES[level] || THREAT_STYLES.NORMAL;
-  const icon = level === "NORMAL" ? "✓" : "⚠";
+  const connectionStatus = connection?.status || "connecting";
+  const threat = getThreatLevel(threatLevel?.level, connectionStatus);
+  const ThreatIcon = threat.Icon;
+  const conn = CONNECTION_STYLES[connectionStatus] || CONNECTION_STYLES.connecting;
+  const connTitle = connection?.lastSuccess
+    ? `Backend ${conn.label.toLowerCase()} · last update ${formatUtcTime(connection.lastSuccess)}`
+    : `Backend ${conn.label.toLowerCase()} · no data received yet`;
+  const offline = connectionStatus === "offline";
 
   const handleBellClick = () => setShowNotifs((v) => !v);
 
@@ -308,7 +318,7 @@ export default function Navbar({
             </button>
           ) : (
             <span className="text-xs text-[color:var(--text-muted)] border border-[color:var(--border)] rounded px-1.5 py-0.5">
-              ⌘K
+              {SEARCH_SHORTCUT}
             </span>
           )}
         </div>
@@ -394,13 +404,33 @@ export default function Navbar({
           ))}
         </div>
 
-        {/* Threat badge */}
+        {/* Backend connection */}
         <div
-          className={`flex items-center gap-1 border rounded px-2 py-0.5 ${badgeStyle}`}
+          className={`flex items-center gap-1.5 ${conn.text}`}
+          title={connTitle}
+          role="status"
         >
-          <span className="text-[10px]">{icon}</span>
-          <span className="hidden sm:inline text-[10px] font-bold">
-            THREAT: {level}
+          <span
+            className={`w-2 h-2 rounded-full ${conn.dot} ${connectionStatus === "online" && running ? "animate-pulse" : ""}`}
+            aria-hidden="true"
+          />
+          <span className="hidden sm:inline text-xs font-medium">
+            {conn.label}
+          </span>
+        </div>
+
+        {/* Threat badge - only meaningful while the backend is reachable */}
+        <div
+          className={`sev-badge flex items-center gap-1.5 rounded-md px-2 py-1 ${threat.className}`}
+          title={
+            threat.key === "UNKNOWN"
+              ? "Threat level unknown: backend not reachable"
+              : "Highest severity in the current alert set"
+          }
+        >
+          <ThreatIcon className="w-3.5 h-3.5" aria-hidden="true" />
+          <span className="hidden sm:inline text-[11px] font-bold tracking-wide">
+            THREAT: {threat.key}
           </span>
         </div>
 
@@ -498,7 +528,7 @@ export default function Navbar({
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
-                            <p className="text-[11px] font-semibold text-white truncate">
+                            <p className="text-[11px] font-semibold text-[color:var(--text-primary)] truncate">
                               {notif.title}
                             </p>
                             {!notif.read && (
@@ -518,9 +548,7 @@ export default function Navbar({
                           </span>
                         )}
                         {notif.type === "high_alert" && (
-                          <span className="text-[8px] bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded px-1.5 py-0.5 flex-shrink-0">
-                            HIGH
-                          </span>
+                          <SeverityBadge severity={notif.severity} />
                         )}
                       </button>
                     ))
@@ -573,10 +601,16 @@ export default function Navbar({
         {/* Run button */}
         <button
           onClick={handleRun}
-          disabled={running}
+          disabled={running || offline}
+          title={offline ? "Backend unreachable" : undefined}
           className="flex items-center gap-1.5 bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 disabled:text-slate-500 text-white text-[11px] font-bold px-3 py-1.5 rounded transition-colors"
         >
-          {running ? "Running..." : "▶ Run"}
+          {running ? (
+            <LoaderCircle className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+          ) : (
+            <Play className="w-3.5 h-3.5" aria-hidden="true" />
+          )}
+          {running ? "Running..." : "Run"}
         </button>
       </div>
     </header>

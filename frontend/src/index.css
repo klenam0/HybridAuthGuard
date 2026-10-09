@@ -25,6 +25,14 @@
     --badge-low-text: #60a5fa;
     --badge-critical-bg: rgba(239, 68, 68, 0.18);
     --badge-critical-text: #f87171;
+    /* Severity series for charts. Checked with the dataviz palette
+       validator against --bg-card: CVD and normal-vision separation pass;
+       severity is never colour-only (legend, tooltip, labels). */
+    --chart-critical: #ef4444;
+    --chart-high: #ea580c;
+    --chart-medium: #eab308;
+    --chart-low: #3b82f6;
+    --chart-total: #06b6d4;
   }
 
   html.light {
@@ -49,6 +57,11 @@
     --badge-low-text: #1d4ed8;
     --badge-critical-bg: #fee2e2;
     --badge-critical-text: #b91c1c;
+    --chart-critical: #b91c1c;
+    --chart-high: #c2410c;
+    --chart-medium: #f59e0b;
+    --chart-low: #2563eb;
+    --chart-total: #0891b2;
   }
 
   html,
@@ -325,5 +338,11 @@
 
   .ui-chip {
     @apply text-xs font-medium leading-5;
+  }
+
+  /* Hairline ring in the badge's own text colour (ignored where
+     color-mix is unsupported, leaving a borderless badge). */
+  .sev-badge {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 28%, transparent);
   }
 }

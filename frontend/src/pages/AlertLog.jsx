@@ -15,12 +15,9 @@ import {
   Globe,
   Cpu,
 } from "lucide-react";
-
-const SEVERITY_BADGE = {
-  HIGH: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  MEDIUM: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  LOW: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-};
+import PageHeader from "../components/PageHeader";
+import SeverityBadge from "../components/SeverityBadge";
+import { FILTER_ACTIVE } from "../config/severity";
 
 const SEVERITY_BORDER = {
   HIGH: "border-l-orange-500",
@@ -119,11 +116,7 @@ function AlertCard({
         </span>
 
         {/* Severity badge */}
-        <span
-          className={`text-[9px] font-bold px-2 py-0.5 rounded border flex-shrink-0 ${SEVERITY_BADGE[severity] || SEVERITY_BADGE.LOW}`}
-        >
-          {severity}
-        </span>
+        <SeverityBadge severity={severity} />
 
         {/* Alert type */}
         <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -272,8 +265,8 @@ function AlertCard({
                   ))}
               </div>
               <p className="text-[9px] text-slate-600 mt-2">
-                σ = standard deviations from normal baseline (630,000 real
-                enterprise logins)
+                σ = standard deviations from normal baseline (561,464 normal
+                RBA Dataset training logins)
               </p>
             </div>
           )}
@@ -503,36 +496,32 @@ export default function AlertLog({ data }) {
   const low = alerts.filter((a) => a.severity === "LOW").length;
 
   return (
-    <div className="p-3 sm:p-5 space-y-4">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
-            Alert Log
-          </p>
-          <p className="text-[10px] text-slate-700 mt-0.5">
-            Complete record of all detected threats with full analysis
-          </p>
-        </div>
-
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
+      <PageHeader routeId="alert-log">
         {/* Summary counts */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           {[
-            { label: "Total", value: total, color: "text-white" },
+            {
+              label: "Total",
+              value: total,
+              color: "text-[color:var(--text-primary)]",
+            },
             { label: "HIGH", value: high, color: "text-orange-400" },
             { label: "MEDIUM", value: medium, color: "text-amber-400" },
             { label: "LOW", value: low, color: "text-blue-400" },
           ].map(({ label, value, color }) => (
             <div
               key={label}
-              className="bg-[#0f1629] border border-[#1e2a3d] rounded-lg px-3 py-1.5 text-center"
+              className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-4 py-2 text-center"
             >
-              <p className={`text-base font-bold ${color}`}>{value}</p>
-              <p className="text-[9px] text-slate-600">{label}</p>
+              <p className={`text-2xl font-semibold leading-none ${color}`}>
+                {value}
+              </p>
+              <p className="ui-caption mt-1">{label}</p>
             </div>
           ))}
         </div>
-      </div>
+      </PageHeader>
 
       {/* Controls */}
       <div
@@ -572,21 +561,15 @@ export default function AlertLog({ data }) {
         </div>
 
         {/* Severity filter */}
-        <div className="flex items-center gap-1 bg-[#0f1629] border border-[#1e2a3d] rounded-lg p-1 w-full sm:w-auto overflow-x-auto">
+        <div className="flex items-center gap-1 bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg p-1.5 w-full sm:w-auto overflow-x-auto">
           {FILTERS.map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1 rounded text-[10px] font-bold whitespace-nowrap transition-colors ${
+              className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
                 filter === f
-                  ? f === "ALL"
-                    ? "bg-slate-700 text-white"
-                    : f === "HIGH"
-                      ? "bg-orange-500/20 text-orange-400"
-                      : f === "MEDIUM"
-                        ? "bg-amber-500/20 text-amber-400"
-                        : "bg-blue-500/20 text-blue-400"
-                  : "text-slate-600 hover:text-slate-400"
+                  ? FILTER_ACTIVE[f]
+                  : "text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)]"
               }`}
             >
               {f}

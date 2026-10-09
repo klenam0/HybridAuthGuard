@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ShieldX, Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import PageHeader from "../components/PageHeader";
 
 const REASON_MAP = {
   "Brute Force Attack": {
@@ -90,14 +91,7 @@ export default function BlockedIPs({ data }) {
 
   return (
     <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <p className="ui-kicker">Blocked IP Addresses</p>
-          <p className="ui-caption mt-1">
-            IPs flagged and blocked by automated response
-          </p>
-        </div>
+      <PageHeader routeId="blocked-ips">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-4 py-2 text-center">
             <p className="text-2xl font-semibold text-red-700 leading-none">
@@ -118,7 +112,7 @@ export default function BlockedIPs({ data }) {
             <p className="ui-caption mt-1">Internal</p>
           </div>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Search */}
       <div className="flex items-center gap-2 bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-3 py-2.5">

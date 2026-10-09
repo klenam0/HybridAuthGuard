@@ -9,6 +9,17 @@ const BADGE_STYLES = {
   "email-alerts": "bg-green-600  text-white",
 };
 
+const FOOTER_STATUS = {
+  online: { label: "Backend connected", dot: "bg-green-400", text: "text-green-400" },
+  degraded: { label: "Partial connectivity", dot: "bg-amber-400", text: "text-amber-400" },
+  offline: { label: "Backend offline", dot: "bg-red-400", text: "text-red-400" },
+  connecting: {
+    label: "Connecting…",
+    dot: "bg-slate-400",
+    text: "text-[color:var(--text-secondary)]",
+  },
+};
+
 const BADGE_DOT = {
   "live-alerts": "bg-red-500",
   "alert-log": "bg-purple-500",
@@ -82,7 +93,7 @@ function UserAvatar({ collapsed }) {
           {/* Status row */}
           <div className="px-4 py-2.5 flex items-center gap-2 border-b border-[color:var(--border)]">
             <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-[11px] text-green-600 font-medium">
+            <span className="text-[11px] text-green-400 font-medium">
               Active - SOC Platform v2.4
             </span>
           </div>
@@ -117,7 +128,11 @@ export default function Sidebar({
   onToggleCollapsed,
   mobileOpen = false,
   onCloseMobile,
+  connection,
 }) {
+  const footerStatus =
+    FOOTER_STATUS[connection?.status] || FOOTER_STATUS.connecting;
+
   // Close mobile sidebar on route change
   useEffect(() => {
     if (mobileOpen && onCloseMobile) onCloseMobile();
@@ -185,7 +200,7 @@ export default function Sidebar({
                   <img src={socLogo} alt="Logo" className="w-5 h-5" />
                 </div>
                 <p className="ui-label text-[color:var(--text-primary)] leading-tight whitespace-nowrap overflow-hidden">
-                  Autonomous Cyber AI
+                  HybridAuthGuard
                 </p>
               </div>
 
@@ -220,7 +235,7 @@ export default function Sidebar({
                   py-2 rounded-lg text-left transition-all border
                   ${
                     active
-                      ? "bg-cyan-50 text-cyan-700 border-cyan-200"
+                      ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
                       : "text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)] hover:bg-white/[0.03] border-transparent"
                   }
                 `}
@@ -262,9 +277,9 @@ export default function Sidebar({
           {/* Active status - hidden when collapsed */}
           {!collapsed && (
             <div className="flex items-center gap-1.5 px-2 mb-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              <span className="ui-caption text-green-700 whitespace-nowrap">
-                All Systems Active
+              <div className={`w-1.5 h-1.5 rounded-full ${footerStatus.dot}`} />
+              <span className={`ui-caption whitespace-nowrap ${footerStatus.text}`}>
+                {footerStatus.label}
               </span>
             </div>
           )}

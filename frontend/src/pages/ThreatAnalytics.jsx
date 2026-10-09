@@ -12,16 +12,14 @@ import {
   Pie,
 } from "recharts";
 import { Globe, User, Target, Clock, Shield, Cpu } from "lucide-react";
-
-const CHART_TOOLTIP = {
-  contentStyle: {
-    background: "#111827",
-    border: "1px solid #1e2a3d",
-    borderRadius: "8px",
-    color: "#f1f5f9",
-    fontSize: 11,
-  },
-};
+import PageHeader from "../components/PageHeader";
+import {
+  axisTick,
+  barCursor,
+  chartTooltip,
+  formatHour,
+  lineCursor,
+} from "../config/chartTheme";
 
 const COLORS = [
   "#f97316",
@@ -98,28 +96,19 @@ export default function ThreatAnalytics({ data }) {
   const velocityData = timeline.filter((t) => t.total > 0);
 
   // Attack type severity breakdown
-  const typeData = stats?.type_counts || [];
+  const typeData = [...(stats?.type_counts || [])].sort(
+    (a, b) => b.count - a.count,
+  );
 
   // Summary stats
   const uniqueAttackers = Object.keys(ipCounts).length;
   const uniqueTargets = Object.keys(userCounts).length;
   const peakHour = peakHours[0]?.hour ?? "-";
-  const mostCommonAttack =
-    typeData.sort((a, b) => b.count - a.count)[0]?.name || "-";
+  const mostCommonAttack = typeData[0]?.name || "-";
 
   return (
-    <div className="p-3 sm:p-5 space-y-5 sm:space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
-            Threat Analytics
-          </p>
-          <p className="text-[10px] text-slate-700 mt-0.5">
-            Intelligence derived from current session alerts
-          </p>
-        </div>
-      </div>
+    <div className="p-3 sm:p-6 space-y-5 sm:space-y-6">
+      <PageHeader routeId="threat-analytics" />
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -170,7 +159,7 @@ export default function ThreatAnalytics({ data }) {
         {/* Alert velocity */}
         <div className="lg:col-span-2">
           <CardWrap>
-            <CardTitle>Alert Velocity - Attacks Per Hour (24h)</CardTitle>
+            <CardTitle>Alerts by Hour of Day</CardTitle>
             {velocityData.length === 0 ? (
               <p className="text-[11px] text-slate-700 py-8 text-center">
                 No alert data yet - run detection first
@@ -183,28 +172,29 @@ export default function ThreatAnalytics({ data }) {
                 >
                   <defs>
                     <linearGradient id="velGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f97316" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+                      <stop offset="5%" stopColor="var(--chart-total)" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="var(--chart-total)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <XAxis
                     dataKey="hour"
-                    tick={{ fill: "#475569", fontSize: 9 }}
-                    tickFormatter={(h) => `${h}:00`}
+                    tick={axisTick}
+                    tickFormatter={formatHour}
                     interval={5}
                   />
-                  <YAxis
-                    tick={{ fill: "#475569", fontSize: 9 }}
-                    allowDecimals={false}
-                  />
+                  <YAxis tick={axisTick} allowDecimals={false} />
                   <Tooltip
-                    {...CHART_TOOLTIP}
-                    labelFormatter={(h) => `${h}:00 – ${h + 1}:00`}
+                    {...chartTooltip}
+                    cursor={lineCursor}
+                    labelFormatter={(h) =>
+                      `${formatHour(h)}–${formatHour((h + 1) % 24)}`
+                    }
                   />
                   <Area
                     type="monotone"
                     dataKey="total"
-                    stroke="#f97316"
+                    name="Alerts"
+                    stroke="var(--chart-total)"
                     strokeWidth={2}
                     fill="url(#velGrad)"
                   />
@@ -237,7 +227,7 @@ export default function ThreatAnalytics({ data }) {
                     <Cell fill="#06b6d4" />
                     <Cell fill="#8b5cf6" />
                   </Pie>
-                  <Tooltip {...CHART_TOOLTIP} />
+                  <Tooltip {...chartTooltip} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="space-y-2 mt-2">
@@ -254,7 +244,7 @@ export default function ThreatAnalytics({ data }) {
                         {d.name}
                       </span>
                     </div>
-                    <span className="text-[10px] font-bold text-white">
+                    <span className="text-[10px] font-bold text-[color:var(--text-primary)]">
                       {d.value}
                     </span>
                   </div>
@@ -291,7 +281,7 @@ export default function ThreatAnalytics({ data }) {
                       style={{ width: `${(count / topUsers[0].count) * 100}%` }}
                     />
                   </div>
-                  <span className="text-[10px] font-bold text-white w-4 text-right flex-shrink-0">
+                  <span className="text-[10px] font-bold text-[color:var(--text-primary)] w-4 text-right flex-shrink-0">
                     {count}
                   </span>
                 </div>
@@ -324,7 +314,7 @@ export default function ThreatAnalytics({ data }) {
                       style={{ width: `${(count / topIPs[0].count) * 100}%` }}
                     />
                   </div>
-                  <span className="text-[10px] font-bold text-white w-4 text-right flex-shrink-0">
+                  <span className="text-[10px] font-bold text-[color:var(--text-primary)] w-4 text-right flex-shrink-0">
                     {count}
                   </span>
                 </div>
@@ -347,14 +337,14 @@ export default function ThreatAnalytics({ data }) {
                 layout="vertical"
                 margin={{ top: 0, right: 20, bottom: 0, left: 10 }}
               >
-                <XAxis type="number" tick={{ fill: "#475569", fontSize: 9 }} />
+                <XAxis type="number" tick={axisTick} allowDecimals={false} />
                 <YAxis
                   type="category"
                   dataKey="name"
-                  tick={{ fill: "#94a3b8", fontSize: 9 }}
+                  tick={axisTick}
                   width={120}
                 />
-                <Tooltip {...CHART_TOOLTIP} />
+                <Tooltip {...chartTooltip} cursor={barCursor} />
                 <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                   {typeData.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -399,7 +389,7 @@ export default function ThreatAnalytics({ data }) {
                       )}
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold text-white w-4 text-right flex-shrink-0">
+                  <span className="text-[10px] font-bold text-[color:var(--text-primary)] w-4 text-right flex-shrink-0">
                     {total}
                   </span>
                 </div>

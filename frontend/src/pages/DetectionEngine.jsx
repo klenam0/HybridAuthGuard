@@ -1,5 +1,6 @@
 import { Shield, Cpu, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
+import PageHeader from "../components/PageHeader";
 
 const DETECTOR_INFO = {
   "Suspicious Login Time": {
@@ -8,7 +9,8 @@ const DETECTOR_INFO = {
     type: "rule",
     rule: "Login hour between 00:00 and 05:59",
     threshold: "Any successful login in the restricted window",
-    mitre: "T1078.001",
+    mitre: "T1078",
+    tactic: "Persistence",
   },
   "Multiple IP Login": {
     description:
@@ -17,6 +19,7 @@ const DETECTOR_INFO = {
     rule: "Same user, different IPs, within 120 seconds",
     threshold: "2 different IPs within 2 minutes",
     mitre: "T1078",
+    tactic: "Defense Evasion / Persistence",
   },
   "Brute Force Attack": {
     description:
@@ -25,6 +28,7 @@ const DETECTOR_INFO = {
     rule: "Failed login count >= threshold from single IP",
     threshold: "5 failed attempts (configurable)",
     mitre: "T1110.001",
+    tactic: "Credential Access",
   },
   "Slow Brute Force": {
     description:
@@ -33,6 +37,7 @@ const DETECTOR_INFO = {
     rule: "4+ failures within 60 minutes, spread over 5+ minutes",
     threshold: "4 failures, minimum 5 minute spread, within 1 hour",
     mitre: "T1110.001",
+    tactic: "Credential Access",
   },
   "Credential Stuffing": {
     description:
@@ -41,16 +46,18 @@ const DETECTOR_INFO = {
     rule: "5+ unique usernames from single IP with high failure rate",
     threshold: "5 unique usernames, 70%+ failure rate",
     mitre: "T1110.004",
+    tactic: "Credential Access",
   },
   "ML Anomaly Detected": {
     description:
-      "Isolation Forest trained on 630,000 real enterprise login events detects statistical deviations from normal behaviour. Catches novel attacks that rule-based detectors miss - including unknown attack patterns.",
+      "Isolation Forest trained on 561,464 normal login events from the RBA Dataset (a privacy-preserving synthesis of real production logins) detects statistical deviations from normal behaviour. Catches novel attacks that rule-based detectors miss - including unknown attack patterns.",
     type: "ml",
     rule: "Isolation Forest anomaly score below threshold with High/Medium confidence",
     threshold:
       "Score < -0.10 = High confidence, Score < -0.02 = Medium confidence",
-    mitre: "T1190",
-    training: "630,000 normal RBA Dataset events",
+    mitre: "T1078",
+    tactic: "Persistence",
+    training: "561,464 normal RBA Dataset events",
     features: [
       "Login hour",
       "Failure status",
@@ -111,7 +118,7 @@ function DetectorCard({ name, info, alerts, detectorData }) {
               )}
             </div>
             <div>
-              <p className="text-[12px] font-bold text-white">{name}</p>
+              <p className="text-[12px] font-bold text-[color:var(--text-primary)]">{name}</p>
               <span
                 className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${typeStyle.bg} ${typeStyle.text} ${typeStyle.border}`}
               >
@@ -133,7 +140,7 @@ function DetectorCard({ name, info, alerts, detectorData }) {
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-2 mb-3">
           <div className="bg-[#0b1120] rounded-lg p-2 text-center">
-            <p className="text-lg font-bold text-white">{alertCount}</p>
+            <p className="text-lg font-bold text-[color:var(--text-primary)]">{alertCount}</p>
             <p className="text-[9px] text-slate-600">Alerts</p>
           </div>
           <div className="bg-[#0b1120] rounded-lg p-2 text-center">
@@ -145,6 +152,12 @@ function DetectorCard({ name, info, alerts, detectorData }) {
           <div className="bg-[#0b1120] rounded-lg p-2 text-center">
             <p className="text-[11px] font-bold text-slate-300">{info.mitre}</p>
             <p className="text-[9px] text-slate-600">MITRE</p>
+            <p
+              className="text-[9px] text-slate-500 truncate"
+              title={info.tactic}
+            >
+              {info.tactic}
+            </p>
           </div>
         </div>
 
@@ -168,11 +181,11 @@ function DetectorCard({ name, info, alerts, detectorData }) {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <p className="text-[9px] text-slate-600">Algorithm</p>
-                <p className="text-[11px] text-white">Isolation Forest</p>
+                <p className="text-[11px] text-[color:var(--text-primary)]">Isolation Forest</p>
               </div>
               <div>
                 <p className="text-[9px] text-slate-600">Training data</p>
-                <p className="text-[11px] text-white">{info.training}</p>
+                <p className="text-[11px] text-[color:var(--text-primary)]">{info.training}</p>
               </div>
             </div>
             <p className="text-[9px] text-slate-600 mt-2 mb-1">
@@ -253,7 +266,8 @@ function DetectorCard({ name, info, alerts, detectorData }) {
 }
 
 export default function DetectionEngine({ data }) {
-  const { alerts, detectors } = data;
+  const { alerts, detectors, modelInfo } = data;
+  const pct = (v) => (typeof v === "number" ? `${(v * 100).toFixed(1)}%` : "-");
 
   const ruleAlerts = alerts.filter((a) => a.type !== "ML Anomaly Detected");
   const mlAlerts = alerts.filter((a) => a.type === "ML Anomaly Detected");
@@ -262,20 +276,11 @@ export default function DetectionEngine({ data }) {
   const detectorNames = Object.keys(DETECTOR_INFO);
 
   return (
-    <div className="p-3 sm:p-5 space-y-4 sm:space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
-            Detection Engine
-          </p>
-          <p className="text-[10px] text-slate-700 mt-0.5">
-            6 active detectors - 5 rule-based, 1 machine learning
-          </p>
-        </div>
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
+      <PageHeader routeId="detection-engine">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="bg-[#0f1629] border border-[#1e2a3d] rounded-lg px-3 py-1.5 text-center">
-            <p className="text-lg font-bold text-white">{totalAlerts}</p>
+            <p className="text-lg font-bold text-[color:var(--text-primary)]">{totalAlerts}</p>
             <p className="text-[9px] text-slate-600">Total Alerts</p>
           </div>
           <div className="bg-[#0f1629] border border-cyan-500/20 rounded-lg px-3 py-1.5 text-center">
@@ -291,7 +296,7 @@ export default function DetectionEngine({ data }) {
             <p className="text-[9px] text-slate-600">ML Detections</p>
           </div>
         </div>
-      </div>
+      </PageHeader>
 
       {/* How hybrid detection works */}
       <div className="bg-[#0f1629] border border-[#1e2a3d] rounded-xl p-4">
@@ -305,8 +310,7 @@ export default function DetectionEngine({ data }) {
               Rule-Based (5)
             </p>
             <p className="text-[10px] text-slate-600 mt-1">
-              Deterministic. 100% recall on known patterns. No false negatives
-              for defined attacks.
+              Deterministic. Fires reliably on its coded patterns.
             </p>
           </div>
           <div className="text-slate-600 text-lg font-bold text-center">+</div>
@@ -316,7 +320,9 @@ export default function DetectionEngine({ data }) {
               ML-Based (1)
             </p>
             <p className="text-[10px] text-slate-600 mt-1">
-              Probabilistic. 74.6% precision. Catches novel attacks rules never
+              Probabilistic. {pct(modelInfo?.precision)} precision,{" "}
+              {pct(modelInfo?.recall)} recall. Catches novel
+              attacks rules never
               anticipated.
             </p>
           </div>

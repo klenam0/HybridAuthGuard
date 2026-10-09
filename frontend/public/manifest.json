@@ -1,6 +1,6 @@
 {
-  "short_name": "SOC Dashboard",
-  "name": "Autonomous Cyber Threat Monitoring Dashboard",
+  "short_name": "HybridAuthGuard",
+  "name": "HybridAuthGuard",
   "icons": [
     { "src": "soclogo.png", "type": "image/png", "sizes": "192x192" },
     { "src": "soclogo.png", "type": "image/png", "sizes": "512x512" }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Save,
+  Lock,
   Download,
   Trash2,
   Shield,
@@ -9,6 +9,7 @@ import {
   Activity,
   AlertTriangle,
 } from "lucide-react";
+import PageHeader from "../components/PageHeader";
 
 const API = "http://localhost:5000/api";
 
@@ -29,27 +30,30 @@ function SectionCard({ title, icon: Icon, iconColor, children }) {
     <div className="bg-[#0f1629] border border-[#1e2a3d] rounded-xl p-4">
       <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[#1e2a3d]">
         <Icon className={`w-4 h-4 ${iconColor}`} />
-        <p className="text-[12px] font-bold text-white">{title}</p>
+        <p className="text-[12px] font-bold text-[color:var(--text-primary)]">{title}</p>
       </div>
       {children}
     </div>
   );
 }
 
-function Toggle({ value, onChange }) {
+// Read-only on/off state. These settings live in the backend source and
+// cannot be changed from the dashboard, so they are not interactive.
+function StateBadge({ on, label }) {
   return (
-    <button
-      onClick={() => onChange(!value)}
-      className={`relative w-10 h-5 rounded-full transition-colors ${
-        value ? "bg-cyan-500" : "bg-slate-700"
+    <span
+      className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1 rounded-lg border whitespace-nowrap ${
+        on
+          ? "bg-green-500/10 border-green-500/20 text-green-400"
+          : "bg-[color:var(--bg-elevated)] border-[color:var(--border)] text-[color:var(--text-secondary)]"
       }`}
     >
-      <div
-        className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
-          value ? "translate-x-5" : "translate-x-0"
-        }`}
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${on ? "bg-green-400" : "bg-slate-500"}`}
+        aria-hidden="true"
       />
-    </button>
+      {label || (on ? "On" : "Off")}
+    </span>
   );
 }
 
@@ -65,19 +69,8 @@ function ValueBadge({ value, unit = "" }) {
 export default function Settings({ data }) {
   const { modelInfo } = data;
 
-  const [emailEnabled, setEmailEnabled] = useState(true);
-  const [emailHigh, setEmailHigh] = useState(true);
-  const [emailMedium, setEmailMedium] = useState(false);
-  const [mlEnabled, setMlEnabled] = useState(true);
-  const [internalGuard, setInternalGuard] = useState(true);
-  const [saved, setSaved] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [exporting, setExporting] = useState(false);
-
-  const handleSave = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
 
   const handleClearAlerts = async () => {
     if (!window.confirm("Clear all alerts? This cannot be undone.")) return;
@@ -144,29 +137,16 @@ export default function Settings({ data }) {
   const rocAuc = modelInfo?.roc_auc ? modelInfo.roc_auc.toFixed(3) : "-";
 
   return (
-    <div className="p-3 sm:p-5 space-y-4 sm:space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
-            Settings
-          </p>
-          <p className="text-[10px] text-slate-700 mt-0.5">
-            System configuration and controls
-          </p>
-        </div>
-        <button
-          onClick={handleSave}
-          className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-[11px] font-bold transition-colors w-full sm:w-auto ${
-            saved
-              ? "bg-green-500/20 text-green-400 border border-green-500/30"
-              : "bg-cyan-600 hover:bg-cyan-500 text-white"
-          }`}
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
+      <PageHeader routeId="settings">
+        <span
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border bg-[color:var(--bg-elevated)] border-[color:var(--border)] text-sm font-medium text-[color:var(--text-secondary)]"
+          title="Change these values in the backend source and restart the pipeline"
         >
-          <Save className="w-3.5 h-3.5" />
-          {saved ? "Saved!" : "Save Changes"}
-        </button>
-      </div>
+          <Lock className="w-3.5 h-3.5" aria-hidden="true" />
+          Read-only
+        </span>
+      </PageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Detection Settings */}
@@ -207,15 +187,15 @@ export default function Settings({ data }) {
           </SettingRow>
           <SettingRow
             label="Internal IP Guard"
-            description="Exclude internal IPs from ML scoring"
+            description="Exclude internal IPs from ML scoring (INTERNAL_IP_GUARD_ENABLED)"
           >
-            <Toggle value={internalGuard} onChange={setInternalGuard} />
+            <StateBadge on={false} label="Disabled" />
           </SettingRow>
           <SettingRow
             label="Internal IP Ranges"
             description="Subnets treated as internal"
           >
-            <ValueBadge value="192.168.x, 10.x, 172.16.x" />
+            <ValueBadge value="192.168.x, 10.0.x, 172.16.x" />
           </SettingRow>
         </SectionCard>
 
@@ -229,7 +209,7 @@ export default function Settings({ data }) {
             label="ML Detection"
             description="Enable Isolation Forest anomaly detection"
           >
-            <Toggle value={mlEnabled} onChange={setMlEnabled} />
+            <StateBadge on />
           </SettingRow>
           <SettingRow
             label="Algorithm"
@@ -241,7 +221,7 @@ export default function Settings({ data }) {
             label="Contamination"
             description="Expected anomaly rate in training data"
           >
-            <ValueBadge value="0.15" />
+            <ValueBadge value="0.4" />
           </SettingRow>
           <SettingRow
             label="N Estimators"
@@ -254,7 +234,7 @@ export default function Settings({ data }) {
             description="Input features used per event"
           >
             <ValueBadge
-              value={modelInfo?.feature_count || "10"}
+              value={modelInfo?.feature_count || "-"}
               unit=" features"
             />
           </SettingRow>
@@ -262,7 +242,7 @@ export default function Settings({ data }) {
             label="Training Set"
             description="Events used to train the model"
           >
-            <ValueBadge value="630,000" unit=" events" />
+            <ValueBadge value={modelInfo?.training_size || "-"} />
           </SettingRow>
           <SettingRow
             label="Inference Mode"
@@ -307,21 +287,21 @@ export default function Settings({ data }) {
         >
           <SettingRow
             label="Email Notifications"
-            description="Send email alerts for detected threats"
+            description="Sent only when SMTP credentials are set in the backend .env file"
           >
-            <Toggle value={emailEnabled} onChange={setEmailEnabled} />
+            <ValueBadge value="Depends on .env" />
           </SettingRow>
           <SettingRow
             label="HIGH Severity Alerts"
             description="Email on HIGH severity detections"
           >
-            <Toggle value={emailHigh} onChange={setEmailHigh} />
+            <StateBadge on />
           </SettingRow>
           <SettingRow
             label="MEDIUM Severity Alerts"
             description="Email on MEDIUM severity detections"
           >
-            <Toggle value={emailMedium} onChange={setEmailMedium} />
+            <StateBadge on={false} />
           </SettingRow>
           <SettingRow
             label="SMTP Provider"

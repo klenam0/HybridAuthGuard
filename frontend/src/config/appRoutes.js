@@ -21,7 +21,7 @@ export const appRoutes = [
     title: "Dashboard",
     Icon: LayoutDashboard,
     description:
-      "SOC overview, security metrics, agent pipeline, and detection status.",
+      "Current threat posture, recent high-severity alerts and pipeline activity.",
     keywords: ["home", "overview", "metrics", "summary", "monitoring"],
     sections: [
       {
@@ -33,8 +33,8 @@ export const appRoutes = [
       },
       {
         id: "dashboard-pipeline",
-        title: "AI Agent Pipeline",
-        description: "Agent processing, queues, and live pipeline events.",
+        title: "Detection Pipeline",
+        description: "Pipeline stage processing, queues, and live pipeline events.",
         keywords: ["agents", "detection engine", "events"],
       },
     ],
@@ -65,7 +65,7 @@ export const appRoutes = [
     id: "detection-engine",
     title: "Detection Engine",
     Icon: Shield,
-    description: "Detection engine controls and detector configuration.",
+    description: "The five rule-based detectors and the Isolation Forest model, with their rules and activity.",
     keywords: [
       "detectors",
       "rules",
@@ -78,7 +78,7 @@ export const appRoutes = [
     id: "mitre-mapping",
     title: "MITRE Mapping",
     Icon: Target,
-    description: "Map detected threats to the MITRE ATT&CK framework.",
+    description: "Techniques observed in detected alerts, mapped to MITRE ATT&CK.",
     keywords: ["attack", "techniques", "tactics", "framework", "mitre"],
     sections: [
       {
@@ -93,14 +93,14 @@ export const appRoutes = [
     id: "threat-analytics",
     title: "Threat Analytics",
     Icon: BarChart3,
-    description: "Analyze threat patterns, trends, and security intelligence.",
+    description: "Patterns across the current alert set: timing, targeted accounts and source IPs.",
     keywords: ["analytics", "reports", "trends", "reporting"],
   },
   {
     id: "response-actions",
     title: "Response Actions",
     Icon: Zap,
-    description: "Review automated response activity and remediation actions.",
+    description: "Automated responses taken per alert. IP blocking is simulated in this prototype.",
     keywords: [
       "respond",
       "remediation",
@@ -122,7 +122,7 @@ export const appRoutes = [
     title: "Blocked IPs",
     Icon: Ban,
     description:
-      "View and manage IP addresses automatically blocked by the platform.",
+      "Source IPs of HIGH-severity alerts, flagged for blocking (simulated in this prototype).",
     keywords: ["blocked", "ip", "blacklist", "denylist", "firewall", "ban"],
     sections: [
       {
@@ -138,7 +138,7 @@ export const appRoutes = [
     title: "Email Alerts",
     Icon: Mail,
     description:
-      "Configure and review email notifications for security events.",
+      "Email notifications sent for HIGH-severity detections.",
     keywords: ["email", "notifications", "messages", "recipients"],
   },
   {
@@ -161,7 +161,7 @@ export const appRoutes = [
     id: "system-health",
     title: "System Health",
     Icon: Activity,
-    description: "Inspect agent, API, model, and pipeline health.",
+    description: "Live status of the backend API, ML model, detectors and pipeline.",
     keywords: ["health", "status", "api", "uptime", "diagnostics"],
     sections: [
       {
@@ -176,7 +176,7 @@ export const appRoutes = [
     id: "settings",
     title: "Settings",
     Icon: Settings,
-    description: "Manage application preferences and configuration.",
+    description: "Current detection, model and alerting configuration (read-only).",
     keywords: ["preferences", "configuration", "options", "theme"],
   },
 ];

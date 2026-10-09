@@ -1,4 +1,6 @@
 import { ExternalLink, Shield } from "lucide-react";
+import PageHeader from "../components/PageHeader";
+import SeverityBadge from "../components/SeverityBadge";
 
 const TACTIC_COLORS = {
   "Credential Access": "bg-red-500/20 text-red-400 border-red-500/30",
@@ -7,12 +9,6 @@ const TACTIC_COLORS = {
   Persistence: "bg-amber-500/20 text-amber-400 border-amber-500/30",
   "Initial Access": "bg-purple-500/20 text-purple-400 border-purple-500/30",
   "Lateral Movement": "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-};
-
-const SEVERITY_BADGE = {
-  HIGH: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  MEDIUM: "bg-amber-500/20  text-amber-400  border-amber-500/30",
-  LOW: "bg-blue-500/20   text-blue-400   border-blue-500/30",
 };
 
 function TacticBadge({ tactic }) {
@@ -28,16 +24,7 @@ function TacticBadge({ tactic }) {
   );
 }
 
-function SeverityBadge({ severity }) {
-  const cls = SEVERITY_BADGE[severity] || SEVERITY_BADGE.LOW;
-  return (
-    <span
-      className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${cls}`}
-    >
-      {severity}
-    </span>
-  );
-}
+
 
 export default function MITREMapping({ data }) {
   const { alerts } = data;
@@ -51,13 +38,21 @@ export default function MITREMapping({ data }) {
       techniqueMap[id] = {
         technique_id: alert.mitre.technique_id,
         technique_name: alert.mitre.technique_name,
-        tactic: alert.mitre.tactic,
+        tactics: new Set(),
         url: alert.mitre.url,
         count: 0,
         severities: {},
         alert_types: new Set(),
       };
     }
+    // Collect every distinct tactic in the group (e.g. T1078 is
+    // "Defense Evasion / Persistence" for Multiple IP Login but
+    // "Persistence" for ML Anomaly / Suspicious Login Time).
+    (alert.mitre.tactic || "")
+      .split(" / ")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .forEach((s) => techniqueMap[id].tactics.add(s));
     techniqueMap[id].count += 1;
     techniqueMap[id].alert_types.add(alert.type);
     const sev = alert.severity || "LOW";
@@ -65,9 +60,9 @@ export default function MITREMapping({ data }) {
       (techniqueMap[id].severities[sev] || 0) + 1;
   });
 
-  const techniques = Object.values(techniqueMap).sort(
-    (a, b) => b.count - a.count,
-  );
+  const techniques = Object.values(techniqueMap)
+    .map((t) => ({ ...t, tactic: [...t.tactics].sort().join(" / ") }))
+    .sort((a, b) => b.count - a.count);
 
   const maxCount = techniques[0]?.count || 1;
   const totalAlerts = alerts.length;
@@ -84,14 +79,7 @@ export default function MITREMapping({ data }) {
 
   return (
     <div id="mitre-matrix" className="p-3 sm:p-6 space-y-4 sm:space-y-5">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <p className="ui-kicker">MITRE ATT&CK Mapping</p>
-          <p className="ui-caption mt-1">
-            Techniques identified from live detection pipeline
-          </p>
-        </div>
+      <PageHeader routeId="mitre-mapping">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-4 py-2 text-center">
             <p className="text-2xl font-semibold text-cyan-700 leading-none">
@@ -106,7 +94,7 @@ export default function MITREMapping({ data }) {
             <p className="ui-caption mt-1">Total Alerts</p>
           </div>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Empty state */}
       {techniques.length === 0 && (
