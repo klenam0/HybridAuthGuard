@@ -8,10 +8,17 @@ Features with high deviation are the primary drivers of the anomaly flag.
 
 This is mathematically grounded explainability - no black box,
 no additional libraries required beyond what is already installed.
+
+Value descriptions match the settled frequency-encoded feature scheme
+(anomaly_model._extract_features_v2_frequency): IP, user, country and
+device are the share of training logins with that exact value, and 0.0
+means the value never appeared in the 561,464-event training partition.
 """
 
 import numpy as np
 
+
+TRAINING_EVENTS = "561,464"
 
 # Human-readable labels for each feature position
 FEATURE_LABELS = {
@@ -26,6 +33,16 @@ FEATURE_LABELS = {
     8: "New/unknown IP",
     9: "New/unknown country",
 }
+
+
+def _freq_desc(entity):
+    """Description for a frequency-encoded identity feature."""
+    def describe(v, mean, std):
+        if v <= 0:
+            return f"{entity} never seen in the {TRAINING_EVENTS} training logins"
+        return f"{entity} seen in {v:.4%} of training logins"
+    return describe
+
 
 # What each feature value means in plain English
 FEATURE_DESCRIPTIONS = {
@@ -43,31 +60,19 @@ FEATURE_DESCRIPTIONS = {
     2: lambda v, mean, std: (
         "Login failed" if v == 1 else "Login succeeded"
     ),
-    3: lambda v, mean, std: (
-        "Unknown/external IP - not seen in 630,000 training events"
-        if v == -1 else f"Known IP (encoded ID: {int(v)})"
-    ),
-    4: lambda v, mean, std: (
-        "Unknown user - not seen in training data"
-        if v == -1 else f"Known user (encoded ID: {int(v)})"
-    ),
+    3: _freq_desc("Source IP"),
+    4: _freq_desc("User account"),
     5: lambda v, mean, std: (
         f"{v:.1%} cumulative failure rate from this IP"
     ),
-    6: lambda v, mean, std: (
-        "Unknown country - not seen in training data"
-        if v == -1 else f"Known country (encoded ID: {int(v)})"
-    ),
-    7: lambda v, mean, std: (
-        "Unknown device type"
-        if v == -1 else f"Device type (encoded ID: {int(v)})"
-    ),
+    6: _freq_desc("Country"),
+    7: _freq_desc("Device type"),
     8: lambda v, mean, std: (
-        "IP address was NEVER seen in 630,000 normal training events - strong anomaly signal"
+        f"IP address was NEVER seen in the {TRAINING_EVENTS} normal training logins - strong anomaly signal"
         if v == 1 else "IP address seen in training data (known)"
     ),
     9: lambda v, mean, std: (
-        "Country was NEVER seen in 630,000 normal training events - strong anomaly signal"
+        f"Country was NEVER seen in the {TRAINING_EVENTS} normal training logins - strong anomaly signal"
         if v == 1 else "Country seen in training data (known)"
     ),
 }
