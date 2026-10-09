@@ -75,7 +75,7 @@ def run_batch(delay=0.5, threshold=5, fresh=True, retrain=False):
         print("🗑️  Removed existing model - will retrain.\n")
 
     print("=" * 55)
-    print("  AGENTIC CYBER THREAT DETECTION SYSTEM")
+    print("  HYBRIDAUTHGUARD")
     print("=" * 55)
 
     print("\n[1/3] Generating synthetic log data...")
@@ -108,7 +108,7 @@ def run_live(threshold=5):
     clear_alerts()
 
     print("=" * 55)
-    print("  AGENTIC CYBER THREAT DETECTION SYSTEM - LIVE MODE")
+    print("  HYBRIDAUTHGUARD — LIVE MODE")
     print("=" * 55)
 
     detector = get_or_train_model(base)
@@ -123,7 +123,7 @@ def run_live(threshold=5):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Agentic Cyber Threat Detection System"
+        description="HybridAuthGuard: hybrid rule-based and Isolation Forest authentication threat detection"
     )
     parser.add_argument("--delay",     type=float, default=0.5,
                         help="Seconds between events in batch mode (default: 0.5)")

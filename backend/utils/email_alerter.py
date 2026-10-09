@@ -81,7 +81,7 @@ class EmailAlerter:
                             padding:20px 28px; margin-bottom:20px;
                             border-left:4px solid {severity_color};">
                     <div style="font-size:13px; color:#64748b; margin-bottom:4px;">
-                        AGENTIC CYBER THREAT DETECTION SYSTEM
+                        HYBRIDAUTHGUARD
                     </div>
                     <div style="font-size:22px; font-weight:800; color:{severity_color};">
                         🚨 {alert.get('type')}
@@ -155,8 +155,8 @@ class EmailAlerter:
                 <!-- Footer -->
                 <div style="font-size:12px; color:#475569; text-align:center;
                             padding-top:16px;">
-                    Agentic Cyber Threat Detection System &nbsp;·&nbsp;
-                    Autonomous SOC Agent &nbsp;·&nbsp;
+                    HybridAuthGuard &nbsp;·&nbsp;
+                    Hybrid authentication threat detection &nbsp;·&nbsp;
                     This alert was generated automatically
                 </div>
 

@@ -242,7 +242,7 @@ def get_agents():
 
     return jsonify([
         {
-            "name":     "Monitoring Agent",
+            "name":     "Monitoring Stage",
             "role":     "Orchestrator",
             "status":   "active",
             "processed": processed,
@@ -252,7 +252,7 @@ def get_agents():
             "last_run": last_run,
         },
         {
-            "name":     "Detection Agent",
+            "name":     "Detection Stage",
             "role":     "Threat Detection Engine",
             "status":   "active",
             "processed": processed,
@@ -262,7 +262,7 @@ def get_agents():
             "last_run": last_run,
         },
         {
-            "name":     "Analysis Agent",
+            "name":     "Analysis Stage",
             "role":     "Alert Intelligence",
             "status":   "active",
             "processed": generated,
@@ -489,7 +489,7 @@ def clear_queue():
 # ── Startup ────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    print("🚀 SOC Dashboard API running at http://localhost:5000")
+    print("🚀 HybridAuthGuard API running at http://localhost:5000")
     print("   Open frontend in browser to view dashboard")
     start_llm_service()
     app.run(debug=False, port=5000)
