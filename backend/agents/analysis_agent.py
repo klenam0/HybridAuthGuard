@@ -34,10 +34,10 @@ class AnalysisAgent:
                 "url":            "https://attack.mitre.org/techniques/T1110/001/"
             },
             "Slow Brute Force": {
-                "technique_id":   "T1110.003",
-                "technique_name": "Brute Force: Password Spraying",
+                "technique_id":   "T1110.001",
+                "technique_name": "Brute Force: Password Guessing",
                 "tactic":         "Credential Access",
-                "url":            "https://attack.mitre.org/techniques/T1110/003/"
+                "url":            "https://attack.mitre.org/techniques/T1110/001/"
             },
             "Credential Stuffing": {
                 "technique_id":   "T1110.004",
@@ -52,16 +52,16 @@ class AnalysisAgent:
                 "url":            "https://attack.mitre.org/techniques/T1078/"
             },
             "Suspicious Login Time": {
-                "technique_id":   "T1078.001",
-                "technique_name": "Valid Accounts: Default Accounts",
+                "technique_id":   "T1078",
+                "technique_name": "Valid Accounts",
                 "tactic":         "Persistence",
-                "url":            "https://attack.mitre.org/techniques/T1078/001/"
+                "url":            "https://attack.mitre.org/techniques/T1078/"
             },
             "ML Anomaly Detected": {
-                "technique_id":   "T1190",
-                "technique_name": "Exploit Public-Facing Application",
-                "tactic":         "Initial Access",
-                "url":            "https://attack.mitre.org/techniques/T1190/"
+                "technique_id":   "T1078",
+                "technique_name": "Valid Accounts",
+                "tactic":         "Persistence",
+                "url":            "https://attack.mitre.org/techniques/T1078/"
             },
         }
 
@@ -90,7 +90,7 @@ class AnalysisAgent:
         # Get feature explanation for ML alerts
         feature_explanation = alert.pop("feature_explanation", None)
 
-        # Generate explanation - LLM if available, template if not
+        # Generate explanation — LLM if available, template if not
         if self.llm_analyzer:
             alert["explanation"] = self.llm_analyzer.generate_explanation(
                 alert, feature_explanation
