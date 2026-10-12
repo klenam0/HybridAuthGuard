@@ -17,6 +17,8 @@ means the value never appeared in the 561,464-event training partition.
 
 import numpy as np
 
+import config
+
 
 TRAINING_EVENTS = "561,464"
 
@@ -134,7 +136,7 @@ class AlertExplainer:
                 "normal_std":    float(std),
                 "deviation":     float(deviation),
                 "value_display": value_str,
-                "is_anomalous":  bool(deviation > 1.5),  # >1.5 std devs = suspicious
+                "is_anomalous":  bool(deviation > config.EXPLAINER_DEVIATION_FLAG),
             })
 
         # Sort by deviation - most anomalous features first
@@ -145,12 +147,12 @@ class AlertExplainer:
         summary   = self._build_summary(anomalous, anomaly_score, confidence)
 
         # Score context
-        if anomaly_score < -0.15:
+        if anomaly_score < config.EXPLAINER_STRONG_CUTOFF:
             score_context = (
                 f"Score {anomaly_score:.4f} indicates a strongly anomalous pattern - "
                 f"this event is far outside the normal login behaviour baseline."
             )
-        elif anomaly_score < -0.10:
+        elif anomaly_score < config.CONFIDENCE_HIGH_CUTOFF:
             score_context = (
                 f"Score {anomaly_score:.4f} indicates a clearly anomalous pattern - "
                 f"this event deviates significantly from normal behaviour."

@@ -79,7 +79,12 @@ function BarRow({ label, pct, color }) {
 }
 
 export default function ResponseActions({ data }) {
-  const { alerts, stats, timeline, modelInfo, pipelineStats } = data;
+  const { alerts, stats, timeline, modelInfo, pipelineStats, backendConfig } =
+    data;
+  // Confidence cut-offs from /api/config (backend/config.py).
+  const highCut = backendConfig?.ml?.confidence_high_cutoff;
+  const medCut = backendConfig?.ml?.confidence_medium_cutoff;
+  const fmtCut = (v) => (typeof v === "number" ? v.toFixed(2) : "?");
 
   const total = stats?.total_alerts || 0;
   const high = stats?.severity_counts?.HIGH || 0;
@@ -139,10 +144,17 @@ export default function ResponseActions({ data }) {
   const mlAlerts = alerts.filter(
     (a) => a.type === "ML Anomaly Detected" && a.anomaly_score !== undefined,
   );
-  const hiC = mlAlerts.filter((a) => a.anomaly_score < -0.1).length;
-  const mdC = mlAlerts.filter(
-    (a) => a.anomaly_score >= -0.1 && a.anomaly_score < -0.02,
-  ).length;
+  // Prefer the confidence the backend assigned; fall back to the score
+  // and the configured cut-offs for alerts that lack it.
+  const bandOf = (a) => {
+    if (a.confidence) return a.confidence;
+    if (typeof highCut !== "number" || typeof medCut !== "number") return null;
+    if (a.anomaly_score < highCut) return "High";
+    if (a.anomaly_score < medCut) return "Medium";
+    return "Low";
+  };
+  const hiC = mlAlerts.filter((a) => bandOf(a) === "High").length;
+  const mdC = mlAlerts.filter((a) => bandOf(a) === "Medium").length;
   const loC = mlAlerts.length - hiC - mdC;
   const tot = mlAlerts.length || 1;
   const hiP = mlAlerts.length ? Math.round((hiC / tot) * 100) : null;
@@ -333,17 +345,17 @@ export default function ResponseActions({ data }) {
             <div className="space-y-2">
               {[
                 {
-                  label: "High (score < -0.10)",
+                  label: `High (score < ${fmtCut(highCut)})`,
                   pct: hiP,
                   color: "bg-red-400",
                 },
                 {
-                  label: "Med  (score < -0.02)",
+                  label: `Med  (score < ${fmtCut(medCut)})`,
                   pct: mdP,
                   color: "bg-orange-400",
                 },
                 {
-                  label: "Low  (score ≥ -0.02)",
+                  label: `Low  (score ≥ ${fmtCut(medCut)})`,
                   pct: loP,
                   color: "bg-green-400",
                 },

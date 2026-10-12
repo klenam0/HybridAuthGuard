@@ -2,6 +2,8 @@
 from collections import defaultdict
 from datetime import datetime
 
+import config
+
 
 class DetectionAgent:
     """
@@ -32,10 +34,10 @@ class DetectionAgent:
 
     # Settled after reviewer-revision testing. Change these, not the
     # logic below, if a future revision needs different behaviour.
-    ML_REALERT_COOLDOWN_SECONDS = 0
-    INTERNAL_IP_GUARD_ENABLED = False
+    ML_REALERT_COOLDOWN_SECONDS = config.ML_REALERT_COOLDOWN_SECONDS
+    INTERNAL_IP_GUARD_ENABLED = config.INTERNAL_IP_GUARD_ENABLED
 
-    def __init__(self, threshold=5, anomaly_detector=None):
+    def __init__(self, threshold=config.BRUTE_FORCE_THRESHOLD, anomaly_detector=None):
         self.failed_attempts = defaultdict(int)
         self.threshold = threshold
         self.rule_blocked_ips = set()   # Fix B: rule-confirmed blocks only
@@ -44,7 +46,7 @@ class DetectionAgent:
         self.ip_attempt_times = defaultdict(list)
         self.anomaly_detector = anomaly_detector
         self.ip_users_tried = defaultdict(set)
-        self.internal_ip_prefixes = ("192.168.", "10.0.", "172.16.")
+        self.internal_ip_prefixes = config.INTERNAL_IP_PREFIXES
         self.suspicious_last_fired = {}  # ip → last datetime it triggered suspicious time
         self.ml_last_alerted = {}        # Fix C: ip → timestamp of last FAILED-event ML alert
 
@@ -57,9 +59,10 @@ class DetectionAgent:
         self.ip_users_tried[ip].add(user)
 
         # ── 1. Suspicious Login Time ───────────────────────────────────────
-        if log_event["status"] == "SUCCESS" and 0 <= hour <= 5:
+        start, end = config.SUSPICIOUS_HOUR_START, config.SUSPICIOUS_HOUR_END
+        if log_event["status"] == "SUCCESS" and start <= hour <= end:
             last_fired = self.suspicious_last_fired.get(ip)
-            cooldown   = 600  # 10 minutes between alerts from same IP
+            cooldown   = config.SUSPICIOUS_COOLDOWN_SECONDS
             if last_fired is None or (timestamp - last_fired).total_seconds() > cooldown:
                 self.suspicious_last_fired[ip] = timestamp
                 return {
@@ -69,9 +72,9 @@ class DetectionAgent:
                     "description": f"User {user} logged in at unusual hour ({timestamp.strftime('%H:%M')})",
                     "trigger_details": {
                         "rule":      "Off-hours login detected",
-                        "threshold": "Logins between 00:00–05:59 flagged",
+                        "threshold": f"Logins between {start:02d}:00–{end:02d}:59 flagged",
                         "actual":    f"Login at {timestamp.strftime('%H:%M')} (hour {hour})",
-                        "values":    {"login_hour": hour, "restricted_window": "00:00–05:59"},
+                        "values":    {"login_hour": hour, "restricted_window": f"{start:02d}:00–{end:02d}:59"},
                     }
                 }
 
@@ -84,7 +87,8 @@ class DetectionAgent:
             if prev is not None:
                 last_ip, last_time = prev
                 time_diff = abs((timestamp - last_time).total_seconds())
-                if ip != last_ip and time_diff < 120:
+                window = config.MULTI_IP_WINDOW_SECONDS
+                if ip != last_ip and time_diff < window:
                     return {
                         "type": "Multiple IP Login",
                         "ip":   ip,
@@ -94,14 +98,14 @@ class DetectionAgent:
                             f"within {int(time_diff)} seconds"
                         ),
                         "trigger_details": {
-                            "rule":      "Same user authenticated from two IPs within 2 minutes",
-                            "threshold": "Maximum 120 seconds between logins from different IPs",
+                            "rule":      f"Same user authenticated from two IPs within {window // 60} minutes",
+                            "threshold": f"Maximum {window} seconds between logins from different IPs",
                             "actual":    f"{user} logged from {last_ip} then {ip} within {int(time_diff)}s",
                             "values": {
                                 "first_ip":    last_ip,
                                 "second_ip":   ip,
                                 "time_diff_s": int(time_diff),
-                                "threshold_s": 120,
+                                "threshold_s": window,
                             },
                         }
                     }
@@ -138,7 +142,7 @@ class DetectionAgent:
             # unique_users_for_ip < 3 prevents misfiring on credential stuffing
             recent_failures = [
                 t for t in self.ip_attempt_times[ip]
-                if abs((timestamp - t).total_seconds()) <= 3600
+                if abs((timestamp - t).total_seconds()) <= config.SLOW_BF_WINDOW_SECONDS
             ]
 
             unique_users_for_ip = len(self.ip_users_tried[ip])
@@ -148,10 +152,10 @@ class DetectionAgent:
             ) if recent_failures else 0
 
             if (
-                len(recent_failures) >= 4
+                len(recent_failures) >= config.SLOW_BF_MIN_FAILURES
                 and self.failed_attempts[ip] < self.threshold
-                and time_spread_minutes >= 5
-                and unique_users_for_ip < 3
+                and time_spread_minutes >= config.SLOW_BF_MIN_SPREAD_MINUTES
+                and unique_users_for_ip < config.SLOW_BF_UNIQUE_USERS_BELOW
             ):
                 self.rule_blocked_ips.add(ip)
                 return {
@@ -165,13 +169,15 @@ class DetectionAgent:
                     ),
                     "trigger_details": {
                         "rule":      "Slow brute force evasion pattern",
-                        "threshold": "4+ failures within 60 min, spread over 5+ min",
+                        "threshold": (f"{config.SLOW_BF_MIN_FAILURES}+ failures within "
+                                      f"{config.SLOW_BF_WINDOW_SECONDS // 60} min, spread over "
+                                      f"{config.SLOW_BF_MIN_SPREAD_MINUTES}+ min"),
                         "actual":    f"{len(recent_failures)} failures over {int(time_spread_minutes)} minutes from {ip}",
                         "values": {
                             "failure_count":        len(recent_failures),
                             "spread_minutes":       int(time_spread_minutes),
-                            "min_spread_threshold": 5,
-                            "window_minutes":       60,
+                            "min_spread_threshold": config.SLOW_BF_MIN_SPREAD_MINUTES,
+                            "window_minutes":       config.SLOW_BF_WINDOW_SECONDS // 60,
                             "unique_users":         unique_users_for_ip,
                         },
                     }
@@ -179,7 +185,8 @@ class DetectionAgent:
 
             # ── 4. Credential Stuffing ─────────────────────────────────────
             # Many different usernames from one IP
-            if unique_users >= 5 and self.failed_attempts[ip] >= 5:
+            if (unique_users >= config.CRED_STUFFING_MIN_USERS
+                    and self.failed_attempts[ip] >= config.CRED_STUFFING_MIN_FAILURES):
                 self.rule_blocked_ips.add(ip)
                 total_ip  = self.failed_attempts[ip]
                 fail_rate = round(total_ip / max(total_ip, 1), 2)
@@ -193,12 +200,12 @@ class DetectionAgent:
                     ),
                     "trigger_details": {
                         "rule":      "Multiple unique usernames from single IP",
-                        "threshold": "5+ unique usernames with high failure rate",
+                        "threshold": f"{config.CRED_STUFFING_MIN_USERS}+ unique usernames with high failure rate",
                         "actual":    f"{unique_users} unique usernames tried from {ip}, {total_ip} total attempts",
                         "values":    {
                             "unique_usernames":    unique_users,
                             "total_attempts":      total_ip,
-                            "unique_threshold":    5,
+                            "unique_threshold":    config.CRED_STUFFING_MIN_USERS,
                         },
                     }
                 }
@@ -292,7 +299,8 @@ class DetectionAgent:
                                 if is_failed_event else
                                 "Isolation Forest — SUCCESS event from suspicious IP, blocked immediately"
                             ),
-                            "threshold": "Score < -0.10 = High, < -0.02 = Medium confidence",
+                            "threshold": (f"Score < {config.CONFIDENCE_HIGH_CUTOFF:.2f} = High, "
+                                          f"< {config.CONFIDENCE_MEDIUM_CUTOFF:.2f} = Medium confidence"),
                             "actual":    f"Score {result['anomaly_score']} ({result['confidence']} confidence)",
                             "values": {
                                 "anomaly_score":   result["anomaly_score"],

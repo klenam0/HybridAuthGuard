@@ -7,56 +7,31 @@ const DETECTOR_INFO = {
     description:
       "Flags successful logins occurring between midnight and 06:00. Legitimate enterprise activity rarely occurs in this window. Attackers exploiting stolen credentials often operate from different time zones.",
     type: "rule",
-    rule: "Login hour between 00:00 and 05:59",
-    threshold: "Any successful login in the restricted window",
-    mitre: "T1078",
-    tactic: "Persistence",
   },
   "Multiple IP Login": {
     description:
       "Detects when the same user authenticates from two different IP addresses within 2 minutes. Physically impossible for a legitimate user - indicates stolen credentials or active session hijacking.",
     type: "rule",
-    rule: "Same user, different IPs, within 120 seconds",
-    threshold: "2 different IPs within 2 minutes",
-    mitre: "T1078",
-    tactic: "Defense Evasion / Persistence",
   },
   "Brute Force Attack": {
     description:
       "Detects rapid repeated failed login attempts from a single IP. Automated tools typically attempt hundreds of passwords per minute. Fires when the failure threshold is reached.",
     type: "rule",
-    rule: "Failed login count >= threshold from single IP",
-    threshold: "5 failed attempts (configurable)",
-    mitre: "T1110.001",
-    tactic: "Credential Access",
   },
   "Slow Brute Force": {
     description:
       "Detects attackers who deliberately slow their attempts to evade rate-limiting rules. One attempt every 10 minutes stays under the rapid-fire threshold but accumulates over time.",
     type: "rule",
-    rule: "4+ failures within 60 minutes, spread over 5+ minutes",
-    threshold: "4 failures, minimum 5 minute spread, within 1 hour",
-    mitre: "T1110.001",
-    tactic: "Credential Access",
   },
   "Credential Stuffing": {
     description:
       "Detects automated attacks using leaked username/password lists. Distinguished from brute force by the number of unique usernames tried - a stuffing attack tries many accounts, not one.",
     type: "rule",
-    rule: "5+ unique usernames from single IP with high failure rate",
-    threshold: "5 unique usernames, 70%+ failure rate",
-    mitre: "T1110.004",
-    tactic: "Credential Access",
   },
   "ML Anomaly Detected": {
     description:
       "Isolation Forest trained on 561,464 normal login events from the RBA Dataset (a privacy-preserving synthesis of real production logins) detects statistical deviations from normal behaviour. Catches novel attacks that rule-based detectors miss - including unknown attack patterns.",
     type: "ml",
-    rule: "Isolation Forest anomaly score below threshold with High/Medium confidence",
-    threshold:
-      "Score < -0.10 = High confidence, Score < -0.02 = Medium confidence",
-    mitre: "T1078",
-    tactic: "Persistence",
     training: "561,464 normal RBA Dataset events",
     features: [
       "Login hour",
@@ -69,6 +44,60 @@ const DETECTOR_INFO = {
     ],
   },
 };
+
+// Thresholds, MITRE technique and tactic come from /api/config
+// (backend/config.py) so this page always shows what the backend enforces.
+const pad2 = (h) => String(h).padStart(2, "0");
+const fmtScore = (v) => (typeof v === "number" ? v.toFixed(2) : "?");
+
+function detectorPolicy(name, cfg) {
+  const mitre = cfg?.mitre?.[name] || {};
+  const base = { mitre: mitre.technique_id || "-", tactic: mitre.tactic || "-" };
+  const r = cfg?.rules;
+  const ml = cfg?.ml;
+  if (!r || !ml) return { ...base, rule: "-", threshold: "-" };
+  const slowWindowMin = r.slow_bf_window_seconds / 60;
+  switch (name) {
+    case "Suspicious Login Time":
+      return {
+        ...base,
+        rule: `Login hour between ${pad2(r.suspicious_hour_start)}:00 and ${pad2(r.suspicious_hour_end)}:59`,
+        threshold: "Any successful login in the restricted window",
+      };
+    case "Multiple IP Login":
+      return {
+        ...base,
+        rule: `Same user, different IPs, within ${r.multi_ip_window_seconds} seconds`,
+        threshold: `2 different IPs within ${r.multi_ip_window_seconds / 60} minutes`,
+      };
+    case "Brute Force Attack":
+      return {
+        ...base,
+        rule: "Failed login count >= threshold from single IP",
+        threshold: `${r.brute_force_threshold} failed attempts (configurable)`,
+      };
+    case "Slow Brute Force":
+      return {
+        ...base,
+        rule: `${r.slow_bf_min_failures}+ failures within ${slowWindowMin} minutes, spread over ${r.slow_bf_min_spread_minutes}+ minutes`,
+        threshold: `${r.slow_bf_min_failures} failures, minimum ${r.slow_bf_min_spread_minutes} minute spread, within ${slowWindowMin === 60 ? "1 hour" : `${slowWindowMin} minutes`}`,
+      };
+    case "Credential Stuffing":
+      return {
+        ...base,
+        rule: `${r.cred_stuffing_min_users}+ unique usernames seen from a single IP`,
+        threshold: `${r.cred_stuffing_min_users} unique usernames and ${r.cred_stuffing_min_failures}+ failed attempts from the IP`,
+      };
+    case "ML Anomaly Detected":
+      return {
+        ...base,
+        rule: `Isolation Forest flags the event and its score is below ${fmtScore(ml.alert_margin)}`,
+        threshold: `Score < ${fmtScore(ml.confidence_high_cutoff)} = High confidence, Score < ${fmtScore(ml.confidence_medium_cutoff)} = Medium confidence`,
+      };
+    default:
+      return { ...base, rule: "-", threshold: "-" };
+  }
+}
 
 const TYPE_COLORS = {
   rule: {
@@ -266,7 +295,7 @@ function DetectorCard({ name, info, alerts, detectorData }) {
 }
 
 export default function DetectionEngine({ data }) {
-  const { alerts, detectors, modelInfo } = data;
+  const { alerts, detectors, modelInfo, backendConfig } = data;
   const pct = (v) => (typeof v === "number" ? `${(v * 100).toFixed(1)}%` : "-");
 
   const ruleAlerts = alerts.filter((a) => a.type !== "ML Anomaly Detected");
@@ -350,7 +379,7 @@ export default function DetectionEngine({ data }) {
             <DetectorCard
               key={name}
               name={name}
-              info={DETECTOR_INFO[name]}
+              info={{ ...DETECTOR_INFO[name], ...detectorPolicy(name, backendConfig) }}
               alerts={alerts}
               detectorData={detectors.find((d) => d.name === name)}
             />

@@ -3,6 +3,8 @@
 import uuid
 from datetime import datetime
 
+import config
+
 
 class AnalysisAgent:
     """
@@ -17,63 +19,18 @@ class AnalysisAgent:
     def __init__(self, llm_analyzer=None):
         self.llm_analyzer = llm_analyzer
 
-        self.severity_mapping = {
-            "Brute Force Attack":    "HIGH",
-            "Multiple IP Login":     "HIGH",
-            "Suspicious Login Time": "MEDIUM",
-            "ML Anomaly Detected":   "MEDIUM",
-            "Credential Stuffing":   "HIGH",
-            "Slow Brute Force":      "HIGH",
-        }
-
-        self.mitre_mapping = {
-            "Brute Force Attack": {
-                "technique_id":   "T1110.001",
-                "technique_name": "Brute Force: Password Guessing",
-                "tactic":         "Credential Access",
-                "url":            "https://attack.mitre.org/techniques/T1110/001/"
-            },
-            "Slow Brute Force": {
-                "technique_id":   "T1110.001",
-                "technique_name": "Brute Force: Password Guessing",
-                "tactic":         "Credential Access",
-                "url":            "https://attack.mitre.org/techniques/T1110/001/"
-            },
-            "Credential Stuffing": {
-                "technique_id":   "T1110.004",
-                "technique_name": "Brute Force: Credential Stuffing",
-                "tactic":         "Credential Access",
-                "url":            "https://attack.mitre.org/techniques/T1110/004/"
-            },
-            "Multiple IP Login": {
-                "technique_id":   "T1078",
-                "technique_name": "Valid Accounts",
-                "tactic":         "Defense Evasion / Persistence",
-                "url":            "https://attack.mitre.org/techniques/T1078/"
-            },
-            "Suspicious Login Time": {
-                "technique_id":   "T1078",
-                "technique_name": "Valid Accounts",
-                "tactic":         "Persistence",
-                "url":            "https://attack.mitre.org/techniques/T1078/"
-            },
-            "ML Anomaly Detected": {
-                "technique_id":   "T1078",
-                "technique_name": "Valid Accounts",
-                "tactic":         "Persistence",
-                "url":            "https://attack.mitre.org/techniques/T1078/"
-            },
-        }
+        self.severity_mapping = config.SEVERITY_MAP
+        self.mitre_mapping    = config.MITRE_MAPPING
 
     def evaluate_alert(self, alert):
         alert = alert.copy()  
         alert_type = alert.get("type", "Unknown Threat")
-        severity   = self.severity_mapping.get(alert_type, "LOW")
+        severity   = self.severity_mapping.get(alert_type, config.DEFAULT_SEVERITY)
 
-        # Upgrade ML anomaly to HIGH if model confidence is High
+        # Upgrade ML anomaly severity if model confidence is High
         if alert_type == "ML Anomaly Detected":
-            if alert.get("confidence") == "High":
-                severity = "HIGH"
+            if alert.get("confidence") == config.ML_UPGRADE_CONFIDENCE:
+                severity = config.ML_UPGRADE_SEVERITY
 
         alert["severity"]    = severity
         alert["alert_id"]    = str(uuid.uuid4())[:8].upper()

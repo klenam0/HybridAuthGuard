@@ -63,6 +63,9 @@ export default function App() {
     color: "green",
   });
   const [enrichment, setEnrichment] = useState(null);
+  // Detection/severity policy from /api/config (backend/config.py). Fetched
+  // until it succeeds once; it only changes when the backend restarts.
+  const [backendConfig, setBackendConfig] = useState(null);
   const [running, setRunning] = useState(false);
   // "connecting" until the first poll completes, then "online" (all
   // endpoints OK), "degraded" (some failing) or "offline" (none reachable).
@@ -224,6 +227,23 @@ export default function App() {
     return () => clearInterval(id);
   }, [fetchAll]);
 
+  useEffect(() => {
+    if (backendConfig) return undefined;
+    let cancelled = false;
+    const load = () =>
+      fetchJson("config")
+        .then(({ data }) => {
+          if (!cancelled) setBackendConfig(data);
+        })
+        .catch(() => {});
+    load();
+    const id = setInterval(load, POLL_INTERVAL_MS * 5);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [backendConfig]);
+
   // Create bell notifications for new HIGH and newly enriched alerts.
   // This is the navbar notification system and should remain unchanged.
   useEffect(() => {
@@ -360,6 +380,7 @@ export default function App() {
     pipelineStats,
     threatLevel,
     enrichment,
+    backendConfig,
     connection,
     running,
     handleRun,

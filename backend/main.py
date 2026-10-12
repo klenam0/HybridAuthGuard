@@ -9,6 +9,7 @@ from utils.log_generator import generate_logs, generate_training_data
 from utils.log_parser     import parse_logs
 from agents.monitoring_agent import MonitoringAgent
 from ml.anomaly_model        import AnomalyDetector
+import config
 
 
 def clear_alerts():
@@ -33,7 +34,7 @@ def get_or_train_model(base):
 
     # Fallback only: used if backend/data/model.pkl is missing, to train a small synthetic model.
     # The deployed RBA model is loaded from model.pkl with its own contamination (0.4); see ADR-13.
-    detector = AnomalyDetector(contamination=0.15)
+    detector = AnomalyDetector(contamination=config.SYNTHETIC_FALLBACK_CONTAMINATION)
 
     if os.path.exists(model_path):
         print("🔄 Loading pre-trained anomaly model...")

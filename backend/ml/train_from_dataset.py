@@ -43,6 +43,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import config  # noqa: E402
 
 # ── Configuration ──────────────────────────────────────────────────────────
 DATASET_PATH  = os.environ.get(
@@ -54,7 +55,7 @@ MODEL_PATH    = os.path.join(os.path.dirname(__file__), "..", "data", "model.pkl
 CHUNK_SIZE      = 100_000
 NORMAL_TARGET   = 700_000
 ATTACK_TARGET   = 70_000
-CONTAMINATION   = 0.4          # settled after a validation-only sweep; was 0.15
+CONTAMINATION   = config.ML_CONTAMINATION  # settled after a validation-only sweep; was 0.15
 USER_HELD_OUT_FRACTION = 0.30  # user-disjoint split
 RANDOM_SEED     = 42
 

@@ -15,6 +15,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from utils.llm_analyzer import LLMAnalyzer
+import config
 
 app = Flask(__name__)
 CORS(app)
@@ -101,14 +102,16 @@ def get_status():
         "server_start_time": SERVER_START_TIME.isoformat(),
         "uptime_seconds":    uptime_seconds,
         "detectors": [
-            "Suspicious Login Time",
-            "Multiple IP Login",
-            "Slow Brute Force",
-            "Credential Stuffing",
-            "Brute Force Attack",
-            "ML Anomaly Detection",
+            "ML Anomaly Detection" if d == "ML Anomaly Detected" else d
+            for d in config.DETECTORS
         ],
     })
+
+
+@app.route("/api/config")
+def get_config():
+    """Read-only detection, severity and response policy (backend/config.py)."""
+    return jsonify(config.public_config())
 
 
 @app.route("/api/run", methods=["POST"])

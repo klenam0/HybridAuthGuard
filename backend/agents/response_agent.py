@@ -6,6 +6,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from utils.email_alerter import EmailAlerter
+import config
 
 
 class ResponseAgent:
@@ -32,18 +33,18 @@ class ResponseAgent:
         user     = alert.get("user",     "Unknown User")
         alert_type = alert.get("type",   "Unknown")
 
-        if severity == "HIGH":
+        if severity in config.SIMULATED_BLOCK_SEVERITIES:
             # Simulate firewall block
             action = f"Simulated: Block IP {ip} temporarily."
 
-            # Send real email for HIGH severity
-            self.email_alerter.send_alert(alert)
-
-        elif severity == "MEDIUM":
+        elif severity in config.ADMIN_NOTIFY_SEVERITIES:
             action = f"Simulated: Notify admin about {user} at {ip}."
 
         else:
             action = f"Simulated: Log low severity alert for {ip}."
+
+        if severity in config.EMAIL_SEVERITIES:
+            self.email_alerter.send_alert(alert)
 
         self.actions_log.append({
             "alert":  alert,

@@ -9,6 +9,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from collections import defaultdict
 from datetime import datetime
 from ml.explainer import AlertExplainer
+import config
 
 # (Optional) If you have an explainer module, uncomment the next line
 # from ml.explainer import AlertExplainer
@@ -25,7 +26,7 @@ class AnomalyDetector:
     The model detects which mode it's in from the loaded payload.
     """
 
-    def __init__(self, contamination=0.05):
+    def __init__(self, contamination=config.DEFAULT_CONTAMINATION):
         self.contamination = contamination
         self.model = IsolationForest(
             contamination=contamination,
@@ -329,7 +330,7 @@ class AnomalyDetector:
             self.model        = payload["model"]
             self.scaler       = payload.get("scaler", None)
             self.explainer = AlertExplainer(self.scaler) if self.scaler is not None else None
-            self.contamination = payload.get("contamination", 0.05)
+            self.contamination = payload.get("contamination", config.DEFAULT_CONTAMINATION)
 
             # Detect encoding scheme FIRST: frequency-encoded payloads carry
             # no ip_encoder/user_encoder at all, so those must not be read
@@ -459,14 +460,16 @@ class AnomalyDetector:
             return None
 
         # Determine confidence based on anomaly score (negative = more anomalous)
-        if raw_score < -0.10:
+        if raw_score < config.CONFIDENCE_HIGH_CUTOFF:
             confidence = "High"
-        elif raw_score < -0.02:
+        elif raw_score < config.CONFIDENCE_MEDIUM_CUTOFF:
             confidence = "Medium"
         else:
             confidence = "Low"
 
-        is_anomaly = prediction == -1 and confidence in ("High", "Medium")
+        # At the deployed margin (-0.02, equal to the Medium cut-off) this is
+        # exactly "prediction == -1 and confidence in (High, Medium)".
+        is_anomaly = bool(prediction == -1 and raw_score < config.ML_ALERT_MARGIN)
 
         return {
             "is_anomaly":    is_anomaly,
