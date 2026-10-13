@@ -56,6 +56,7 @@ class AnomalyDetector:
         self.device_freq_map  = {}
 
         self.is_trained    = False
+        self.metadata      = {}     # training provenance, see model_metrics()
         self.scaler        = None
         self.explainer     = None
         self.feature_count = 5      # 5=synthetic, 7=old RBA, 10=new RBA
@@ -314,6 +315,9 @@ class AnomalyDetector:
             "known_users":    self.known_users,
             "contamination":  self.contamination,
             "feature_count":  self.feature_count,
+            "model_kind":     "synthetic",
+            "trained_on":     "Synthetic fallback data (utils/log_generator.py)",
+            "trained_at":     datetime.now().isoformat(),
         }
         joblib.dump(payload, model_path)
         print(f"💾 Model saved → {model_path}")
@@ -327,6 +331,11 @@ class AnomalyDetector:
         try:
             payload = joblib.load(model_path)
 
+            self.metadata = {
+                k: payload.get(k) for k in
+                ("model_kind", "trained_on", "training_size", "trained_at", "metrics")
+                if payload.get(k) is not None
+            }
             self.model        = payload["model"]
             self.scaler       = payload.get("scaler", None)
             self.explainer = AlertExplainer(self.scaler) if self.scaler is not None else None
@@ -407,11 +416,37 @@ class AnomalyDetector:
             self.is_trained = True
             return True
 
-        except (FileNotFoundError, KeyError) as e:
-            print(f"⚠ Could not load model from {model_path} - {e}")
+        except Exception as e:
+            # Any failure (missing file, missing keys, unpickling or version
+            # errors) is reported to the caller, which must fail loudly
+            # rather than silently fall back to another model (audit F14).
+            print(f"⚠ Could not load model from {model_path} - {type(e).__name__}: {e}")
             return False
 
     # ── Runtime Inference ──────────────────────────────────────────────────
+
+    def is_rba_model(self):
+        """True for models trained on the RBA dataset (any encoding)."""
+        return self.encoding_scheme == "frequency" or self.country_encoder is not None
+
+    def model_metrics(self):
+        """
+        The data/model_metrics.json contents describing this loaded model,
+        in the same shape ml/train_from_dataset.py writes.
+        """
+        meta = self.metadata
+        out = dict(meta.get("metrics") or {})
+        out.update({
+            "trained_on":    meta.get("trained_on", "unknown"),
+            "training_size": meta.get("training_size", "unknown"),
+            "trained_at":    meta.get("trained_at", "unknown"),
+            "feature_count": self.feature_count,
+            "contamination": self.contamination,
+            "n_estimators":  getattr(self.model, "n_estimators", None),
+        })
+        if not self.is_rba_model():
+            out["model_kind"] = "synthetic"
+        return out
 
     def score_event(self, log_event):
         """

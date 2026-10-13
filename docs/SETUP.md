@@ -14,7 +14,7 @@ A pre-trained model is distributed as a [GitHub Release asset](https://github.co
 The trained Isolation Forest (`backend/data/model.pkl`, about 390 MB) is distributed as a [GitHub Release asset](https://github.com/klenam0/HybridAuthGuard/releases/tag/v2.0.0-model) rather than committed to the repository.
 This model was trained and pickled under `scikit-learn==1.8.0`. Loading it with a substantially different scikit-learn version may produce warnings or, in rare cases, fail to unpickle - install from `requirements.txt` exactly, or retrain locally if you need a different version.
 
-**Download it and place it at `backend/data/model.pkl` before running `main.py`.** If this file is absent, the system will not error out - it silently falls back to training a weaker synthetic 5-feature model instead of loading the RBA-trained 10-feature one, which will not reproduce the reported precision/recall/F1 figures.
+**Download it and place it at `backend/data/model.pkl` before running `main.py`.** If the file is missing or cannot be loaded, `main.py` stops with an error and does not train or overwrite anything. To run without the RBA model, train the small synthetic 5-feature demo model explicitly with `python main.py --retrain`; it does not reproduce the reported precision/recall/F1 figures. `--retrain` refuses to replace an RBA-trained `model.pkl` unless you add `--force`, and even then the old file is renamed to `model.pkl.replaced-<timestamp>` rather than deleted. On every start `main.py` rewrites `backend/data/model_metrics.json` if it does not describe the loaded model, so the dashboard always shows the metrics of the model actually in use.
 
 ## 1. Clone and enter the repo
 

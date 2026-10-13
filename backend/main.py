@@ -1,7 +1,9 @@
 # backend/main.py
 import os
 import sys
+import json
 import argparse
+from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,49 +26,111 @@ def ensure_data_dir():
     os.makedirs(data_dir, exist_ok=True)
 
 
+class ModelError(SystemExit):
+    """Raised (exits non-zero) when no usable model can be loaded."""
+
+
+def _model_paths(base):
+    data = os.path.join(base, "data")
+    return (os.path.join(data, "model.pkl"),
+            os.path.join(data, "training_logs.json"),
+            os.path.join(data, "model_metrics.json"))
+
+
+def sync_model_metrics(detector, metrics_path):
+    """
+    Keep data/model_metrics.json (what the dashboard shows) describing the
+    model actually loaded. Writes only when the contents differ.
+    """
+    wanted = detector.model_metrics()
+    try:
+        with open(metrics_path, "r", encoding="utf-8") as f:
+            current = json.load(f)
+    except (OSError, ValueError):
+        current = None
+    if current != wanted:
+        with open(metrics_path, "w", encoding="utf-8") as f:
+            json.dump(wanted, f, indent=2)
+        print(f"📝 model_metrics.json updated to match the loaded model "
+              f"({wanted.get('trained_on')}, trained {wanted.get('trained_at')})")
+
+
 def get_or_train_model(base):
     """
-    Load pre-trained model if available.
-    Falls back to synthetic training on first run.
+    Load data/model.pkl. Never trains or overwrites a model implicitly
+    (audit F14): a missing or unloadable model is an error. Train the RBA
+    model with ml/train_from_dataset.py, or a synthetic demo model with
+    `python main.py --retrain`.
     """
-    model_path    = os.path.join(base, "data", "model.pkl")
-    training_path = os.path.join(base, "data", "training_logs.json")
-
-    # Fallback only: used if backend/data/model.pkl is missing, to train a small synthetic model.
-    # The deployed RBA model is loaded from model.pkl with its own contamination (0.4); see ADR-13.
+    model_path, _, metrics_path = _model_paths(base)
     detector = AnomalyDetector(contamination=config.SYNTHETIC_FALLBACK_CONTAMINATION)
 
-    if os.path.exists(model_path):
-        print("🔄 Loading pre-trained anomaly model...")
-        loaded = detector.load_model(model_path)
-        if loaded:
-            print("🧠 Model ready (offline-trained, inference only).\n")
-            return detector
-        print("⚠ Failed to load model - retraining...")
+    if not os.path.exists(model_path):
+        raise ModelError(
+            f"❌ No model at {model_path}.\n"
+            "   Train the RBA model:        python ml/train_from_dataset.py\n"
+            "   or a synthetic demo model:  python main.py --retrain"
+        )
 
-    print("📚 First run - generating offline training dataset...")
-    generate_training_data(output_path=training_path, n=10000)
-
-    print("\n🏋️  Training anomaly model...")
-    trained = detector.train(training_path)
-
-    if trained:
-        detector.save_model(model_path)
-        print("🧠 Model trained and saved.\n")
-    else:
-        print("⚠ Training failed - running in rules-only mode.\n")
-
+    print("🔄 Loading pre-trained anomaly model...")
+    if not detector.load_model(model_path):
+        raise ModelError(
+            f"❌ {model_path} exists but could not be loaded (see the error above).\n"
+            "   Nothing was retrained or overwritten. Fix or replace the file, or\n"
+            "   retrain explicitly (python ml/train_from_dataset.py, or\n"
+            "   python main.py --retrain --force for the synthetic demo model)."
+        )
+    sync_model_metrics(detector, metrics_path)
+    print("🧠 Model ready (offline-trained, inference only).\n")
     return detector
 
 
-def run_batch(delay=0.5, threshold=5, fresh=True, retrain=False):
+def train_synthetic_model(base, force=False):
+    """
+    Explicit, opt-in: train the small synthetic fallback model and save it
+    as data/model.pkl. Refuses to replace an RBA-trained model unless
+    force=True, in which case the old file is renamed, not deleted.
+    """
+    model_path, training_path, metrics_path = _model_paths(base)
+    if os.path.exists(model_path):
+        existing = AnomalyDetector()
+        loaded = existing.load_model(model_path)
+        if loaded and existing.is_rba_model() and not force:
+            raise ModelError(
+                f"❌ Refusing to overwrite the RBA-trained model at {model_path}\n"
+                "   with a synthetic demo model. Pass --force to replace it (the old\n"
+                "   file is kept as model.pkl.replaced-<timestamp>)."
+            )
+        if not loaded and not force:
+            raise ModelError(
+                f"❌ {model_path} exists but could not be loaded; not overwriting it\n"
+                "   without --force."
+            )
+        aside = f"{model_path}.replaced-{datetime.now():%Y%m%d-%H%M%S}"
+        os.replace(model_path, aside)
+        print(f"📦 Existing model moved to {aside}")
+
+    detector = AnomalyDetector(contamination=config.SYNTHETIC_FALLBACK_CONTAMINATION)
+    print("📚 Generating synthetic training dataset...")
+    generate_training_data(output_path=training_path, n=10000)
+    print("\n🏋️  Training synthetic anomaly model...")
+    if not detector.train(training_path):
+        raise ModelError("❌ Synthetic training failed; no model written.")
+    detector.save_model(model_path)
+    detector.metadata = {"model_kind": "synthetic",
+                         "trained_on": "Synthetic fallback data (utils/log_generator.py)",
+                         "trained_at": datetime.now().isoformat()}
+    sync_model_metrics(detector, metrics_path)
+    print("🧠 Synthetic model trained and saved.\n")
+
+
+def run_batch(delay=0.5, threshold=5, fresh=True, retrain=False, force=False):
     """
     Batch mode: generate logs → parse → detect → respond → exit.
     """
     base             = os.path.dirname(os.path.abspath(__file__))
     raw_logs_path    = os.path.join(base, "data", "raw_logs.txt")
     parsed_logs_path = os.path.join(base, "data", "parsed_logs.json")
-    model_path       = os.path.join(base, "data", "model.pkl")
 
     ensure_data_dir()
 
@@ -75,9 +139,8 @@ def run_batch(delay=0.5, threshold=5, fresh=True, retrain=False):
     else:
         AlertManager().backup()   # keep a restore point for this run
 
-    if retrain and os.path.exists(model_path):
-        os.remove(model_path)
-        print("🗑️  Removed existing model - will retrain.\n")
+    if retrain:
+        train_synthetic_model(base, force=force)
 
     print("=" * 55)
     print("  HYBRIDAUTHGUARD")
@@ -137,7 +200,11 @@ if __name__ == "__main__":
     parser.add_argument("--no-fresh",  action="store_true",
                         help="Keep existing alerts (batch mode only)")
     parser.add_argument("--retrain",   action="store_true",
-                        help="Delete saved model and retrain from scratch")
+                        help="Train the synthetic demo model and save it as data/model.pkl "
+                             "(refuses to replace an RBA-trained model without --force)")
+    parser.add_argument("--force",     action="store_true",
+                        help="With --retrain: replace an existing RBA model "
+                             "(the old file is renamed, not deleted)")
     parser.add_argument("--live",      action="store_true",
                         help="Run in live streaming mode (reads from /api/ingest queue)")
 
@@ -151,4 +218,5 @@ if __name__ == "__main__":
             threshold=args.threshold,
             fresh=not args.no_fresh,
             retrain=args.retrain,
+            force=args.force,
         )
