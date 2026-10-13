@@ -553,8 +553,11 @@ def stage_select(args):
            "ablation": {"settings": {"n_estimators": ne, "max_samples": ms,
                                      "quantile": best_if["quantile"]}, "rows": ablation},
            "strata_val_a": strata, "overlap_val_a": overlap, "importance": importance,
-           "latency": latency, "timings_seconds": clk.total()}
+           "timings_file": "phase4_select_timings.json"}
+    # Wall-clock measurements live in their own file, so the selection is
+    # reproducible byte for byte (eval/selection_hash.py checks it).
     save_json("phase4_selection.json", out)
+    save_json("phase4_select_timings.json", {"latency": latency, "timings_seconds": clk.total()})
     print(f"val_a base rate {S.base['val_a']:.5f}; fixed bar {THRESHOLD['val_a']}; "
           f"{out['n_rows_meeting']} rows meet")
     for label, r in (("CHOSEN" if met else "FALLBACK", chosen), ("best with D", best_d),
