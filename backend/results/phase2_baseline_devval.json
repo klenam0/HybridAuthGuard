@@ -1,0 +1,1913 @@
+{
+  "protocol": "backend/eval/PROTOCOL.md (amendment 1: contamination by IF event F1)",
+  "config": {
+    "ML_ALERT_MARGIN": -0.02,
+    "CONFIDENCE_HIGH_CUTOFF": -0.1,
+    "CONFIDENCE_MEDIUM_CUTOFF": -0.02,
+    "BRUTE_FORCE_THRESHOLD": 5,
+    "forest": {
+      "n_estimators": 200,
+      "max_samples": 100000,
+      "max_features": 1.0,
+      "n_jobs": -1
+    }
+  },
+  "stream": {
+    "dev_events": 6392584,
+    "dev_train_events": 4055357,
+    "dev_val_events": 2337227,
+    "dev_val_excl_placeholder_events": 1420881,
+    "dev_val_cold_events": 827475,
+    "placeholder_dev_val_events": 916346,
+    "ml_reached_events": 4291078,
+    "training_rows": 3672966,
+    "training_users": 985535,
+    "training_user_fraction": 1.0
+  },
+  "placeholder_user": "-4324475583306591935",
+  "sweep_seed": 42,
+  "sweep_rule": "max IF event F1 (predict == -1) on dev_val",
+  "sweep": [
+    {
+      "contamination": 0.02,
+      "if_f1": 0.015857066265209965,
+      "precision": 0.05072578996388088,
+      "recall": 0.009397357124821143,
+      "fpr": 0.019902772280717296,
+      "flag_rate": 0.018834713102321682,
+      "if_f1_excl_placeholder": 0.011107326804245529
+    },
+    {
+      "contamination": 0.05,
+      "if_f1": 0.05085529619720188,
+      "precision": 0.07804512718690945,
+      "recall": 0.037715680498274555,
+      "fpr": 0.05042324587410882,
+      "flag_rate": 0.04913129961274622,
+      "if_f1_excl_placeholder": 0.03285794267619455
+    },
+    {
+      "contamination": 0.1,
+      "if_f1": 0.11356948737586427,
+      "precision": 0.11451234068769012,
+      "recall": 0.11264203349886373,
+      "fpr": 0.09857701941363313,
+      "flag_rate": 0.10000697407654456,
+      "if_f1_excl_placeholder": 0.11609796085664514
+    },
+    {
+      "contamination": 0.15,
+      "if_f1": 0.1616163898496295,
+      "precision": 0.13107651387627198,
+      "recall": 0.210710377914317,
+      "fpr": 0.15808386998138224,
+      "flag_rate": 0.16343427489071452,
+      "if_f1_excl_placeholder": 0.18720461686814135
+    },
+    {
+      "contamination": 0.2,
+      "if_f1": 0.2709344833141257,
+      "precision": 0.1920049178888206,
+      "recall": 0.46005386751956906,
+      "fpr": 0.21910386086539052,
+      "flag_rate": 0.24360064298418596,
+      "if_f1_excl_placeholder": 0.290871023961351
+    },
+    {
+      "contamination": 0.25,
+      "if_f1": 0.343059817364693,
+      "precision": 0.2267026011435502,
+      "recall": 0.7048102011615184,
+      "fpr": 0.27208663335567085,
+      "flag_rate": 0.316080551867662,
+      "if_f1_excl_placeholder": 0.3681427519791185
+    },
+    {
+      "contamination": 0.3,
+      "if_f1": 0.3585772967919966,
+      "precision": 0.2279823067515516,
+      "recall": 0.8394242908846057,
+      "fpr": 0.32170115645451747,
+      "flag_rate": 0.37433676745990013,
+      "if_f1_excl_placeholder": 0.3930241311205702
+    },
+    {
+      "contamination": 0.35,
+      "if_f1": 0.34771729780812927,
+      "precision": 0.215684309211259,
+      "recall": 0.8965449036276407,
+      "fpr": 0.3689685736425912,
+      "flag_rate": 0.4226059342973532,
+      "if_f1_excl_placeholder": 0.37956569020594033
+    },
+    {
+      "contamination": 0.4,
+      "if_f1": 0.32672928115090716,
+      "precision": 0.19905914893069224,
+      "recall": 0.9110428415116573,
+      "fpr": 0.4148604953212673,
+      "flag_rate": 0.46530610847812387,
+      "if_f1_excl_placeholder": 0.3504696845548815
+    },
+    {
+      "contamination": 0.45,
+      "if_f1": 0.3082393031503073,
+      "precision": 0.1850689053984276,
+      "recall": 0.9215975086272199,
+      "fpr": 0.45927595021353995,
+      "flag_rate": 0.5062790221061112,
+      "if_f1_excl_placeholder": 0.3244319653822724
+    },
+    {
+      "contamination": 0.5,
+      "if_f1": 0.29152460617338777,
+      "precision": 0.17282327259544691,
+      "recall": 0.9309022809527817,
+      "fpr": 0.5042491285273863,
+      "flag_rate": 0.5476258831512728,
+      "if_f1_excl_placeholder": 0.30126958916259716
+    }
+  ],
+  "chosen_contamination": 0.3,
+  "rules_only": {
+    "dev_val": {
+      "events": 2337227,
+      "attack_events": 237620,
+      "benign_events": 2099607,
+      "attacking_ips": 14728,
+      "benign_ips": 581198,
+      "benign_users": 643496,
+      "ml_scored_events": 0,
+      "alerts": 116600,
+      "event_recall": 0.04614089723087282,
+      "campaign_recall": 0.2576045627376426,
+      "fpr": 0.05031227272532431,
+      "precision": 0.09403087478559177,
+      "emails": 40158,
+      "detector_suppression": {
+        "benign_ips_blocked": 76031,
+        "attack_ips_blocked": 4831,
+        "benign_events_after_block": 987091,
+        "benign_successes_after_block": 336739,
+        "benign_users_affected": 271766
+      },
+      "response_blocks": {
+        "benign_ips_blocked": 77316,
+        "attack_ips_blocked": 4872,
+        "benign_events_after_block": 991110,
+        "benign_successes_after_block": 339358,
+        "benign_users_affected": 273004
+      },
+      "f1": 0.061905030771836726,
+      "benign_ips_flagged": 75274,
+      "attacking_ips_flagged": 3794,
+      "per_type": {
+        "Brute Force Attack": {
+          "alerts": 25293,
+          "attack": 995,
+          "precision": 0.039338947534891075
+        },
+        "Credential Stuffing": {
+          "alerts": 6961,
+          "attack": 229,
+          "precision": 0.03289757218790404
+        },
+        "Multiple IP Login": {
+          "alerts": 2179,
+          "attack": 251,
+          "precision": 0.11519045433685177
+        },
+        "Slow Brute Force": {
+          "alerts": 5725,
+          "attack": 175,
+          "precision": 0.03056768558951965
+        },
+        "Suspicious Login Time": {
+          "alerts": 76442,
+          "attack": 9314,
+          "precision": 0.12184401245388661
+        }
+      },
+      "per_type_severity_confidence": {
+        "Brute Force Attack | HIGH [attack]": 995,
+        "Brute Force Attack | HIGH [benign]": 24298,
+        "Credential Stuffing | HIGH [attack]": 229,
+        "Credential Stuffing | HIGH [benign]": 6732,
+        "Multiple IP Login | HIGH [attack]": 251,
+        "Multiple IP Login | HIGH [benign]": 1928,
+        "Slow Brute Force | HIGH [attack]": 175,
+        "Slow Brute Force | HIGH [benign]": 5550,
+        "Suspicious Login Time | MEDIUM [attack]": 9314,
+        "Suspicious Login Time | MEDIUM [benign]": 67128
+      },
+      "tpr_at_1pct_fpr": null,
+      "tpr_at_5pct_fpr": null
+    },
+    "dev_val_excl_placeholder": {
+      "events": 1420881,
+      "attack_events": 124027,
+      "benign_events": 1296854,
+      "attacking_ips": 8935,
+      "benign_ips": 449331,
+      "benign_users": 643495,
+      "ml_scored_events": 0,
+      "alerts": 90452,
+      "event_recall": 0.07941012843977521,
+      "campaign_recall": 0.3185226636821489,
+      "fpr": 0.062152717268096486,
+      "precision": 0.10888648122761244,
+      "emails": 14010,
+      "detector_suppression": {
+        "benign_ips_blocked": 62735,
+        "attack_ips_blocked": 4014,
+        "benign_events_after_block": 523692,
+        "benign_successes_after_block": 336738,
+        "benign_users_affected": 271765
+      },
+      "response_blocks": {
+        "benign_ips_blocked": 63959,
+        "attack_ips_blocked": 4048,
+        "benign_events_after_block": 526795,
+        "benign_successes_after_block": 339357,
+        "benign_users_affected": 273003
+      },
+      "f1": 0.09184115927433455,
+      "benign_ips_flagged": 52944,
+      "attacking_ips_flagged": 2846,
+      "per_type": {
+        "Brute Force Attack": {
+          "alerts": 6531,
+          "attack": 158,
+          "precision": 0.024192313581381106
+        },
+        "Credential Stuffing": {
+          "alerts": 3551,
+          "attack": 90,
+          "precision": 0.025344973246972685
+        },
+        "Multiple IP Login": {
+          "alerts": 2179,
+          "attack": 251,
+          "precision": 0.11519045433685177
+        },
+        "Slow Brute Force": {
+          "alerts": 1749,
+          "attack": 36,
+          "precision": 0.02058319039451115
+        },
+        "Suspicious Login Time": {
+          "alerts": 76442,
+          "attack": 9314,
+          "precision": 0.12184401245388661
+        }
+      },
+      "per_type_severity_confidence": {
+        "Brute Force Attack | HIGH [attack]": 158,
+        "Brute Force Attack | HIGH [benign]": 6373,
+        "Credential Stuffing | HIGH [attack]": 90,
+        "Credential Stuffing | HIGH [benign]": 3461,
+        "Multiple IP Login | HIGH [attack]": 251,
+        "Multiple IP Login | HIGH [benign]": 1928,
+        "Slow Brute Force | HIGH [attack]": 36,
+        "Slow Brute Force | HIGH [benign]": 1713,
+        "Suspicious Login Time | MEDIUM [attack]": 9314,
+        "Suspicious Login Time | MEDIUM [benign]": 67128
+      },
+      "tpr_at_1pct_fpr": null,
+      "tpr_at_5pct_fpr": null
+    },
+    "dev_val_cold": {
+      "events": 827475,
+      "attack_events": 97666,
+      "benign_events": 729809,
+      "attacking_ips": 6824,
+      "benign_ips": 264220,
+      "benign_users": 402116,
+      "ml_scored_events": 0,
+      "alerts": 54568,
+      "event_recall": 0.07972068068724018,
+      "campaign_recall": 0.33704572098475966,
+      "fpr": 0.06410170332237612,
+      "precision": 0.14268435713238528,
+      "emails": 8699,
+      "detector_suppression": {
+        "benign_ips_blocked": 47496,
+        "attack_ips_blocked": 3698,
+        "benign_events_after_block": 334946,
+        "benign_successes_after_block": 201086,
+        "benign_users_affected": 188916
+      },
+      "response_blocks": {
+        "benign_ips_blocked": 48345,
+        "attack_ips_blocked": 3721,
+        "benign_events_after_block": 336618,
+        "benign_successes_after_block": 202444,
+        "benign_users_affected": 189612
+      },
+      "f1": 0.10228989581827976,
+      "benign_ips_flagged": 29264,
+      "attacking_ips_flagged": 2300,
+      "per_type": {
+        "Brute Force Attack": {
+          "alerts": 3603,
+          "attack": 107,
+          "precision": 0.029697474326949764
+        },
+        "Credential Stuffing": {
+          "alerts": 2208,
+          "attack": 66,
+          "precision": 0.029891304347826088
+        },
+        "Multiple IP Login": {
+          "alerts": 1574,
+          "attack": 198,
+          "precision": 0.12579415501905972
+        },
+        "Slow Brute Force": {
+          "alerts": 1314,
+          "attack": 30,
+          "precision": 0.0228310502283105
+        },
+        "Suspicious Login Time": {
+          "alerts": 45869,
+          "attack": 7385,
+          "precision": 0.16100198391070222
+        }
+      },
+      "per_type_severity_confidence": {
+        "Brute Force Attack | HIGH [attack]": 107,
+        "Brute Force Attack | HIGH [benign]": 3496,
+        "Credential Stuffing | HIGH [attack]": 66,
+        "Credential Stuffing | HIGH [benign]": 2142,
+        "Multiple IP Login | HIGH [attack]": 198,
+        "Multiple IP Login | HIGH [benign]": 1376,
+        "Slow Brute Force | HIGH [attack]": 30,
+        "Slow Brute Force | HIGH [benign]": 1284,
+        "Suspicious Login Time | MEDIUM [attack]": 7385,
+        "Suspicious Login Time | MEDIUM [benign]": 38484
+      },
+      "tpr_at_1pct_fpr": null,
+      "tpr_at_5pct_fpr": null
+    },
+    "placeholder_user_dev_val": {
+      "events": 916346,
+      "attack_events": 113593,
+      "attack_share": 0.12396300087521525,
+      "alerts": 26148,
+      "alerts_by_type": {
+        "Brute Force Attack": {
+          "alerts": 18762,
+          "on_attack_events": 837
+        },
+        "Credential Stuffing": {
+          "alerts": 3410,
+          "on_attack_events": 139
+        },
+        "Slow Brute Force": {
+          "alerts": 3976,
+          "on_attack_events": 139
+        }
+      }
+    },
+    "credential_stuffing_dev_val": {
+      "alerts": 6961,
+      "alerts_attack": 229,
+      "alerts_benign": 6732,
+      "alert_event_is_placeholder": 3410,
+      "alert_event_is_placeholder_attack": 139,
+      "alert_event_is_placeholder_benign": 3271,
+      "placeholder_among_ip_usernames": 6567,
+      "placeholder_among_ip_usernames_attack": 227,
+      "placeholder_among_ip_usernames_benign": 6340,
+      "below_username_threshold_without_placeholder": 1153,
+      "below_username_threshold_without_placeholder_attack": 77,
+      "below_username_threshold_without_placeholder_benign": 1076
+    }
+  },
+  "per_seed": [
+    {
+      "seed": 42,
+      "if_only": {
+        "dev_val": {
+          "events": 2337227,
+          "attack_events": 237620,
+          "benign_events": 2099607,
+          "attacking_ips": 14728,
+          "benign_ips": 581198,
+          "benign_users": 643496,
+          "ml_scored_events": 2337227,
+          "alerts": 532014,
+          "event_recall": 0.4008711387930309,
+          "campaign_recall": 0.43087995654535577,
+          "fpr": 0.2080194055363694,
+          "precision": 0.17904604014180078,
+          "emails": 62788,
+          "detector_suppression": {
+            "benign_ips_blocked": 0,
+            "attack_ips_blocked": 0,
+            "benign_events_after_block": 0,
+            "benign_successes_after_block": 0,
+            "benign_users_affected": 0
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 20028,
+            "attack_ips_blocked": 2205,
+            "benign_events_after_block": 519913,
+            "benign_successes_after_block": 188420,
+            "benign_users_affected": 163576
+          },
+          "f1": 0.24753324307398064,
+          "benign_ips_flagged": 115634,
+          "attacking_ips_flagged": 6346,
+          "per_type": {
+            "ML Anomaly Detected": {
+              "alerts": 532014,
+              "attack": 95255,
+              "precision": 0.17904604014180078
+            }
+          },
+          "per_type_severity_confidence": {
+            "ML Anomaly Detected | HIGH | High [attack]": 3784,
+            "ML Anomaly Detected | HIGH | High [benign]": 59004,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 91471,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 377755
+          },
+          "tpr_at_1pct_fpr": 0.0030721319754229443,
+          "tpr_at_5pct_fpr": 0.037454759700361925,
+          "roc_auc": 0.7487722767693988,
+          "pr_auc": 0.17379284464931583
+        },
+        "dev_val_excl_placeholder": {
+          "events": 1420881,
+          "attack_events": 124027,
+          "benign_events": 1296854,
+          "attacking_ips": 8935,
+          "benign_ips": 449331,
+          "benign_users": 643495,
+          "ml_scored_events": 1420881,
+          "alerts": 205436,
+          "event_recall": 0.3579220653567368,
+          "campaign_recall": 0.48628987129266926,
+          "fpr": 0.12418051685077888,
+          "precision": 0.21608676181389824,
+          "emails": 26447,
+          "detector_suppression": {
+            "benign_ips_blocked": 0,
+            "attack_ips_blocked": 0,
+            "benign_events_after_block": 0,
+            "benign_successes_after_block": 0,
+            "benign_users_affected": 0
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 17704,
+            "attack_ips_blocked": 1761,
+            "benign_events_after_block": 307051,
+            "benign_successes_after_block": 188419,
+            "benign_users_affected": 163575
+          },
+          "f1": 0.26948094323186517,
+          "benign_ips_flagged": 67986,
+          "attacking_ips_flagged": 4345,
+          "per_type": {
+            "ML Anomaly Detected": {
+              "alerts": 205436,
+              "attack": 44392,
+              "precision": 0.21608676181389824
+            }
+          },
+          "per_type_severity_confidence": {
+            "ML Anomaly Detected | HIGH | High [attack]": 1111,
+            "ML Anomaly Detected | HIGH | High [benign]": 25336,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 43281,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 135708
+          },
+          "tpr_at_1pct_fpr": 0.0018463721609004492,
+          "tpr_at_5pct_fpr": 0.0659211300765156,
+          "roc_auc": 0.819542933089543,
+          "pr_auc": 0.2065113196355741
+        },
+        "dev_val_cold": {
+          "events": 827475,
+          "attack_events": 97666,
+          "benign_events": 729809,
+          "attacking_ips": 6824,
+          "benign_ips": 264220,
+          "benign_users": 402116,
+          "ml_scored_events": 827475,
+          "alerts": 119173,
+          "event_recall": 0.3671595027952409,
+          "campaign_recall": 0.526084407971864,
+          "fpr": 0.11415863602668644,
+          "precision": 0.30089869349601,
+          "emails": 7074,
+          "detector_suppression": {
+            "benign_ips_blocked": 0,
+            "attack_ips_blocked": 0,
+            "benign_events_after_block": 0,
+            "benign_successes_after_block": 0,
+            "benign_users_affected": 0
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 12104,
+            "attack_ips_blocked": 1622,
+            "benign_events_after_block": 204222,
+            "benign_successes_after_block": 115658,
+            "benign_users_affected": 120805
+          },
+          "f1": 0.33074308588399687,
+          "benign_ips_flagged": 41828,
+          "attacking_ips_flagged": 3590,
+          "per_type": {
+            "ML Anomaly Detected": {
+              "alerts": 119173,
+              "attack": 35859,
+              "precision": 0.30089869349601
+            }
+          },
+          "per_type_severity_confidence": {
+            "ML Anomaly Detected | HIGH | High [attack]": 666,
+            "ML Anomaly Detected | HIGH | High [benign]": 6408,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 35193,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 76906
+          },
+          "tpr_at_1pct_fpr": 0.007791862060491881,
+          "tpr_at_5pct_fpr": 0.1053386029938771,
+          "roc_auc": 0.8429284239907997,
+          "pr_auc": 0.28996380373720265
+        },
+        "placeholder_user_dev_val": {
+          "events": 916346,
+          "attack_events": 113593,
+          "attack_share": 0.12396300087521525,
+          "alerts": 326578,
+          "alerts_by_type": {
+            "ML Anomaly Detected": {
+              "alerts": 326578,
+              "on_attack_events": 50863
+            }
+          }
+        },
+        "credential_stuffing_dev_val": {
+          "alerts": 0,
+          "alerts_attack": 0,
+          "alerts_benign": 0,
+          "alert_event_is_placeholder": 0,
+          "alert_event_is_placeholder_attack": 0,
+          "alert_event_is_placeholder_benign": 0,
+          "placeholder_among_ip_usernames": 0,
+          "placeholder_among_ip_usernames_attack": 0,
+          "placeholder_among_ip_usernames_benign": 0,
+          "below_username_threshold_without_placeholder": 0,
+          "below_username_threshold_without_placeholder_attack": 0,
+          "below_username_threshold_without_placeholder_benign": 0
+        }
+      },
+      "hybrid": {
+        "dev_val": {
+          "events": 2337227,
+          "attack_events": 237620,
+          "benign_events": 2099607,
+          "attacking_ips": 14728,
+          "benign_ips": 581198,
+          "benign_users": 643496,
+          "ml_scored_events": 1419245,
+          "alerts": 230600,
+          "event_recall": 0.06441797828465617,
+          "campaign_recall": 0.3889190657251494,
+          "fpr": 0.10253966575649634,
+          "precision": 0.06637901127493495,
+          "emails": 49943,
+          "detector_suppression": {
+            "benign_ips_blocked": 92798,
+            "attack_ips_blocked": 5463,
+            "benign_events_after_block": 1033047,
+            "benign_successes_after_block": 368337,
+            "benign_users_affected": 284469
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 85158,
+            "attack_ips_blocked": 5307,
+            "benign_events_after_block": 1018797,
+            "benign_successes_after_block": 358465,
+            "benign_users_affected": 280383
+          },
+          "f1": 0.06538379394301824,
+          "benign_ips_flagged": 133221,
+          "attacking_ips_flagged": 5728,
+          "per_type": {
+            "Brute Force Attack": {
+              "alerts": 25293,
+              "attack": 995,
+              "precision": 0.039338947534891075
+            },
+            "Credential Stuffing": {
+              "alerts": 6961,
+              "attack": 229,
+              "precision": 0.03289757218790404
+            },
+            "ML Anomaly Detected": {
+              "alerts": 114000,
+              "attack": 4343,
+              "precision": 0.03809649122807018
+            },
+            "Multiple IP Login": {
+              "alerts": 2179,
+              "attack": 251,
+              "precision": 0.11519045433685177
+            },
+            "Slow Brute Force": {
+              "alerts": 5725,
+              "attack": 175,
+              "precision": 0.03056768558951965
+            },
+            "Suspicious Login Time": {
+              "alerts": 76442,
+              "attack": 9314,
+              "precision": 0.12184401245388661
+            }
+          },
+          "per_type_severity_confidence": {
+            "Brute Force Attack | HIGH [attack]": 995,
+            "Brute Force Attack | HIGH [benign]": 24298,
+            "Credential Stuffing | HIGH [attack]": 229,
+            "Credential Stuffing | HIGH [benign]": 6732,
+            "ML Anomaly Detected | HIGH | High [attack]": 655,
+            "ML Anomaly Detected | HIGH | High [benign]": 9130,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 3688,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 100527,
+            "Multiple IP Login | HIGH [attack]": 251,
+            "Multiple IP Login | HIGH [benign]": 1928,
+            "Slow Brute Force | HIGH [attack]": 175,
+            "Slow Brute Force | HIGH [benign]": 5550,
+            "Suspicious Login Time | MEDIUM [attack]": 9314,
+            "Suspicious Login Time | MEDIUM [benign]": 67128
+          },
+          "tpr_at_1pct_fpr": null,
+          "tpr_at_5pct_fpr": null
+        },
+        "dev_val_excl_placeholder": {
+          "events": 1420881,
+          "attack_events": 124027,
+          "benign_events": 1296854,
+          "attacking_ips": 8935,
+          "benign_ips": 449331,
+          "benign_users": 643495,
+          "ml_scored_events": 1092882,
+          "alerts": 136120,
+          "event_recall": 0.09159295959750699,
+          "campaign_recall": 0.42361499720201456,
+          "fpr": 0.09620203970531764,
+          "precision": 0.08345577431677931,
+          "emails": 16379,
+          "detector_suppression": {
+            "benign_ips_blocked": 79067,
+            "attack_ips_blocked": 4607,
+            "benign_events_after_block": 560121,
+            "benign_successes_after_block": 368336,
+            "benign_users_affected": 284468
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 70415,
+            "attack_ips_blocked": 4249,
+            "benign_events_after_block": 548660,
+            "benign_successes_after_block": 358464,
+            "benign_users_affected": 280382
+          },
+          "f1": 0.08733523738501693,
+          "benign_ips_flagged": 82472,
+          "attacking_ips_flagged": 3785,
+          "per_type": {
+            "Brute Force Attack": {
+              "alerts": 6531,
+              "attack": 158,
+              "precision": 0.024192313581381106
+            },
+            "Credential Stuffing": {
+              "alerts": 3551,
+              "attack": 90,
+              "precision": 0.025344973246972685
+            },
+            "ML Anomaly Detected": {
+              "alerts": 45668,
+              "attack": 1511,
+              "precision": 0.03308662520802312
+            },
+            "Multiple IP Login": {
+              "alerts": 2179,
+              "attack": 251,
+              "precision": 0.11519045433685177
+            },
+            "Slow Brute Force": {
+              "alerts": 1749,
+              "attack": 36,
+              "precision": 0.02058319039451115
+            },
+            "Suspicious Login Time": {
+              "alerts": 76442,
+              "attack": 9314,
+              "precision": 0.12184401245388661
+            }
+          },
+          "per_type_severity_confidence": {
+            "Brute Force Attack | HIGH [attack]": 158,
+            "Brute Force Attack | HIGH [benign]": 6373,
+            "Credential Stuffing | HIGH [attack]": 90,
+            "Credential Stuffing | HIGH [benign]": 3461,
+            "ML Anomaly Detected | HIGH | High [attack]": 82,
+            "ML Anomaly Detected | HIGH | High [benign]": 2287,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 1429,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 41870,
+            "Multiple IP Login | HIGH [attack]": 251,
+            "Multiple IP Login | HIGH [benign]": 1928,
+            "Slow Brute Force | HIGH [attack]": 36,
+            "Slow Brute Force | HIGH [benign]": 1713,
+            "Suspicious Login Time | MEDIUM [attack]": 9314,
+            "Suspicious Login Time | MEDIUM [benign]": 67128
+          },
+          "tpr_at_1pct_fpr": null,
+          "tpr_at_5pct_fpr": null
+        },
+        "dev_val_cold": {
+          "events": 827475,
+          "attack_events": 97666,
+          "benign_events": 729809,
+          "attacking_ips": 6824,
+          "benign_ips": 264220,
+          "benign_users": 402116,
+          "ml_scored_events": 597043,
+          "alerts": 82252,
+          "event_recall": 0.08967296705096964,
+          "campaign_recall": 0.4287807737397421,
+          "fpr": 0.10070306066381753,
+          "precision": 0.10647765403880757,
+          "emails": 9964,
+          "detector_suppression": {
+            "benign_ips_blocked": 56590,
+            "attack_ips_blocked": 4066,
+            "benign_events_after_block": 347526,
+            "benign_successes_after_block": 210948,
+            "benign_users_affected": 195253
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 51546,
+            "attack_ips_blocked": 3847,
+            "benign_events_after_block": 342752,
+            "benign_successes_after_block": 207148,
+            "benign_users_affected": 192831
+          },
+          "f1": 0.09735546193265822,
+          "benign_ips_flagged": 47664,
+          "attacking_ips_flagged": 2926,
+          "per_type": {
+            "Brute Force Attack": {
+              "alerts": 3603,
+              "attack": 107,
+              "precision": 0.029697474326949764
+            },
+            "Credential Stuffing": {
+              "alerts": 2208,
+              "attack": 66,
+              "precision": 0.029891304347826088
+            },
+            "ML Anomaly Detected": {
+              "alerts": 27684,
+              "attack": 972,
+              "precision": 0.035110533159947985
+            },
+            "Multiple IP Login": {
+              "alerts": 1574,
+              "attack": 198,
+              "precision": 0.12579415501905972
+            },
+            "Slow Brute Force": {
+              "alerts": 1314,
+              "attack": 30,
+              "precision": 0.0228310502283105
+            },
+            "Suspicious Login Time": {
+              "alerts": 45869,
+              "attack": 7385,
+              "precision": 0.16100198391070222
+            }
+          },
+          "per_type_severity_confidence": {
+            "Brute Force Attack | HIGH [attack]": 107,
+            "Brute Force Attack | HIGH [benign]": 3496,
+            "Credential Stuffing | HIGH [attack]": 66,
+            "Credential Stuffing | HIGH [benign]": 2142,
+            "ML Anomaly Detected | HIGH | High [attack]": 42,
+            "ML Anomaly Detected | HIGH | High [benign]": 1223,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 930,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 25489,
+            "Multiple IP Login | HIGH [attack]": 198,
+            "Multiple IP Login | HIGH [benign]": 1376,
+            "Slow Brute Force | HIGH [attack]": 30,
+            "Slow Brute Force | HIGH [benign]": 1284,
+            "Suspicious Login Time | MEDIUM [attack]": 7385,
+            "Suspicious Login Time | MEDIUM [benign]": 38484
+          },
+          "tpr_at_1pct_fpr": null,
+          "tpr_at_5pct_fpr": null
+        },
+        "placeholder_user_dev_val": {
+          "events": 916346,
+          "attack_events": 113593,
+          "attack_share": 0.12396300087521525,
+          "alerts": 94480,
+          "alerts_by_type": {
+            "Brute Force Attack": {
+              "alerts": 18762,
+              "on_attack_events": 837
+            },
+            "Credential Stuffing": {
+              "alerts": 3410,
+              "on_attack_events": 139
+            },
+            "ML Anomaly Detected": {
+              "alerts": 68332,
+              "on_attack_events": 2832
+            },
+            "Slow Brute Force": {
+              "alerts": 3976,
+              "on_attack_events": 139
+            }
+          }
+        },
+        "credential_stuffing_dev_val": {
+          "alerts": 6961,
+          "alerts_attack": 229,
+          "alerts_benign": 6732,
+          "alert_event_is_placeholder": 3410,
+          "alert_event_is_placeholder_attack": 139,
+          "alert_event_is_placeholder_benign": 3271,
+          "placeholder_among_ip_usernames": 6567,
+          "placeholder_among_ip_usernames_attack": 227,
+          "placeholder_among_ip_usernames_benign": 6340,
+          "below_username_threshold_without_placeholder": 1153,
+          "below_username_threshold_without_placeholder_attack": 77,
+          "below_username_threshold_without_placeholder_benign": 1076
+        }
+      }
+    },
+    {
+      "seed": 43,
+      "if_only": {
+        "dev_val": {
+          "events": 2337227,
+          "attack_events": 237620,
+          "benign_events": 2099607,
+          "attacking_ips": 14728,
+          "benign_ips": 581198,
+          "benign_users": 643496,
+          "ml_scored_events": 2337227,
+          "alerts": 510097,
+          "event_recall": 0.31328591869371264,
+          "campaign_recall": 0.4249728408473656,
+          "fpr": 0.2074931165689579,
+          "precision": 0.1459389096583591,
+          "emails": 65002,
+          "detector_suppression": {
+            "benign_ips_blocked": 0,
+            "attack_ips_blocked": 0,
+            "benign_events_after_block": 0,
+            "benign_successes_after_block": 0,
+            "benign_users_affected": 0
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 20014,
+            "attack_ips_blocked": 2138,
+            "benign_events_after_block": 522774,
+            "benign_successes_after_block": 188245,
+            "benign_users_affected": 163508
+          },
+          "f1": 0.19912079035249966,
+          "benign_ips_flagged": 116471,
+          "attacking_ips_flagged": 6259,
+          "per_type": {
+            "ML Anomaly Detected": {
+              "alerts": 510097,
+              "attack": 74443,
+              "precision": 0.1459389096583591
+            }
+          },
+          "per_type_severity_confidence": {
+            "ML Anomaly Detected | HIGH | High [attack]": 3926,
+            "ML Anomaly Detected | HIGH | High [benign]": 61076,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 70517,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 374578
+          },
+          "tpr_at_1pct_fpr": 0.002739668378082653,
+          "tpr_at_5pct_fpr": 0.02780069017759448,
+          "roc_auc": 0.7396030636553249,
+          "pr_auc": 0.1673306922031757
+        },
+        "dev_val_excl_placeholder": {
+          "events": 1420881,
+          "attack_events": 124027,
+          "benign_events": 1296854,
+          "attacking_ips": 8935,
+          "benign_ips": 449331,
+          "benign_users": 643495,
+          "ml_scored_events": 1420881,
+          "alerts": 199677,
+          "event_recall": 0.2728115652237013,
+          "campaign_recall": 0.4790151091214326,
+          "fpr": 0.12787946831331823,
+          "precision": 0.16945366767329237,
+          "emails": 27135,
+          "detector_suppression": {
+            "benign_ips_blocked": 0,
+            "attack_ips_blocked": 0,
+            "benign_events_after_block": 0,
+            "benign_successes_after_block": 0,
+            "benign_users_affected": 0
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 17775,
+            "attack_ips_blocked": 1690,
+            "benign_events_after_block": 306734,
+            "benign_successes_after_block": 188244,
+            "benign_users_affected": 163507
+          },
+          "f1": 0.20905518621950916,
+          "benign_ips_flagged": 69197,
+          "attacking_ips_flagged": 4280,
+          "per_type": {
+            "ML Anomaly Detected": {
+              "alerts": 199677,
+              "attack": 33836,
+              "precision": 0.16945366767329237
+            }
+          },
+          "per_type_severity_confidence": {
+            "ML Anomaly Detected | HIGH | High [attack]": 1080,
+            "ML Anomaly Detected | HIGH | High [benign]": 26055,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 32756,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 139786
+          },
+          "tpr_at_1pct_fpr": 0.0016609286687576093,
+          "tpr_at_5pct_fpr": 0.05371411063719996,
+          "roc_auc": 0.809882797320997,
+          "pr_auc": 0.19423285377934824
+        },
+        "dev_val_cold": {
+          "events": 827475,
+          "attack_events": 97666,
+          "benign_events": 729809,
+          "attacking_ips": 6824,
+          "benign_ips": 264220,
+          "benign_users": 402116,
+          "ml_scored_events": 827475,
+          "alerts": 112525,
+          "event_recall": 0.27457866606597997,
+          "campaign_recall": 0.5177315357561547,
+          "fpr": 0.11743894635445712,
+          "precision": 0.2383203732503888,
+          "emails": 7050,
+          "detector_suppression": {
+            "benign_ips_blocked": 0,
+            "attack_ips_blocked": 0,
+            "benign_events_after_block": 0,
+            "benign_successes_after_block": 0,
+            "benign_users_affected": 0
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 12040,
+            "attack_ips_blocked": 1551,
+            "benign_events_after_block": 203385,
+            "benign_successes_after_block": 115058,
+            "benign_users_affected": 120441
+          },
+          "f1": 0.25516791870251343,
+          "benign_ips_flagged": 42337,
+          "attacking_ips_flagged": 3533,
+          "per_type": {
+            "ML Anomaly Detected": {
+              "alerts": 112525,
+              "attack": 26817,
+              "precision": 0.2383203732503888
+            }
+          },
+          "per_type_severity_confidence": {
+            "ML Anomaly Detected | HIGH | High [attack]": 640,
+            "ML Anomaly Detected | HIGH | High [benign]": 6410,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 26177,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 79298
+          },
+          "tpr_at_1pct_fpr": 0.0074232588618352345,
+          "tpr_at_5pct_fpr": 0.08346814654024942,
+          "roc_auc": 0.8326986639945377,
+          "pr_auc": 0.27171039089035426
+        },
+        "placeholder_user_dev_val": {
+          "events": 916346,
+          "attack_events": 113593,
+          "attack_share": 0.12396300087521525,
+          "alerts": 310420,
+          "alerts_by_type": {
+            "ML Anomaly Detected": {
+              "alerts": 310420,
+              "on_attack_events": 40607
+            }
+          }
+        },
+        "credential_stuffing_dev_val": {
+          "alerts": 0,
+          "alerts_attack": 0,
+          "alerts_benign": 0,
+          "alert_event_is_placeholder": 0,
+          "alert_event_is_placeholder_attack": 0,
+          "alert_event_is_placeholder_benign": 0,
+          "placeholder_among_ip_usernames": 0,
+          "placeholder_among_ip_usernames_attack": 0,
+          "placeholder_among_ip_usernames_benign": 0,
+          "below_username_threshold_without_placeholder": 0,
+          "below_username_threshold_without_placeholder_attack": 0,
+          "below_username_threshold_without_placeholder_benign": 0
+        }
+      },
+      "hybrid": {
+        "dev_val": {
+          "events": 2337227,
+          "attack_events": 237620,
+          "benign_events": 2099607,
+          "attacking_ips": 14728,
+          "benign_ips": 581198,
+          "benign_users": 643496,
+          "ml_scored_events": 1419245,
+          "alerts": 231940,
+          "event_recall": 0.06405605588755155,
+          "campaign_recall": 0.38783269961977185,
+          "fpr": 0.10321884047824188,
+          "precision": 0.06562473053375872,
+          "emails": 49972,
+          "detector_suppression": {
+            "benign_ips_blocked": 93440,
+            "attack_ips_blocked": 5512,
+            "benign_events_after_block": 1035221,
+            "benign_successes_after_block": 369622,
+            "benign_users_affected": 285077
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 85063,
+            "attack_ips_blocked": 5307,
+            "benign_events_after_block": 1018712,
+            "benign_successes_after_block": 358507,
+            "benign_users_affected": 280361
+          },
+          "f1": 0.06483090552857995,
+          "benign_ips_flagged": 133877,
+          "attacking_ips_flagged": 5712,
+          "per_type": {
+            "Brute Force Attack": {
+              "alerts": 25293,
+              "attack": 995,
+              "precision": 0.039338947534891075
+            },
+            "Credential Stuffing": {
+              "alerts": 6961,
+              "attack": 229,
+              "precision": 0.03289757218790404
+            },
+            "ML Anomaly Detected": {
+              "alerts": 115340,
+              "attack": 4257,
+              "precision": 0.03690827119819664
+            },
+            "Multiple IP Login": {
+              "alerts": 2179,
+              "attack": 251,
+              "precision": 0.11519045433685177
+            },
+            "Slow Brute Force": {
+              "alerts": 5725,
+              "attack": 175,
+              "precision": 0.03056768558951965
+            },
+            "Suspicious Login Time": {
+              "alerts": 76442,
+              "attack": 9314,
+              "precision": 0.12184401245388661
+            }
+          },
+          "per_type_severity_confidence": {
+            "Brute Force Attack | HIGH [attack]": 995,
+            "Brute Force Attack | HIGH [benign]": 24298,
+            "Credential Stuffing | HIGH [attack]": 229,
+            "Credential Stuffing | HIGH [benign]": 6732,
+            "ML Anomaly Detected | HIGH | High [attack]": 735,
+            "ML Anomaly Detected | HIGH | High [benign]": 9079,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 3522,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 102004,
+            "Multiple IP Login | HIGH [attack]": 251,
+            "Multiple IP Login | HIGH [benign]": 1928,
+            "Slow Brute Force | HIGH [attack]": 175,
+            "Slow Brute Force | HIGH [benign]": 5550,
+            "Suspicious Login Time | MEDIUM [attack]": 9314,
+            "Suspicious Login Time | MEDIUM [benign]": 67128
+          },
+          "tpr_at_1pct_fpr": null,
+          "tpr_at_5pct_fpr": null
+        },
+        "dev_val_excl_placeholder": {
+          "events": 1420881,
+          "attack_events": 124027,
+          "benign_events": 1296854,
+          "attacking_ips": 8935,
+          "benign_ips": 449331,
+          "benign_users": 643495,
+          "ml_scored_events": 1092882,
+          "alerts": 137034,
+          "event_recall": 0.09160908511856289,
+          "campaign_recall": 0.42395075545607164,
+          "fpr": 0.09690528000838954,
+          "precision": 0.0829137294394092,
+          "emails": 16459,
+          "detector_suppression": {
+            "benign_ips_blocked": 79658,
+            "attack_ips_blocked": 4652,
+            "benign_events_after_block": 561672,
+            "benign_successes_after_block": 369621,
+            "benign_users_affected": 285076
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 70404,
+            "attack_ips_blocked": 4239,
+            "benign_events_after_block": 548664,
+            "benign_successes_after_block": 358506,
+            "benign_users_affected": 280360
+          },
+          "f1": 0.08704479029805294,
+          "benign_ips_flagged": 82893,
+          "attacking_ips_flagged": 3788,
+          "per_type": {
+            "Brute Force Attack": {
+              "alerts": 6531,
+              "attack": 158,
+              "precision": 0.024192313581381106
+            },
+            "Credential Stuffing": {
+              "alerts": 3551,
+              "attack": 90,
+              "precision": 0.025344973246972685
+            },
+            "ML Anomaly Detected": {
+              "alerts": 46582,
+              "attack": 1513,
+              "precision": 0.032480357219526856
+            },
+            "Multiple IP Login": {
+              "alerts": 2179,
+              "attack": 251,
+              "precision": 0.11519045433685177
+            },
+            "Slow Brute Force": {
+              "alerts": 1749,
+              "attack": 36,
+              "precision": 0.02058319039451115
+            },
+            "Suspicious Login Time": {
+              "alerts": 76442,
+              "attack": 9314,
+              "precision": 0.12184401245388661
+            }
+          },
+          "per_type_severity_confidence": {
+            "Brute Force Attack | HIGH [attack]": 158,
+            "Brute Force Attack | HIGH [benign]": 6373,
+            "Credential Stuffing | HIGH [attack]": 90,
+            "Credential Stuffing | HIGH [benign]": 3461,
+            "ML Anomaly Detected | HIGH | High [attack]": 88,
+            "ML Anomaly Detected | HIGH | High [benign]": 2361,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 1425,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 42708,
+            "Multiple IP Login | HIGH [attack]": 251,
+            "Multiple IP Login | HIGH [benign]": 1928,
+            "Slow Brute Force | HIGH [attack]": 36,
+            "Slow Brute Force | HIGH [benign]": 1713,
+            "Suspicious Login Time | MEDIUM [attack]": 9314,
+            "Suspicious Login Time | MEDIUM [benign]": 67128
+          },
+          "tpr_at_1pct_fpr": null,
+          "tpr_at_5pct_fpr": null
+        },
+        "dev_val_cold": {
+          "events": 827475,
+          "attack_events": 97666,
+          "benign_events": 729809,
+          "attacking_ips": 6824,
+          "benign_ips": 264220,
+          "benign_users": 402116,
+          "ml_scored_events": 597043,
+          "alerts": 82925,
+          "event_recall": 0.08975487887289334,
+          "campaign_recall": 0.4296600234466589,
+          "fpr": 0.10161425797708716,
+          "precision": 0.10570997889659331,
+          "emails": 9950,
+          "detector_suppression": {
+            "benign_ips_blocked": 57077,
+            "attack_ips_blocked": 4100,
+            "benign_events_after_block": 348442,
+            "benign_successes_after_block": 211704,
+            "benign_users_affected": 195643
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 51483,
+            "attack_ips_blocked": 3837,
+            "benign_events_after_block": 342624,
+            "benign_successes_after_block": 207057,
+            "benign_users_affected": 192778
+          },
+          "f1": 0.09708124989617424,
+          "benign_ips_flagged": 47976,
+          "attacking_ips_flagged": 2932,
+          "per_type": {
+            "Brute Force Attack": {
+              "alerts": 3603,
+              "attack": 107,
+              "precision": 0.029697474326949764
+            },
+            "Credential Stuffing": {
+              "alerts": 2208,
+              "attack": 66,
+              "precision": 0.029891304347826088
+            },
+            "ML Anomaly Detected": {
+              "alerts": 28357,
+              "attack": 980,
+              "precision": 0.03455936805726981
+            },
+            "Multiple IP Login": {
+              "alerts": 1574,
+              "attack": 198,
+              "precision": 0.12579415501905972
+            },
+            "Slow Brute Force": {
+              "alerts": 1314,
+              "attack": 30,
+              "precision": 0.0228310502283105
+            },
+            "Suspicious Login Time": {
+              "alerts": 45869,
+              "attack": 7385,
+              "precision": 0.16100198391070222
+            }
+          },
+          "per_type_severity_confidence": {
+            "Brute Force Attack | HIGH [attack]": 107,
+            "Brute Force Attack | HIGH [benign]": 3496,
+            "Credential Stuffing | HIGH [attack]": 66,
+            "Credential Stuffing | HIGH [benign]": 2142,
+            "ML Anomaly Detected | HIGH | High [attack]": 47,
+            "ML Anomaly Detected | HIGH | High [benign]": 1204,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 933,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 26173,
+            "Multiple IP Login | HIGH [attack]": 198,
+            "Multiple IP Login | HIGH [benign]": 1376,
+            "Slow Brute Force | HIGH [attack]": 30,
+            "Slow Brute Force | HIGH [benign]": 1284,
+            "Suspicious Login Time | MEDIUM [attack]": 7385,
+            "Suspicious Login Time | MEDIUM [benign]": 38484
+          },
+          "tpr_at_1pct_fpr": null,
+          "tpr_at_5pct_fpr": null
+        },
+        "placeholder_user_dev_val": {
+          "events": 916346,
+          "attack_events": 113593,
+          "attack_share": 0.12396300087521525,
+          "alerts": 94906,
+          "alerts_by_type": {
+            "Brute Force Attack": {
+              "alerts": 18762,
+              "on_attack_events": 837
+            },
+            "Credential Stuffing": {
+              "alerts": 3410,
+              "on_attack_events": 139
+            },
+            "ML Anomaly Detected": {
+              "alerts": 68758,
+              "on_attack_events": 2744
+            },
+            "Slow Brute Force": {
+              "alerts": 3976,
+              "on_attack_events": 139
+            }
+          }
+        },
+        "credential_stuffing_dev_val": {
+          "alerts": 6961,
+          "alerts_attack": 229,
+          "alerts_benign": 6732,
+          "alert_event_is_placeholder": 3410,
+          "alert_event_is_placeholder_attack": 139,
+          "alert_event_is_placeholder_benign": 3271,
+          "placeholder_among_ip_usernames": 6567,
+          "placeholder_among_ip_usernames_attack": 227,
+          "placeholder_among_ip_usernames_benign": 6340,
+          "below_username_threshold_without_placeholder": 1153,
+          "below_username_threshold_without_placeholder_attack": 77,
+          "below_username_threshold_without_placeholder_benign": 1076
+        }
+      }
+    },
+    {
+      "seed": 44,
+      "if_only": {
+        "dev_val": {
+          "events": 2337227,
+          "attack_events": 237620,
+          "benign_events": 2099607,
+          "attacking_ips": 14728,
+          "benign_ips": 581198,
+          "benign_users": 643496,
+          "ml_scored_events": 2337227,
+          "alerts": 500403,
+          "event_recall": 0.3228642370170861,
+          "campaign_recall": 0.4232753938077132,
+          "fpr": 0.20179204965500686,
+          "precision": 0.15331442857057212,
+          "emails": 62047,
+          "detector_suppression": {
+            "benign_ips_blocked": 0,
+            "attack_ips_blocked": 0,
+            "benign_events_after_block": 0,
+            "benign_successes_after_block": 0,
+            "benign_users_affected": 0
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 19248,
+            "attack_ips_blocked": 2053,
+            "benign_events_after_block": 518418,
+            "benign_successes_after_block": 186844,
+            "benign_users_affected": 162069
+          },
+          "f1": 0.20790408970994131,
+          "benign_ips_flagged": 113003,
+          "attacking_ips_flagged": 6234,
+          "per_type": {
+            "ML Anomaly Detected": {
+              "alerts": 500403,
+              "attack": 76719,
+              "precision": 0.15331442857057212
+            }
+          },
+          "per_type_severity_confidence": {
+            "ML Anomaly Detected | HIGH | High [attack]": 3514,
+            "ML Anomaly Detected | HIGH | High [benign]": 58533,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 73205,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 365151
+          },
+          "tpr_at_1pct_fpr": 0.002057907583536739,
+          "tpr_at_5pct_fpr": 0.037071795303425636,
+          "roc_auc": 0.7465433954175662,
+          "pr_auc": 0.17184721173634088
+        },
+        "dev_val_excl_placeholder": {
+          "events": 1420881,
+          "attack_events": 124027,
+          "benign_events": 1296854,
+          "attacking_ips": 8935,
+          "benign_ips": 449331,
+          "benign_users": 643495,
+          "ml_scored_events": 1420881,
+          "alerts": 204455,
+          "event_recall": 0.30535286671450573,
+          "campaign_recall": 0.48438724118634585,
+          "fpr": 0.1284516221563877,
+          "precision": 0.1852339145533247,
+          "emails": 26292,
+          "detector_suppression": {
+            "benign_ips_blocked": 0,
+            "attack_ips_blocked": 0,
+            "benign_events_after_block": 0,
+            "benign_successes_after_block": 0,
+            "benign_users_affected": 0
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 17130,
+            "attack_ips_blocked": 1609,
+            "benign_events_after_block": 304317,
+            "benign_successes_after_block": 186843,
+            "benign_users_affected": 162068
+          },
+          "f1": 0.2305879774234205,
+          "benign_ips_flagged": 68012,
+          "attacking_ips_flagged": 4328,
+          "per_type": {
+            "ML Anomaly Detected": {
+              "alerts": 204455,
+              "attack": 37872,
+              "precision": 0.1852339145533247
+            }
+          },
+          "per_type_severity_confidence": {
+            "ML Anomaly Detected | HIGH | High [attack]": 1007,
+            "ML Anomaly Detected | HIGH | High [benign]": 25285,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 36865,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 141298
+          },
+          "tpr_at_1pct_fpr": 0.0016931797108694076,
+          "tpr_at_5pct_fpr": 0.06090609302813097,
+          "roc_auc": 0.8207194210850617,
+          "pr_auc": 0.20577095476226492
+        },
+        "dev_val_cold": {
+          "events": 827475,
+          "attack_events": 97666,
+          "benign_events": 729809,
+          "attacking_ips": 6824,
+          "benign_ips": 264220,
+          "benign_users": 402116,
+          "ml_scored_events": 827475,
+          "alerts": 116177,
+          "event_recall": 0.3075993692789712,
+          "campaign_recall": 0.5252051582649473,
+          "fpr": 0.11802403094508289,
+          "precision": 0.2585881887120514,
+          "emails": 6862,
+          "detector_suppression": {
+            "benign_ips_blocked": 0,
+            "attack_ips_blocked": 0,
+            "benign_events_after_block": 0,
+            "benign_successes_after_block": 0,
+            "benign_users_affected": 0
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 11537,
+            "attack_ips_blocked": 1482,
+            "benign_events_after_block": 201435,
+            "benign_successes_after_block": 113840,
+            "benign_users_affected": 119448
+          },
+          "f1": 0.28097248916261,
+          "benign_ips_flagged": 41631,
+          "attacking_ips_flagged": 3584,
+          "per_type": {
+            "ML Anomaly Detected": {
+              "alerts": 116177,
+              "attack": 30042,
+              "precision": 0.2585881887120514
+            }
+          },
+          "per_type_severity_confidence": {
+            "ML Anomaly Detected | HIGH | High [attack]": 592,
+            "ML Anomaly Detected | HIGH | High [benign]": 6270,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 29450,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 79865
+          },
+          "tpr_at_1pct_fpr": 0.0069727438412548895,
+          "tpr_at_5pct_fpr": 0.10863555382630598,
+          "roc_auc": 0.8449517795561543,
+          "pr_auc": 0.28908237506648815
+        },
+        "placeholder_user_dev_val": {
+          "events": 916346,
+          "attack_events": 113593,
+          "attack_share": 0.12396300087521525,
+          "alerts": 295948,
+          "alerts_by_type": {
+            "ML Anomaly Detected": {
+              "alerts": 295948,
+              "on_attack_events": 38847
+            }
+          }
+        },
+        "credential_stuffing_dev_val": {
+          "alerts": 0,
+          "alerts_attack": 0,
+          "alerts_benign": 0,
+          "alert_event_is_placeholder": 0,
+          "alert_event_is_placeholder_attack": 0,
+          "alert_event_is_placeholder_benign": 0,
+          "placeholder_among_ip_usernames": 0,
+          "placeholder_among_ip_usernames_attack": 0,
+          "placeholder_among_ip_usernames_benign": 0,
+          "below_username_threshold_without_placeholder": 0,
+          "below_username_threshold_without_placeholder_attack": 0,
+          "below_username_threshold_without_placeholder_benign": 0
+        }
+      },
+      "hybrid": {
+        "dev_val": {
+          "events": 2337227,
+          "attack_events": 237620,
+          "benign_events": 2099607,
+          "attacking_ips": 14728,
+          "benign_ips": 581198,
+          "benign_users": 643496,
+          "ml_scored_events": 1419245,
+          "alerts": 227894,
+          "event_recall": 0.0638961366888309,
+          "campaign_recall": 0.3859994568169473,
+          "fpr": 0.10130991180730489,
+          "precision": 0.06662307915083328,
+          "emails": 49478,
+          "detector_suppression": {
+            "benign_ips_blocked": 93869,
+            "attack_ips_blocked": 5516,
+            "benign_events_after_block": 1037850,
+            "benign_successes_after_block": 371834,
+            "benign_users_affected": 285856
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 84889,
+            "attack_ips_blocked": 5293,
+            "benign_events_after_block": 1018947,
+            "benign_successes_after_block": 358919,
+            "benign_users_affected": 280455
+          },
+          "f1": 0.0652311208685453,
+          "benign_ips_flagged": 131754,
+          "attacking_ips_flagged": 5685,
+          "per_type": {
+            "Brute Force Attack": {
+              "alerts": 25293,
+              "attack": 995,
+              "precision": 0.039338947534891075
+            },
+            "Credential Stuffing": {
+              "alerts": 6961,
+              "attack": 229,
+              "precision": 0.03289757218790404
+            },
+            "ML Anomaly Detected": {
+              "alerts": 111294,
+              "attack": 4219,
+              "precision": 0.03790860244038313
+            },
+            "Multiple IP Login": {
+              "alerts": 2179,
+              "attack": 251,
+              "precision": 0.11519045433685177
+            },
+            "Slow Brute Force": {
+              "alerts": 5725,
+              "attack": 175,
+              "precision": 0.03056768558951965
+            },
+            "Suspicious Login Time": {
+              "alerts": 76442,
+              "attack": 9314,
+              "precision": 0.12184401245388661
+            }
+          },
+          "per_type_severity_confidence": {
+            "Brute Force Attack | HIGH [attack]": 995,
+            "Brute Force Attack | HIGH [benign]": 24298,
+            "Credential Stuffing | HIGH [attack]": 229,
+            "Credential Stuffing | HIGH [benign]": 6732,
+            "ML Anomaly Detected | HIGH | High [attack]": 679,
+            "ML Anomaly Detected | HIGH | High [benign]": 8641,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 3540,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 98434,
+            "Multiple IP Login | HIGH [attack]": 251,
+            "Multiple IP Login | HIGH [benign]": 1928,
+            "Slow Brute Force | HIGH [attack]": 175,
+            "Slow Brute Force | HIGH [benign]": 5550,
+            "Suspicious Login Time | MEDIUM [attack]": 9314,
+            "Suspicious Login Time | MEDIUM [benign]": 67128
+          },
+          "tpr_at_1pct_fpr": null,
+          "tpr_at_5pct_fpr": null
+        },
+        "dev_val_excl_placeholder": {
+          "events": 1420881,
+          "attack_events": 124027,
+          "benign_events": 1296854,
+          "attacking_ips": 8935,
+          "benign_ips": 449331,
+          "benign_users": 643495,
+          "ml_scored_events": 1092882,
+          "alerts": 136338,
+          "event_recall": 0.09175421480806599,
+          "campaign_recall": 0.4251818690542809,
+          "fpr": 0.0963547168763793,
+          "precision": 0.08346902551012923,
+          "emails": 16332,
+          "detector_suppression": {
+            "benign_ips_blocked": 80099,
+            "attack_ips_blocked": 4660,
+            "benign_events_after_block": 564117,
+            "benign_successes_after_block": 371833,
+            "benign_users_affected": 285855
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 70307,
+            "attack_ips_blocked": 4226,
+            "benign_events_after_block": 549055,
+            "benign_successes_after_block": 358918,
+            "benign_users_affected": 280454
+          },
+          "f1": 0.08741574328346745,
+          "benign_ips_flagged": 82429,
+          "attacking_ips_flagged": 3799,
+          "per_type": {
+            "Brute Force Attack": {
+              "alerts": 6531,
+              "attack": 158,
+              "precision": 0.024192313581381106
+            },
+            "Credential Stuffing": {
+              "alerts": 3551,
+              "attack": 90,
+              "precision": 0.025344973246972685
+            },
+            "ML Anomaly Detected": {
+              "alerts": 45886,
+              "attack": 1531,
+              "precision": 0.033365296604628863
+            },
+            "Multiple IP Login": {
+              "alerts": 2179,
+              "attack": 251,
+              "precision": 0.11519045433685177
+            },
+            "Slow Brute Force": {
+              "alerts": 1749,
+              "attack": 36,
+              "precision": 0.02058319039451115
+            },
+            "Suspicious Login Time": {
+              "alerts": 76442,
+              "attack": 9314,
+              "precision": 0.12184401245388661
+            }
+          },
+          "per_type_severity_confidence": {
+            "Brute Force Attack | HIGH [attack]": 158,
+            "Brute Force Attack | HIGH [benign]": 6373,
+            "Credential Stuffing | HIGH [attack]": 90,
+            "Credential Stuffing | HIGH [benign]": 3461,
+            "ML Anomaly Detected | HIGH | High [attack]": 74,
+            "ML Anomaly Detected | HIGH | High [benign]": 2248,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 1457,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 42107,
+            "Multiple IP Login | HIGH [attack]": 251,
+            "Multiple IP Login | HIGH [benign]": 1928,
+            "Slow Brute Force | HIGH [attack]": 36,
+            "Slow Brute Force | HIGH [benign]": 1713,
+            "Suspicious Login Time | MEDIUM [attack]": 9314,
+            "Suspicious Login Time | MEDIUM [benign]": 67128
+          },
+          "tpr_at_1pct_fpr": null,
+          "tpr_at_5pct_fpr": null
+        },
+        "dev_val_cold": {
+          "events": 827475,
+          "attack_events": 97666,
+          "benign_events": 729809,
+          "attacking_ips": 6824,
+          "benign_ips": 264220,
+          "benign_users": 402116,
+          "ml_scored_events": 597043,
+          "alerts": 82166,
+          "event_recall": 0.08984702967255749,
+          "campaign_recall": 0.43112543962485345,
+          "fpr": 0.10056192784687501,
+          "precision": 0.10679599834481415,
+          "emails": 9907,
+          "detector_suppression": {
+            "benign_ips_blocked": 57129,
+            "attack_ips_blocked": 4106,
+            "benign_events_after_block": 348930,
+            "benign_successes_after_block": 212082,
+            "benign_users_affected": 195943
+          },
+          "response_blocks": {
+            "benign_ips_blocked": 51380,
+            "attack_ips_blocked": 3829,
+            "benign_events_after_block": 342570,
+            "benign_successes_after_block": 207017,
+            "benign_users_affected": 192760
+          },
+          "f1": 0.09759108501267849,
+          "benign_ips_flagged": 47500,
+          "attacking_ips_flagged": 2942,
+          "per_type": {
+            "Brute Force Attack": {
+              "alerts": 3603,
+              "attack": 107,
+              "precision": 0.029697474326949764
+            },
+            "Credential Stuffing": {
+              "alerts": 2208,
+              "attack": 66,
+              "precision": 0.029891304347826088
+            },
+            "ML Anomaly Detected": {
+              "alerts": 27598,
+              "attack": 989,
+              "precision": 0.035835930139865205
+            },
+            "Multiple IP Login": {
+              "alerts": 1574,
+              "attack": 198,
+              "precision": 0.12579415501905972
+            },
+            "Slow Brute Force": {
+              "alerts": 1314,
+              "attack": 30,
+              "precision": 0.0228310502283105
+            },
+            "Suspicious Login Time": {
+              "alerts": 45869,
+              "attack": 7385,
+              "precision": 0.16100198391070222
+            }
+          },
+          "per_type_severity_confidence": {
+            "Brute Force Attack | HIGH [attack]": 107,
+            "Brute Force Attack | HIGH [benign]": 3496,
+            "Credential Stuffing | HIGH [attack]": 66,
+            "Credential Stuffing | HIGH [benign]": 2142,
+            "ML Anomaly Detected | HIGH | High [attack]": 38,
+            "ML Anomaly Detected | HIGH | High [benign]": 1170,
+            "ML Anomaly Detected | MEDIUM | Medium [attack]": 951,
+            "ML Anomaly Detected | MEDIUM | Medium [benign]": 25439,
+            "Multiple IP Login | HIGH [attack]": 198,
+            "Multiple IP Login | HIGH [benign]": 1376,
+            "Slow Brute Force | HIGH [attack]": 30,
+            "Slow Brute Force | HIGH [benign]": 1284,
+            "Suspicious Login Time | MEDIUM [attack]": 7385,
+            "Suspicious Login Time | MEDIUM [benign]": 38484
+          },
+          "tpr_at_1pct_fpr": null,
+          "tpr_at_5pct_fpr": null
+        },
+        "placeholder_user_dev_val": {
+          "events": 916346,
+          "attack_events": 113593,
+          "attack_share": 0.12396300087521525,
+          "alerts": 91556,
+          "alerts_by_type": {
+            "Brute Force Attack": {
+              "alerts": 18762,
+              "on_attack_events": 837
+            },
+            "Credential Stuffing": {
+              "alerts": 3410,
+              "on_attack_events": 139
+            },
+            "ML Anomaly Detected": {
+              "alerts": 65408,
+              "on_attack_events": 2688
+            },
+            "Slow Brute Force": {
+              "alerts": 3976,
+              "on_attack_events": 139
+            }
+          }
+        },
+        "credential_stuffing_dev_val": {
+          "alerts": 6961,
+          "alerts_attack": 229,
+          "alerts_benign": 6732,
+          "alert_event_is_placeholder": 3410,
+          "alert_event_is_placeholder_attack": 139,
+          "alert_event_is_placeholder_benign": 3271,
+          "placeholder_among_ip_usernames": 6567,
+          "placeholder_among_ip_usernames_attack": 227,
+          "placeholder_among_ip_usernames_benign": 6340,
+          "below_username_threshold_without_placeholder": 1153,
+          "below_username_threshold_without_placeholder_attack": 77,
+          "below_username_threshold_without_placeholder_benign": 1076
+        }
+      }
+    }
+  ],
+  "mean_over_seeds": {
+    "if_only": {
+      "dev_val": {
+        "event_recall": 0.3456737648346098,
+        "fpr": 0.20576819058677806,
+        "precision": 0.15943312612357732,
+        "f1": 0.21818604104547387,
+        "campaign_recall": 0.4263760637334782,
+        "attacking_ips_flagged": 6279.666666666667,
+        "attacking_ips": 14728.0,
+        "benign_ips_flagged": 115036.0,
+        "alerts": 514171.3333333333,
+        "tpr_at_1pct_fpr": 0.002623235979014112,
+        "tpr_at_5pct_fpr": 0.03410908172712735,
+        "roc_auc": 0.7449729119474299,
+        "pr_auc": 0.1709902495296108,
+        "response_benign_ips_blocked": 19763.333333333332,
+        "response_attack_ips_blocked": 2132.0,
+        "response_benign_users_affected": 163051.0,
+        "response_benign_events_after_block": 520368.3333333333
+      },
+      "dev_val_excl_placeholder": {
+        "event_recall": 0.312028832431648,
+        "fpr": 0.1268372024401616,
+        "precision": 0.19025811468017176,
+        "f1": 0.2363747022915983,
+        "campaign_recall": 0.4832307405334826,
+        "attacking_ips_flagged": 4317.666666666667,
+        "attacking_ips": 8935.0,
+        "benign_ips_flagged": 68398.33333333333,
+        "alerts": 203189.33333333334,
+        "tpr_at_1pct_fpr": 0.0017334935135091553,
+        "tpr_at_5pct_fpr": 0.06018044458061551,
+        "roc_auc": 0.816715050498534,
+        "pr_auc": 0.20217170939239573,
+        "response_benign_ips_blocked": 17536.333333333332,
+        "response_attack_ips_blocked": 1686.6666666666667,
+        "response_benign_users_affected": 163050.0,
+        "response_benign_events_after_block": 306034.0
+      },
+      "dev_val_cold": {
+        "event_recall": 0.3164458460467307,
+        "fpr": 0.1165405377754088,
+        "precision": 0.26593575181948337,
+        "f1": 0.2889611645830401,
+        "campaign_recall": 0.5230070339976554,
+        "attacking_ips_flagged": 3569.0,
+        "attacking_ips": 6824.0,
+        "benign_ips_flagged": 41932.0,
+        "alerts": 115958.33333333333,
+        "tpr_at_1pct_fpr": 0.007395954921194002,
+        "tpr_at_5pct_fpr": 0.0991474344534775,
+        "roc_auc": 0.8401929558471638,
+        "pr_auc": 0.2835855232313484,
+        "response_benign_ips_blocked": 11893.666666666666,
+        "response_attack_ips_blocked": 1551.6666666666667,
+        "response_benign_users_affected": 120231.33333333333,
+        "response_benign_events_after_block": 203014.0
+      }
+    },
+    "hybrid": {
+      "dev_val": {
+        "event_recall": 0.06412339028701287,
+        "fpr": 0.1023561393473477,
+        "precision": 0.06620894031984231,
+        "f1": 0.06514860678004783,
+        "campaign_recall": 0.38758374072062285,
+        "attacking_ips_flagged": 5708.333333333333,
+        "attacking_ips": 14728.0,
+        "benign_ips_flagged": 132950.66666666666,
+        "alerts": 230144.66666666666,
+        "tpr_at_1pct_fpr": null,
+        "tpr_at_5pct_fpr": null,
+        "response_benign_ips_blocked": 85036.66666666667,
+        "response_attack_ips_blocked": 5302.333333333333,
+        "response_benign_users_affected": 280399.6666666667,
+        "response_benign_events_after_block": 1018818.6666666666
+      },
+      "dev_val_excl_placeholder": {
+        "event_recall": 0.0916520865080453,
+        "fpr": 0.09648734553002881,
+        "precision": 0.08327950975543924,
+        "f1": 0.08726525698884578,
+        "campaign_recall": 0.42424920723745574,
+        "attacking_ips_flagged": 3790.6666666666665,
+        "attacking_ips": 8935.0,
+        "benign_ips_flagged": 82598.0,
+        "alerts": 136497.33333333334,
+        "tpr_at_1pct_fpr": null,
+        "tpr_at_5pct_fpr": null,
+        "response_benign_ips_blocked": 70375.33333333333,
+        "response_attack_ips_blocked": 4238.0,
+        "response_benign_users_affected": 280398.6666666667,
+        "response_benign_events_after_block": 548793.0
+      },
+      "dev_val_cold": {
+        "event_recall": 0.08975829186547347,
+        "fpr": 0.1009597488292599,
+        "precision": 0.10632787709340501,
+        "f1": 0.0973425989471703,
+        "campaign_recall": 0.4298554122704181,
+        "attacking_ips_flagged": 2933.3333333333335,
+        "attacking_ips": 6824.0,
+        "benign_ips_flagged": 47713.333333333336,
+        "alerts": 82447.66666666667,
+        "tpr_at_1pct_fpr": null,
+        "tpr_at_5pct_fpr": null,
+        "response_benign_ips_blocked": 51469.666666666664,
+        "response_attack_ips_blocked": 3837.6666666666665,
+        "response_benign_users_affected": 192789.66666666666,
+        "response_benign_events_after_block": 342648.6666666667
+      }
+    }
+  },
+  "timings_seconds": {
+    "load stream": 15.8,
+    "dry pass": 76.7,
+    "features (frequency maps, scaler, reached and all-event features)": 135.9,
+    "start replay workers": 4.0,
+    "rules-only replay + metrics": 103.5,
+    "fit + score seed 42": 170.5,
+    "contamination sweep (vectorised, IF event F1 on dev_val)": 1.6,
+    "fit + score seed 43": 190.8,
+    "fit + score seed 44": 226.3,
+    "Isolation Forest only metrics (3 seeds)": 77.6,
+    "wait for hybrid replays": 195.1,
+    "hybrid replays wall clock (from first submit)": 690.1,
+    "hybrid seed 42: replay / metrics in worker": "306.9 / 37.1",
+    "hybrid seed 43: replay / metrics in worker": "325.5 / 23.3",
+    "hybrid seed 44: replay / metrics in worker": "248.2 / 20.3",
+    "total": 1198.0
+  }
+}

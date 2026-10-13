@@ -1,0 +1,114 @@
+Phase 2 baseline (eval/PROTOCOL.md): current rules, response policy and model design,
+retrained on dev_train; metrics on dev_val. Seeds [42, 43, 44]; IF and hybrid values are
+means over seeds. Placeholder = user ID -4324475583306591935.
+stream: {'dev_events': 6392584, 'dev_train_events': 4055357, 'dev_val_events': 2337227, 'dev_val_excl_placeholder_events': 1420881, 'dev_val_cold_events': 827475, 'placeholder_dev_val_events': 916346, 'ml_reached_events': 4291078, 'training_rows': 3672966, 'training_users': 985535, 'training_user_fraction': 1.0}
+
+Contamination sweep (seed 42; max IF event F1 (predict == -1) on dev_val):
+      c   IF F1    prec  recall     FPR  F1 excl ph
+   0.02  0.0159  0.0507  0.0094  0.0199      0.0111
+   0.05  0.0509  0.0780  0.0377  0.0504      0.0329
+    0.1  0.1136  0.1145  0.1126  0.0986      0.1161
+   0.15  0.1616  0.1311  0.2107  0.1581      0.1872
+    0.2  0.2709  0.1920  0.4601  0.2191      0.2909
+   0.25  0.3431  0.2267  0.7048  0.2721      0.3681
+    0.3  0.3586  0.2280  0.8394  0.3217      0.3930
+   0.35  0.3477  0.2157  0.8965  0.3690      0.3796
+    0.4  0.3267  0.1991  0.9110  0.4149      0.3505
+   0.45  0.3082  0.1851  0.9216  0.4593      0.3244
+    0.5  0.2915  0.1728  0.9309  0.5042      0.3013
+  chosen: 0.3
+
+[dev_val]
+  metric                                  rules only       IF only        hybrid
+  event_recall                                0.0461        0.3457        0.0641
+  fpr                                         0.0503        0.2058        0.1024
+  precision                                   0.0940        0.1594        0.0662
+  f1                                          0.0619        0.2182        0.0651
+  campaign_recall                             0.2576        0.4264        0.3876
+  attacking_ips_flagged                         3794     6279.6667     5708.3333
+  attacking_ips                                14728    14728.0000    14728.0000
+  benign_ips_flagged                           75274   115036.0000   132950.6667
+  alerts                                      116600   514171.3333   230144.6667
+  tpr_at_1pct_fpr                        not reached        0.0026   not reached
+  tpr_at_5pct_fpr                        not reached        0.0341   not reached
+  roc_auc                                        n/a        0.7450           n/a
+  pr_auc                                         n/a        0.1710           n/a
+  response_benign_ips_blocked                  77316    19763.3333    85036.6667
+  response_attack_ips_blocked                   4872     2132.0000     5302.3333
+  response_benign_users_affected              273004   163051.0000   280399.6667
+  response_benign_events_after_block          991110   520368.3333  1018818.6667
+  per-type alert precision (alerts, precision): hybrid seed 42 | rules only
+    Brute Force Attack           25293 0.0393 |     25293 0.0393
+    Credential Stuffing           6961 0.0329 |      6961 0.0329
+    ML Anomaly Detected         114000 0.0381 |         0 0.0000
+    Multiple IP Login             2179 0.1152 |      2179 0.1152
+    Slow Brute Force              5725 0.0306 |      5725 0.0306
+    Suspicious Login Time        76442 0.1218 |     76442 0.1218
+
+[dev_val_excl_placeholder]
+  metric                                  rules only       IF only        hybrid
+  event_recall                                0.0794        0.3120        0.0917
+  fpr                                         0.0622        0.1268        0.0965
+  precision                                   0.1089        0.1903        0.0833
+  f1                                          0.0918        0.2364        0.0873
+  campaign_recall                             0.3185        0.4832        0.4242
+  attacking_ips_flagged                         2846     4317.6667     3790.6667
+  attacking_ips                                 8935     8935.0000     8935.0000
+  benign_ips_flagged                           52944    68398.3333    82598.0000
+  alerts                                       90452   203189.3333   136497.3333
+  tpr_at_1pct_fpr                        not reached        0.0017   not reached
+  tpr_at_5pct_fpr                        not reached        0.0602   not reached
+  roc_auc                                        n/a        0.8167           n/a
+  pr_auc                                         n/a        0.2022           n/a
+  response_benign_ips_blocked                  63959    17536.3333    70375.3333
+  response_attack_ips_blocked                   4048     1686.6667     4238.0000
+  response_benign_users_affected              273003   163050.0000   280398.6667
+  response_benign_events_after_block          526795   306034.0000   548793.0000
+  per-type alert precision (alerts, precision): hybrid seed 42 | rules only
+    Brute Force Attack            6531 0.0242 |      6531 0.0242
+    Credential Stuffing           3551 0.0253 |      3551 0.0253
+    ML Anomaly Detected          45668 0.0331 |         0 0.0000
+    Multiple IP Login             2179 0.1152 |      2179 0.1152
+    Slow Brute Force              1749 0.0206 |      1749 0.0206
+    Suspicious Login Time        76442 0.1218 |     76442 0.1218
+
+[dev_val_cold]
+  metric                                  rules only       IF only        hybrid
+  event_recall                                0.0797        0.3164        0.0898
+  fpr                                         0.0641        0.1165        0.1010
+  precision                                   0.1427        0.2659        0.1063
+  f1                                          0.1023        0.2890        0.0973
+  campaign_recall                             0.3370        0.5230        0.4299
+  attacking_ips_flagged                         2300     3569.0000     2933.3333
+  attacking_ips                                 6824     6824.0000     6824.0000
+  benign_ips_flagged                           29264    41932.0000    47713.3333
+  alerts                                       54568   115958.3333    82447.6667
+  tpr_at_1pct_fpr                        not reached        0.0074   not reached
+  tpr_at_5pct_fpr                        not reached        0.0991   not reached
+  roc_auc                                        n/a        0.8402           n/a
+  pr_auc                                         n/a        0.2836           n/a
+  response_benign_ips_blocked                  48345    11893.6667    51469.6667
+  response_attack_ips_blocked                   3721     1551.6667     3837.6667
+  response_benign_users_affected              189612   120231.3333   192789.6667
+  response_benign_events_after_block          336618   203014.0000   342648.6667
+  per-type alert precision (alerts, precision): hybrid seed 42 | rules only
+    Brute Force Attack            3603 0.0297 |      3603 0.0297
+    Credential Stuffing           2208 0.0299 |      2208 0.0299
+    ML Anomaly Detected          27684 0.0351 |         0 0.0000
+    Multiple IP Login             1574 0.1258 |      1574 0.1258
+    Slow Brute Force              1314 0.0228 |      1314 0.0228
+    Suspicious Login Time        45869 0.1610 |     45869 0.1610
+
+Placeholder user, dev_val events (alerts by type, of which on attack events):
+  rules only       events 916346, attack share 0.1240, alerts 26148: Brute Force Attack 18762 (837), Credential Stuffing 3410 (139), Slow Brute Force 3976 (139)
+  hybrid seed 42   events 916346, attack share 0.1240, alerts 94480: Brute Force Attack 18762 (837), Credential Stuffing 3410 (139), ML Anomaly Detected 68332 (2832), Slow Brute Force 3976 (139)
+  hybrid seed 43   events 916346, attack share 0.1240, alerts 94906: Brute Force Attack 18762 (837), Credential Stuffing 3410 (139), ML Anomaly Detected 68758 (2744), Slow Brute Force 3976 (139)
+  hybrid seed 44   events 916346, attack share 0.1240, alerts 91556: Brute Force Attack 18762 (837), Credential Stuffing 3410 (139), ML Anomaly Detected 65408 (2688), Slow Brute Force 3976 (139)
+Credential Stuffing alerts on dev_val and the placeholder:
+  rules only       {'alerts': 6961, 'alerts_attack': 229, 'alerts_benign': 6732, 'alert_event_is_placeholder': 3410, 'alert_event_is_placeholder_attack': 139, 'alert_event_is_placeholder_benign': 3271, 'placeholder_among_ip_usernames': 6567, 'placeholder_among_ip_usernames_attack': 227, 'placeholder_among_ip_usernames_benign': 6340, 'below_username_threshold_without_placeholder': 1153, 'below_username_threshold_without_placeholder_attack': 77, 'below_username_threshold_without_placeholder_benign': 1076}
+  hybrid seed 42   {'alerts': 6961, 'alerts_attack': 229, 'alerts_benign': 6732, 'alert_event_is_placeholder': 3410, 'alert_event_is_placeholder_attack': 139, 'alert_event_is_placeholder_benign': 3271, 'placeholder_among_ip_usernames': 6567, 'placeholder_among_ip_usernames_attack': 227, 'placeholder_among_ip_usernames_benign': 6340, 'below_username_threshold_without_placeholder': 1153, 'below_username_threshold_without_placeholder_attack': 77, 'below_username_threshold_without_placeholder_benign': 1076}
+  hybrid seed 43   {'alerts': 6961, 'alerts_attack': 229, 'alerts_benign': 6732, 'alert_event_is_placeholder': 3410, 'alert_event_is_placeholder_attack': 139, 'alert_event_is_placeholder_benign': 3271, 'placeholder_among_ip_usernames': 6567, 'placeholder_among_ip_usernames_attack': 227, 'placeholder_among_ip_usernames_benign': 6340, 'below_username_threshold_without_placeholder': 1153, 'below_username_threshold_without_placeholder_attack': 77, 'below_username_threshold_without_placeholder_benign': 1076}
+  hybrid seed 44   {'alerts': 6961, 'alerts_attack': 229, 'alerts_benign': 6732, 'alert_event_is_placeholder': 3410, 'alert_event_is_placeholder_attack': 139, 'alert_event_is_placeholder_benign': 3271, 'placeholder_among_ip_usernames': 6567, 'placeholder_among_ip_usernames_attack': 227, 'placeholder_among_ip_usernames_benign': 6340, 'below_username_threshold_without_placeholder': 1153, 'below_username_threshold_without_placeholder_attack': 77, 'below_username_threshold_without_placeholder_benign': 1076}
+
+Per seed (dev_val): seed 42: IF ROC-AUC 0.7488 PR-AUC 0.1738, hybrid recall 0.0644 FPR 0.1025 campaign 0.3889; seed 43: IF ROC-AUC 0.7396 PR-AUC 0.1673, hybrid recall 0.0641 FPR 0.1032 campaign 0.3878; seed 44: IF ROC-AUC 0.7465 PR-AUC 0.1718, hybrid recall 0.0639 FPR 0.1013 campaign 0.3860
+timings (s): {'load stream': 15.8, 'dry pass': 76.7, 'features (frequency maps, scaler, reached and all-event features)': 135.9, 'start replay workers': 4.0, 'rules-only replay + metrics': 103.5, 'fit + score seed 42': 170.5, 'contamination sweep (vectorised, IF event F1 on dev_val)': 1.6, 'fit + score seed 43': 190.8, 'fit + score seed 44': 226.3, 'Isolation Forest only metrics (3 seeds)': 77.6, 'wait for hybrid replays': 195.1, 'hybrid replays wall clock (from first submit)': 690.1, 'hybrid seed 42: replay / metrics in worker': '306.9 / 37.1', 'hybrid seed 43: replay / metrics in worker': '325.5 / 23.3', 'hybrid seed 44: replay / metrics in worker': '248.2 / 20.3', 'total': 1198.0}

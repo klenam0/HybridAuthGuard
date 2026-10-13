@@ -40,6 +40,43 @@ def rba_test_stream(cache_path=CACHE_PATH):
     return events, np.asarray(truth, dtype=bool)
 
 
+def _shared_strings(series, missing=None):
+    """Per-row str values that share one object per distinct value."""
+    cat = series.astype("category")
+    names = cat.cat.categories.astype(str).to_numpy(dtype=object)
+    if missing is not None:
+        names = np.where((names == "") | (names == "nan"), missing, names).astype(object)
+    out = names[cat.cat.codes.to_numpy()]
+    if missing is not None:
+        out[cat.cat.codes.to_numpy() < 0] = missing
+    return out
+
+
+def events_from_frame(df):
+    """
+    (events, truth) for a time-ordered frame from eval/datasets.py, with the
+    field mapping of eval/PROTOCOL.md: timestamp truncated to whole seconds,
+    user = str(User ID), missing (empty) Country -> "XX" and Device Type ->
+    "Unknown", attack = Is Attack IP or Is Account Takeover. Same event shape
+    as rba_test_stream().
+    """
+    secs = df["Login Timestamp"].to_numpy().astype("datetime64[s]")
+    stamps = [s.replace("T", " ") for s in np.datetime_as_string(secs, unit="s")]
+    ips = _shared_strings(df["IP Address"])
+    users = _shared_strings(df["User ID"])
+    countries = _shared_strings(df["Country"], missing="XX")
+    devices = _shared_strings(df["Device Type"], missing="Unknown")
+    status = np.array(["FAILED", "SUCCESS"], dtype=object)[
+        df["Login Successful"].to_numpy().astype(np.int8)]
+    events = [
+        {"ip": ip, "user": u, "timestamp": t, "status": s,
+         "country": c, "device_type": d}
+        for ip, u, t, s, c, d in zip(ips, users, stamps, status, countries, devices)
+    ]
+    truth = (df["Is Attack IP"].to_numpy() | df["Is Account Takeover"].to_numpy())
+    return events, truth.astype(bool)
+
+
 def ip_sample(events, truth, n_events, seed=42):
     """
     Whole-IP sample: keeps every event of each chosen IP (so failed_rate
