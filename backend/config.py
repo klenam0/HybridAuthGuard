@@ -113,6 +113,11 @@ SIMULATED_BLOCK_SEVERITIES = ("HIGH",)
 EMAIL_SEVERITIES = ("HIGH",)
 ADMIN_NOTIFY_SEVERITIES = ("MEDIUM",)
 
+# ── Email (utils/email_alerter.py) ────────────────────────────────────────
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = 465                            # implicit TLS (SMTP_SSL)
+SMTP_TIMEOUT_SECONDS = 10                  # connect/read timeout per email
+
 # ── API access (api.py) ───────────────────────────────────────────────────
 # Browser origins allowed by CORS. Override with a comma-separated
 # DASHBOARD_ORIGINS environment variable.
