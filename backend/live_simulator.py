@@ -14,14 +14,20 @@ Usage:
     python live_simulator.py --no-attacks           # normal traffic only
 """
 
+import os
 import time
 import random
 import argparse
 import requests
 import sys
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
 API_INGEST = "http://localhost:5000/api/ingest"
+# /api/ingest requires the token configured as INGEST_TOKEN in backend/.env.
+INGEST_HEADERS = {"X-Ingest-Token": os.environ.get("INGEST_TOKEN", "")}
 
 # ── Normal enterprise users ────────────────────────────────────────────────────
 USERS = {
@@ -64,7 +70,10 @@ def send(user, ip, status, country="GH", device="desktop", timestamp=None):
         "device_type": device,
     }
     try:
-        r = requests.post(API_INGEST, json=event, timeout=2)
+        r = requests.post(API_INGEST, json=event, headers=INGEST_HEADERS, timeout=2)
+        if r.status_code == 401:
+            print("⚠  /api/ingest rejected the token - set INGEST_TOKEN in backend/.env")
+            sys.exit(1)
         return r.status_code == 200
     except requests.exceptions.ConnectionError:
         print("⚠  Cannot reach API - is api.py running?")

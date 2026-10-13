@@ -67,25 +67,44 @@ function ValueBadge({ value, unit = "" }) {
 }
 
 export default function Settings({ data }) {
-  const { modelInfo } = data;
+  const { modelInfo, backendConfig, adminToken, setAdminToken } = data;
+  const rules = backendConfig?.rules;
+  const ml = backendConfig?.ml;
+  const show = (v) => (v === undefined || v === null ? "-" : String(v));
+  const pad2 = (h) => String(h).padStart(2, "0");
 
   const [clearing, setClearing] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [tokenInput, setTokenInput] = useState("");
+  const [clearMessage, setClearMessage] = useState("");
 
-  // No fallback: without a token the backend rejects the request anyway.
-  const clearToken = process.env.REACT_APP_CLEAR_TOKEN;
+  // The admin token is typed in here at runtime and kept in memory only;
+  // it is never part of the JavaScript bundle (audit F30).
+  const clearToken = adminToken;
 
   const handleClearAlerts = async () => {
     if (!clearToken) return;
-    if (!window.confirm("Clear all alerts? This cannot be undone.")) return;
+    if (
+      !window.confirm(
+        "Clear all alerts? A backup is written first and can be restored via /api/restore-alerts.",
+      )
+    )
+      return;
     setClearing(true);
+    setClearMessage("");
     try {
-      await fetch(`${API}/clear-alerts`, {
+      const res = await fetch(`${API}/clear-alerts`, {
         method: "POST",
         headers: {
-          "X-Clear-Token": clearToken,
+          "X-Admin-Token": clearToken,
         },
       });
+      if (res.status === 401) {
+        setAdminToken("");
+        setClearMessage("The API rejected the admin token.");
+        setClearing(false);
+        return;
+      }
     } catch {}
     setClearing(false);
     window.location.reload();
@@ -162,43 +181,61 @@ export default function Settings({ data }) {
             label="Brute Force Threshold"
             description="Number of failed logins before alert triggers"
           >
-            <ValueBadge value="5" unit=" attempts" />
+            <ValueBadge value={show(rules?.brute_force_threshold)} unit=" attempts" />
           </SettingRow>
           <SettingRow
             label="Slow Brute Force Window"
             description="Time window for slow brute force detection"
           >
-            <ValueBadge value="60" unit=" minutes" />
+            <ValueBadge
+              value={rules ? String(rules.slow_bf_window_seconds / 60) : "-"}
+              unit=" minutes"
+            />
           </SettingRow>
           <SettingRow
             label="Multiple IP Window"
             description="Time window for same-user multiple IP detection"
           >
-            <ValueBadge value="120" unit=" seconds" />
+            <ValueBadge value={show(rules?.multi_ip_window_seconds)} unit=" seconds" />
           </SettingRow>
           <SettingRow
             label="Credential Stuffing Threshold"
             description="Unique usernames from one IP to trigger alert"
           >
-            <ValueBadge value="5" unit=" usernames" />
+            <ValueBadge value={show(rules?.cred_stuffing_min_users)} unit=" usernames" />
           </SettingRow>
           <SettingRow
             label="Off-Hours Window"
             description="Hours considered suspicious for login activity"
           >
-            <ValueBadge value="00:00 – 05:59" />
+            <ValueBadge
+              value={
+                rules
+                  ? `${pad2(rules.suspicious_hour_start)}:00 – ${pad2(rules.suspicious_hour_end)}:59`
+                  : "-"
+              }
+            />
           </SettingRow>
           <SettingRow
             label="Internal IP Guard"
             description="Exclude internal IPs from ML scoring (INTERNAL_IP_GUARD_ENABLED)"
           >
-            <StateBadge on={false} label="Disabled" />
+            <StateBadge
+              on={Boolean(rules?.internal_ip_guard_enabled)}
+              label={rules?.internal_ip_guard_enabled ? undefined : "Disabled"}
+            />
           </SettingRow>
           <SettingRow
             label="Internal IP Ranges"
             description="Subnets treated as internal"
           >
-            <ValueBadge value="192.168.x, 10.0.x, 172.16.x" />
+            <ValueBadge
+              value={
+                rules?.internal_networks?.join(", ") ||
+                rules?.internal_ip_prefixes?.map((p) => `${p}x`).join(", ") ||
+                "-"
+              }
+            />
           </SettingRow>
         </SectionCard>
 
@@ -224,13 +261,13 @@ export default function Settings({ data }) {
             label="Contamination"
             description="Expected anomaly rate in training data"
           >
-            <ValueBadge value="0.4" />
+            <ValueBadge value={show(ml?.contamination)} />
           </SettingRow>
           <SettingRow
             label="N Estimators"
             description="Number of trees in the forest"
           >
-            <ValueBadge value="200" unit=" trees" />
+            <ValueBadge value={show(modelInfo?.n_estimators)} unit=" trees" />
           </SettingRow>
           <SettingRow
             label="Feature Count"
@@ -375,6 +412,55 @@ export default function Settings({ data }) {
                 </button>
               </div>
 
+              <div className="pt-2 border-t border-[#1e2a3d]">
+                <p className="text-[12px] font-semibold text-slate-200">
+                  Admin Token
+                </p>
+                <p className="text-[10px] text-slate-600 mt-0.5 mb-2">
+                  ADMIN_TOKEN from backend/.env. Held in this tab's memory only;
+                  needed to run the pipeline or clear alerts.
+                </p>
+                {adminToken ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-green-400">Token set for this session</span>
+                    <button
+                      onClick={() => setAdminToken("")}
+                      className="text-[11px] text-slate-400 underline"
+                    >
+                      Forget
+                    </button>
+                  </div>
+                ) : (
+                  <form
+                    className="flex items-center gap-2"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (tokenInput.trim()) setAdminToken(tokenInput.trim());
+                      setTokenInput("");
+                    }}
+                  >
+                    <input
+                      type="password"
+                      autoComplete="off"
+                      value={tokenInput}
+                      onChange={(e) => setTokenInput(e.target.value)}
+                      placeholder="Admin token"
+                      aria-label="Admin token"
+                      className="flex-1 min-w-0 bg-[#0b1120] border border-[#1e2a3d] rounded-lg px-2 py-1 text-[11px] text-slate-200"
+                    />
+                    <button
+                      type="submit"
+                      className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 border border-cyan-500/30 text-[11px] font-semibold px-3 py-1.5 rounded-lg"
+                    >
+                      Use
+                    </button>
+                  </form>
+                )}
+                {clearMessage && (
+                  <p className="text-[10px] text-red-400 mt-1">{clearMessage}</p>
+                )}
+              </div>
+
               <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-[#1e2a3d]">
                 <div>
                   <p className="text-[12px] font-semibold text-red-400">
@@ -389,7 +475,7 @@ export default function Settings({ data }) {
                   title={
                     clearToken
                       ? undefined
-                      : "Set REACT_APP_CLEAR_TOKEN in frontend/.env to enable."
+                      : "Enter the admin token above to enable."
                   }
                 >
                   <button

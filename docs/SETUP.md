@@ -46,13 +46,17 @@ cp .env.example .env
 | `EMAIL_PASSWORD` | No          | Gmail **app password** (not your account password)                                     |
 | `EMAIL_RECEIVER` | No          | Where alert emails are sent                                                            |
 | `RBA_DATASET_PATH` | No        | Path to the RBA Dataset CSV; only needed to retrain. Defaults to `backend/data/rba-dataset.csv` |
-| `CLEAR_TOKEN`    | Recommended | Bearer token required to clear alerts / the live queue via the API. Generate one with: |
+| `ADMIN_TOKEN`    | Yes, for admin actions | Required (header `X-Admin-Token`) for `/api/run`, clearing or restoring alerts, and clearing the live queue. `CLEAR_TOKEN` is accepted as the older name. |
+| `INGEST_TOKEN`   | Yes, for live mode | Required (header `X-Ingest-Token`) by `/api/ingest`. `live_simulator.py` reads it from this file. Give log sources this token, not the admin one. |
+| `DASHBOARD_ORIGINS` | No       | Comma-separated browser origins allowed by CORS. Defaults to `http://localhost:3000,http://127.0.0.1:3000`. |
+
+Generate each token with:
 
 ```bash
 python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
-If `EMAIL_*` variables are left blank, the system runs fine - email alerting is disabled gracefully and simulated actions are still logged. If `CLEAR_TOKEN` is left unset, requests to the clear/restore/queue-clear endpoints are refused until it's set.
+If `EMAIL_*` variables are left blank, the system runs fine - email alerting is disabled gracefully and simulated actions are still logged. The token-protected endpoints fail closed: if `ADMIN_TOKEN` (or `CLEAR_TOKEN`) or `INGEST_TOKEN` is unset, the matching endpoints refuse every request until it is set. `/api/run` keeps existing alerts unless its JSON body sets `"fresh": true`.
 
 ### Running the backend
 
@@ -96,7 +100,7 @@ npm start
 
 The dashboard runs at `http://localhost:3000` and expects the API at `http://localhost:5000/api` (set in `frontend/src/config/api.js`).
 
-`frontend/.env` holds one variable, `REACT_APP_CLEAR_TOKEN`, which must match `CLEAR_TOKEN` in `backend/.env`. Without it the Settings page's **Clear Alerts** button stays disabled. As with the backend, restore a lost `frontend/.env` with `cp .env.example .env`.
+No secrets go in `frontend/.env`: every `REACT_APP_*` value is compiled into the public JavaScript bundle. The admin token is typed into the dashboard at runtime (Settings page, or the prompt that appears the first time you press **Run**) and kept in that tab's memory only. If an older `frontend/.env` still sets `REACT_APP_CLEAR_TOKEN`, delete that line; the code no longer reads it.
 
 ## 4. Verifying everything works
 
@@ -110,10 +114,12 @@ The dashboard runs at `http://localhost:3000` and expects the API at `http://loc
 Almost always a mismatch between `live_queue.jsonl` and `live_queue.jsonl.cursor` - see the invariant note in `docs/ARCHITECTURE.md`. Reset both together via:
 
 ```bash
-curl -X POST http://localhost:5000/api/queue/clear -H "X-Clear-Token: <your token>"
+curl -X POST http://localhost:5000/api/queue/clear -H "X-Admin-Token: <your token>"
 ```
 
-**`CLEAR_TOKEN` changes don't seem to take effect:**
+Events that fail validation or processing are skipped and written to `backend/data/live_queue.deadletter.jsonl` instead of stopping live mode.
+
+**Token changes don't seem to take effect:**
 Make sure `.env` is actually being loaded by the process that serves the endpoint you're calling - `api.py` needs its own `load_dotenv()` call; it does not inherit environment loading from other modules.
 
 **LLM enrichment never completes:**

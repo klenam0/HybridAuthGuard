@@ -10,6 +10,8 @@ response behaviour and therefore any published evaluation number; rerun the
 evaluation (backend/eval/harness.py) after doing so.
 """
 
+import os
+
 # ── Rules (agents/detection_agent.py) ──────────────────────────────────────
 BRUTE_FORCE_THRESHOLD = 5              # lifetime FAILED events from one IP
 
@@ -111,6 +113,24 @@ SIMULATED_BLOCK_SEVERITIES = ("HIGH",)
 EMAIL_SEVERITIES = ("HIGH",)
 ADMIN_NOTIFY_SEVERITIES = ("MEDIUM",)
 
+# ── API access (api.py) ───────────────────────────────────────────────────
+# Browser origins allowed by CORS. Override with a comma-separated
+# DASHBOARD_ORIGINS environment variable.
+DASHBOARD_ORIGINS = tuple(
+    o.strip() for o in os.environ.get(
+        "DASHBOARD_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
+    ).split(",") if o.strip()
+)
+# Secrets are read from the environment at request time, never stored here.
+# ADMIN_TOKEN guards /api/run, clear/restore and queue clear (CLEAR_TOKEN is
+# accepted as the older name). INGEST_TOKEN guards /api/ingest.
+ADMIN_TOKEN_ENV = ("ADMIN_TOKEN", "CLEAR_TOKEN")
+ADMIN_TOKEN_HEADERS = ("X-Admin-Token", "X-Clear-Token")
+INGEST_TOKEN_ENV = ("INGEST_TOKEN",)
+INGEST_TOKEN_HEADERS = ("X-Ingest-Token",)
+RUN_MAX_DELAY_SECONDS = 5.0
+RUN_THRESHOLD_RANGE = (1, 100)
+
 # ── Live ingest (api.py /api/ingest, agents/monitoring_agent.py) ─────────
 INGEST_MAX_BODY_BYTES = 16 * 1024          # Flask MAX_CONTENT_LENGTH
 INGEST_MAX_FIELD_CHARS = {
@@ -148,6 +168,7 @@ def public_config():
             "cred_stuffing_min_failures": CRED_STUFFING_MIN_FAILURES,
             "ml_realert_cooldown_seconds": ML_REALERT_COOLDOWN_SECONDS,
             "internal_ip_guard_enabled": INTERNAL_IP_GUARD_ENABLED,
+            "internal_ip_prefixes": list(INTERNAL_IP_PREFIXES),
         },
         "ml": {
             "contamination": ML_CONTAMINATION,

@@ -1,5 +1,6 @@
 # backend/api.py
 
+import hmac
 import os
 import sys
 import json
@@ -12,6 +13,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
+from functools import wraps
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from utils.llm_analyzer import LLMAnalyzer
@@ -20,7 +23,8 @@ from utils.event_schema import normalize_event
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = config.INGEST_MAX_BODY_BYTES
-CORS(app)
+# Only the dashboard may call the API from a browser (audit F06).
+CORS(app, origins=list(config.DASHBOARD_ORIGINS))
 
 
 @app.errorhandler(413)
@@ -47,27 +51,56 @@ def start_llm_service():
         print(f"⚠ LLM service failed to start: {e}")
 
 
+# ── Access control ─────────────────────────────────────────────────────────────
+
+def _token_valid(env_names, header_names):
+    """Constant-time check; fails closed when no token is configured."""
+    expected = next((os.environ[n] for n in env_names if os.environ.get(n)), None)
+    if not expected:
+        return False
+    supplied = next((request.headers[h] for h in header_names if request.headers.get(h)), "")
+    return hmac.compare_digest(supplied.encode("utf-8"), expected.encode("utf-8"))
+
+
+def require_token(kind):
+    env_names, header_names = {
+        "admin": (config.ADMIN_TOKEN_ENV, config.ADMIN_TOKEN_HEADERS),
+        "ingest": (config.INGEST_TOKEN_ENV, config.INGEST_TOKEN_HEADERS),
+    }[kind]
+
+    def decorator(view):
+        @wraps(view)
+        def wrapped(*args, **kwargs):
+            if not _token_valid(env_names, header_names):
+                return jsonify({"error": "Unauthorized",
+                                "hint": f"send {header_names[0]}"}), 401
+            return view(*args, **kwargs)
+        return wrapped
+    return decorator
+
+
 # ── Pipeline status ────────────────────────────────────────────────────────────
 pipeline_status = {
     "running":    False,
     "started_at": None,
 }
+_pipeline_lock = threading.Lock()
 
 
-def run_pipeline_thread(delay=0.3, threshold=5):
+def run_pipeline_thread(delay=0.3, threshold=5, fresh=False):
     """Run main.py in background so API stays responsive."""
-    pipeline_status["running"]    = True
-    pipeline_status["started_at"] = datetime.now(timezone.utc).isoformat()
-    subprocess.run(
-        [
-            sys.executable,
-            os.path.join(BASE, "main.py"),
-            "--delay",     str(delay),
-            "--threshold", str(threshold),
-        ],
-        cwd=BASE
-    )
-    pipeline_status["running"] = False
+    cmd = [
+        sys.executable,
+        os.path.join(BASE, "main.py"),
+        "--delay",     str(delay),
+        "--threshold", str(threshold),
+    ]
+    if not fresh:
+        cmd.append("--no-fresh")
+    try:
+        subprocess.run(cmd, cwd=BASE)
+    finally:
+        pipeline_status["running"] = False
 
 
 # ── Routes ─────────────────────────────────────────────────────────────────────
@@ -122,18 +155,35 @@ def get_config():
 
 
 @app.route("/api/run", methods=["POST"])
+@require_token("admin")
 def run_pipeline():
-    """Trigger a fresh pipeline run."""
-    if pipeline_status["running"]:
-        return jsonify({"message": "Pipeline already running"})
+    """
+    Trigger a batch pipeline run. Existing alerts are kept unless the body
+    sets "fresh": true (audit F06); a fresh run backs them up first.
+    """
+    body = request.get_json(silent=True) or {}
+    if not isinstance(body, dict):
+        return jsonify({"error": "Body must be a JSON object"}), 400
+    try:
+        delay = float(body.get("delay", 0.3))
+        threshold = int(body.get("threshold", config.BRUTE_FORCE_THRESHOLD))
+    except (TypeError, ValueError):
+        return jsonify({"error": "delay must be a number and threshold an integer"}), 400
+    lo, hi = config.RUN_THRESHOLD_RANGE
+    if not (0 <= delay <= config.RUN_MAX_DELAY_SECONDS) or not (lo <= threshold <= hi):
+        return jsonify({"error": f"delay must be 0-{config.RUN_MAX_DELAY_SECONDS}s, "
+                                 f"threshold {lo}-{hi}"}), 400
+    fresh = body.get("fresh") is True
 
-    body      = request.get_json(silent=True) or {}
-    delay     = float(body.get("delay",     0.3))
-    threshold = int(body.get("threshold",   5))
+    with _pipeline_lock:
+        if pipeline_status["running"]:
+            return jsonify({"message": "Pipeline already running"}), 409
+        pipeline_status["running"]    = True
+        pipeline_status["started_at"] = datetime.now(timezone.utc).isoformat()
 
     thread = threading.Thread(
         target=run_pipeline_thread,
-        args=(delay, threshold),
+        args=(delay, threshold, fresh),
         daemon=True
     )
     thread.start()
@@ -141,6 +191,7 @@ def run_pipeline():
         "message":   "Pipeline started",
         "delay":     delay,
         "threshold": threshold,
+        "fresh":     fresh,
     })
 
 
@@ -392,13 +443,9 @@ def get_enrichment_status():
 
 
 @app.route("/api/clear-alerts", methods=["POST"])
+@require_token("admin")
 def clear_alerts():
-    """Clear all alerts - requires X-Clear-Token header."""
-    token          = request.headers.get("X-Clear-Token", "")
-    expected_token = os.environ.get("CLEAR_TOKEN")
-    if not expected_token or token != expected_token:
-        return jsonify({"error": "Unauthorized"}), 401
-
+    """Clear all alerts - requires the admin token."""
     try:
         with open(ALERTS_PATH, "w", encoding="utf-8") as f:
             f.write("[]")
@@ -407,13 +454,9 @@ def clear_alerts():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/restore-alerts", methods=["POST"])
+@require_token("admin")
 def restore_alerts():
     """Restore alerts.json from the most recent backup."""
-    token = request.headers.get("X-Clear-Token", "")
-    expected_token = os.environ.get("CLEAR_TOKEN")
-    if not expected_token or token != expected_token:
-        return jsonify({"error": "Unauthorized"}), 401
-
     backup_path = ALERTS_PATH + ".bak"
     try:
         if not os.path.exists(backup_path):
@@ -429,6 +472,7 @@ def restore_alerts():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/ingest", methods=["POST"])
+@require_token("ingest")
 def ingest_event():
     """
     Accept a single login event and append it to the live queue.
@@ -486,12 +530,9 @@ def queue_stats():
 
 
 @app.route("/api/queue/clear", methods=["POST"])
+@require_token("admin")
 def clear_queue():
     """Clear the live event queue."""
-    token = request.headers.get("X-Clear-Token", "")
-    expected_token = os.environ.get("CLEAR_TOKEN")
-    if not expected_token or token != expected_token:
-        return jsonify({"error": "Unauthorized"}), 401
     try:
         with open(QUEUE_PATH, "w") as f:
             f.write("")

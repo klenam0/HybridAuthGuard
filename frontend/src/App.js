@@ -66,6 +66,9 @@ export default function App() {
   // Detection/severity policy from /api/config (backend/config.py). Fetched
   // until it succeeds once; it only changes when the backend restarts.
   const [backendConfig, setBackendConfig] = useState(null);
+  // Admin token for /api/run and clear/restore. Entered at runtime and held
+  // in memory only: never in the bundle, never in localStorage (audit F30).
+  const [adminToken, setAdminToken] = useState("");
   const [running, setRunning] = useState(false);
   // "connecting" until the first poll completes, then "online" (all
   // endpoints OK), "degraded" (some failing) or "offline" (none reachable).
@@ -334,9 +337,26 @@ export default function App() {
   }, []);
 
   const handleRun = async () => {
+    let token = adminToken;
+    if (!token) {
+      token = (window.prompt("Admin token (ADMIN_TOKEN in backend/.env):") || "").trim();
+      if (!token) return;
+      setAdminToken(token);
+    }
     setRunning(true);
     try {
-      await fetch(`${API}/run`, { method: "POST" });
+      // Keeps existing alerts; the API only clears history on {fresh: true}.
+      const res = await fetch(`${API}/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Admin-Token": token },
+        body: JSON.stringify({}),
+      });
+      if (res.status === 401) {
+        setAdminToken("");
+        setRunning(false);
+        window.alert("The API rejected the admin token.");
+        return;
+      }
     } catch {}
     setTimeout(fetchAll, 800);
   };
@@ -381,6 +401,8 @@ export default function App() {
     threatLevel,
     enrichment,
     backendConfig,
+    adminToken,
+    setAdminToken,
     connection,
     running,
     handleRun,
