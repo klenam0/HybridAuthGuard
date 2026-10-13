@@ -1,0 +1,26 @@
+{
+  "hgb[A-E|lr=0.05|leaves=15]": {
+    "n_iter": 500
+  },
+  "hgb[A-E|lr=0.05|leaves=63]": {
+    "n_iter": 286
+  },
+  "hgb[A-E|lr=0.1|leaves=15]": {
+    "n_iter": 229
+  },
+  "hgb[A-E|lr=0.1|leaves=63]": {
+    "n_iter": 500
+  },
+  "hgb[-D|lr=0.05|leaves=15]": {
+    "n_iter": 500
+  },
+  "hgb[-D|lr=0.1|leaves=15]": {
+    "n_iter": 292
+  },
+  "hgb[-D|lr=0.05|leaves=63]": {
+    "n_iter": 373
+  },
+  "hgb[-D|lr=0.1|leaves=63]": {
+    "n_iter": 269
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "events": 6392584,
+  "features": [
+    "a_first_event",
+    "a_new_ip",
+    "a_new_prefix",
+    "a_new_asn",
+    "a_new_country",
+    "a_new_region",
+    "a_new_ua",
+    "a_new_browser",
+    "a_new_os",
+    "a_new_device",
+    "a_log_prior_events",
+    "a_log_secs_since_last",
+    "a_hour_deviation",
+    "b_ip_fail_1h",
+    "b_ip_fail_24h",
+    "b_ip_accounts_24h",
+    "b_ip_fail_ratio_24h",
+    "b_ip_placeholder_24h",
+    "c_acct_fail_1h",
+    "c_acct_fail_24h",
+    "c_acct_ips_24h",
+    "c_acct_countries_24h",
+    "c_is_unknown_account",
+    "d_asn_fail_ratio",
+    "d_asn_log_count",
+    "d_ip_fail_ratio",
+    "d_ip_log_count",
+    "e_success",
+    "e_log_rtt",
+    "e_hour_sin",
+    "e_hour_cos",
+    "e_weekday"
+  ],
+  "groups": {
+    "A": [
+      "a_first_event",
+      "a_new_ip",
+      "a_new_prefix",
+      "a_new_asn",
+      "a_new_country",
+      "a_new_region",
+      "a_new_ua",
+      "a_new_browser",
+      "a_new_os",
+      "a_new_device",
+      "a_log_prior_events",
+      "a_log_secs_since_last",
+      "a_hour_deviation"
+    ],
+    "B": [
+      "b_ip_fail_1h",
+      "b_ip_fail_24h",
+      "b_ip_accounts_24h",
+      "b_ip_fail_ratio_24h",
+      "b_ip_placeholder_24h"
+    ],
+    "C": [
+      "c_acct_fail_1h",
+      "c_acct_fail_24h",
+      "c_acct_ips_24h",
+      "c_acct_countries_24h",
+      "c_is_unknown_account"
+    ],
+    "D": [
+      "d_asn_fail_ratio",
+      "d_asn_log_count",
+      "d_ip_fail_ratio",
+      "d_ip_log_count"
+    ],
+    "E": [
+      "e_success",
+      "e_log_rtt",
+      "e_hour_sin",
+      "e_hour_cos",
+      "e_weekday"
+    ]
+  },
+  "freeman_betas": [
+    0.5,
+    2.0,
+    8.0
+  ],
+  "extract_us_per_event": 68.3,
+  "state_sizes_end": {
+    "users": 1509483,
+    "ips_windowed": 38338,
+    "accounts_windowed": 34937,
+    "ips_reputation": 1309101,
+    "asns": 7457,
+    "population_nodes": 1510505
+  },
+  "peak_rss_mb": 10457,
+  "timings_seconds": {
+    "load dev stream": 5.2,
+    "feature extraction (one streaming pass)": 483.0,
+    "total": 488.2
+  }
+}

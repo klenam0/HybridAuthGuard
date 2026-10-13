@@ -323,8 +323,13 @@ def stage_fit(args):
         from sklearn.ensemble import HistGradientBoostingClassifier
         y = S.truth
         cut = int(0.9 * S.n_train)
-        info = {}
+        info_path = os.path.join(RESULTS, "phase4_hgb_fit.json")
+        info = load_json("phase4_hgb_fit.json") if os.path.exists(info_path) else {}
+        hsets = args.sets.split(",") if args.sets else list(HGB_SETS)
         for name, family, meta in references():
+            gi = HGB_GRID.index((meta["learning_rate"], meta["max_leaf_nodes"]))
+            if meta["feature_set"] not in hsets or (args.grid and str(gi) not in args.grid.split(",")):
+                continue
             t = time.time()
             cols = F.columns(meta["groups"])
             Xs = np.ascontiguousarray(X[:, cols], dtype=np.float32)
@@ -379,8 +384,7 @@ def ml_metrics(S, alert_pos, part, half, rkeys, att=None):
         att = S.attacking_ips(part)
     key = ips * np.int64(1 << 20) + S.day[p]
     uk, inv = np.unique(key, return_inverse=True)
-    inc_att = np.zeros(len(uk), bool)
-    np.logical_or.at(inc_att, inv, y)
+    inc_att = np.bincount(inv, weights=y, minlength=len(uk)) > 0
     inc_ip = uk >> 20
     incr = ~np.isin(uk, rkeys[half])
     lo, hi = P3B.bootstrap(inc_ip[incr], inc_att[incr])
@@ -458,19 +462,28 @@ def stage_select(args):
     clk.tick("load stream, frozen rule incidents, thresholds", t)
 
     t = time.time()
+    items = [("candidate",) + c for c in candidates()] + [("reference",) + c for c in references()]
+
+    def evaluate(item):
+        kind, name, family, meta = item
+        s = score(S, name, family, meta)
+        e = event_metrics(S, s, part)
+        out = []
+        for q, th in zip(QUANTILES, thr[name]):
+            _, al = ml_alerts(S, s, th, end)
+            out.append({"name": name, "family": family, "kind": kind, "meta": meta, "quantile": q,
+                        "threshold": th, "val_a": ml_metrics(S, al, part, "val_a", rk, att)})
+        print(f"  {name:34s} AUC {e['roc_auc']:.4f} PR {e['pr_auc']:.4f}", flush=True)
+        return name, e, out
+
+    from concurrent.futures import ThreadPoolExecutor
     rows, ev, refs = [], {}, []
-    order = 0
-    for kind, items in (("candidate", candidates()), ("reference", references())):
-        for name, family, meta in items:
-            s = score(S, name, family, meta)
-            ev[name] = event_metrics(S, s, part)
-            for q, th in zip(QUANTILES, thr[name]):
-                _, al = ml_alerts(S, s, th, end)
-                r = {"name": name, "family": family, "kind": kind, "meta": meta, "quantile": q,
-                     "threshold": th, "order": order, "val_a": ml_metrics(S, al, part, "val_a", rk, att)}
+    with ThreadPoolExecutor(6) as ex:            # results kept in candidate order
+        for (kind, *_), (name, e, out) in zip(items, ex.map(evaluate, items)):
+            ev[name] = e
+            for r in out:
+                r["order"] = len(rows) + len(refs)
                 (rows if kind == "candidate" else refs).append(r)
-                order += 1
-            print(f"  {name:34s} AUC {ev[name]['roc_auc']:.4f} PR {ev[name]['pr_auc']:.4f}", flush=True)
     clk.tick(f"{len(rows)} candidate rows and {len(refs)} reference rows on val_a", t)
 
     chosen, met = choose(rows)
@@ -869,6 +882,7 @@ def main():
     ap.add_argument("stage", choices=["features", "fit", "select", "confirm", "workload", "replay"])
     ap.add_argument("--part", choices=["all", "fixed", "if", "hgb"], default="all")
     ap.add_argument("--sets", default="", help="fit: comma-separated feature sets (default all)")
+    ap.add_argument("--grid", default="", help="fit --part hgb: comma-separated HGB_GRID indices")
     ap.add_argument("--chosen-seeds", action="store_true", help="fit: seeds 43, 44 of the chosen forest")
     args = ap.parse_args()
     os.makedirs(CACHE, exist_ok=True)
