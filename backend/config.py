@@ -44,6 +44,58 @@ INTERNAL_IP_GUARD_ENABLED = False
 # prefixes "10.0." and "172.16." covered only a /16 of 10/8 and 172.16/12).
 INTERNAL_NETWORKS = ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
 
+# ── v3 rules (agents/rules_v3.py; RULES_MODE = "v3") ──────────────────────
+# Every window is a sliding window over event time, in seconds. "Failures"
+# are FAILED logins against real accounts. Values chosen on dev_val under
+# eval/PROTOCOL.md amendment 2 (see audit_scratch/PHASE3_REPORT.md).
+
+# User IDs that stand for "no such account" (the RBA dataset's apparent
+# pseudonym for unknown usernames, 37% of rows). Attempts on them never
+# enter per-account state, never count as a distinct account, and are
+# counted per IP for Invalid Account Spraying only.
+UNKNOWN_ACCOUNT_IDS = ["-4324475583306591935"]
+
+V3_BF_WINDOW_SECONDS = 600             # Brute Force: failures from one IP
+V3_BF_MIN_FAILURES = 5
+
+V3_SLOW_BF_WINDOW_SECONDS = 6 * 3600   # Slow Brute Force: failures from one
+V3_SLOW_BF_MIN_FAILURES = 4            # IP over the longer window, spread
+V3_SLOW_BF_MIN_SPREAD_SECONDS = 300    # out, below the Brute Force count
+
+V3_CS_WINDOW_SECONDS = 3600            # Credential Stuffing: distinct real
+V3_CS_MIN_ACCOUNTS = 5                 # accounts with FAILED logins, one IP
+
+V3_INVALID_WINDOW_SECONDS = 3600       # Invalid Account Spraying: unknown-
+V3_INVALID_MIN_ATTEMPTS = 5            # account attempts from one IP
+
+V3_DIST_WINDOW_SECONDS = 3600          # Distributed Brute Force: distinct IPs
+V3_DIST_MIN_IPS = 5                    # failing against one real account
+
+V3_SAF_WINDOW_SECONDS = 3600           # Success After Failures: a SUCCESS with
+V3_SAF_MIN_FAILURES = 3                # this many failures before it on the
+                                       # account or from the IP
+
+V3_MULTI_IP_WINDOW_SECONDS = 120       # Multiple IP Login (legacy rule)
+# Pairs exempted: "known_ip" (second IP had a SUCCESS on the account within
+# V3_KNOWN_IP_TTL_SECONDS), "same_prefix" (same /24 or /64), "same_asn".
+V3_MULTI_IP_EXEMPT = ()
+V3_KNOWN_IP_TTL_SECONDS = 30 * 86400
+
+# Alert de-duplication per (detector, key): a match inside the cooldown
+# after the last alert for the same key updates state but raises nothing.
+# Keys: the IP, or (account, IP) for Distributed Brute Force, Success After
+# Failures and Multiple IP Login. Suspicious Login Time keeps its legacy
+# 600 s per-IP cooldown.
+V3_DEDUP_SECONDS = {"default": 3600, "Suspicious Login Time": SUSPICIOUS_COOLDOWN_SECONDS}
+
+# The same event delivered again within this many seconds is counted once
+# (same event_id, or the same fields when the event has no id).
+V3_DUPLICATE_WINDOW_SECONDS = 300
+
+# v3 ML scorer: failed_rate per IP over the last N calendar days of event
+# time (day buckets) instead of a lifetime counter (audit F20, F23).
+ML_FAILED_RATE_WINDOW_DAYS = 30
+
 # ── ML (ml/anomaly_model.py, ml/train_from_dataset.py, main.py) ───────────
 ML_CONTAMINATION = 0.4                     # deployed RBA model (ADR-13)
 SYNTHETIC_FALLBACK_CONTAMINATION = 0.15    # main.py synthetic fallback
@@ -118,6 +170,24 @@ MITRE_MAPPING = {
         "tactic":         "Initial Access",
         "url":            "https://attack.mitre.org/techniques/T1078/",
     },
+    "Invalid Account Spraying": {
+        "technique_id":   "T1110",
+        "technique_name": "Brute Force",
+        "tactic":         "Credential Access",
+        "url":            "https://attack.mitre.org/techniques/T1110/",
+    },
+    "Distributed Brute Force": {
+        "technique_id":   "T1110.001",
+        "technique_name": "Brute Force: Password Guessing",
+        "tactic":         "Credential Access",
+        "url":            "https://attack.mitre.org/techniques/T1110/001/",
+    },
+    "Success After Failures": {
+        "technique_id":   "T1078",
+        "technique_name": "Valid Accounts",
+        "tactic":         "Initial Access",
+        "url":            "https://attack.mitre.org/techniques/T1078/",
+    },
 }
 
 # An ML alert on a FAILED login is not use of a valid account; it is
@@ -139,6 +209,26 @@ ACTIONS_LOG_MAX = 1000
 SIMULATED_BLOCK_SEVERITIES = ("HIGH",)
 EMAIL_SEVERITIES = ("HIGH",)
 ADMIN_NOTIFY_SEVERITIES = ("MEDIUM",)
+
+# v3 response policy (RULES_MODE = "v3"). Blocking is a response-layer
+# block list with a TTL in event time; detection never consults it. Only
+# alerts from V3_BLOCK_DETECTORS place a (simulated) block; every other
+# detector alerts only. Interim policy of Phase 3: a detector blocks only if
+# it met the dev_val precision criterion of eval/PROTOCOL.md amendment 2.
+BLOCK_TTL_SECONDS = 3600
+V3_BLOCK_DETECTORS = ()
+# Severity per v3 alert type (email for HIGH, admin notice for MEDIUM).
+V3_SEVERITY_MAP = {
+    "Brute Force Attack":       "MEDIUM",
+    "Slow Brute Force":         "MEDIUM",
+    "Credential Stuffing":      "MEDIUM",
+    "Invalid Account Spraying": "MEDIUM",
+    "Distributed Brute Force":  "MEDIUM",
+    "Success After Failures":   "MEDIUM",
+    "Multiple IP Login":        "MEDIUM",
+    "Suspicious Login Time":    "MEDIUM",
+    "ML Anomaly Detected":      "MEDIUM",
+}
 
 # ── Email (utils/email_alerter.py) ────────────────────────────────────────
 SMTP_HOST = "smtp.gmail.com"
@@ -192,6 +282,18 @@ DETECTORS = [
     "ML Anomaly Detected",
 ]
 
+V3_DETECTORS = [
+    "Brute Force Attack",
+    "Slow Brute Force",
+    "Credential Stuffing",
+    "Invalid Account Spraying",
+    "Distributed Brute Force",
+    "Success After Failures",
+    "Multiple IP Login",
+    "Suspicious Login Time",
+    "ML Anomaly Detected",
+]
+
 
 def public_config():
     """Read-only view served at /api/config. No secrets belong here."""
@@ -233,5 +335,27 @@ def public_config():
             "email_severities": list(EMAIL_SEVERITIES),
             "admin_notify_severities": list(ADMIN_NOTIFY_SEVERITIES),
         },
-        "detectors": list(DETECTORS),
+        "detectors": list(DETECTORS) if RULES_MODE == "legacy" else list(V3_DETECTORS),
+        "v3": {
+            "unknown_account_ids": list(UNKNOWN_ACCOUNT_IDS),
+            "brute_force": {"window_s": V3_BF_WINDOW_SECONDS, "min_failures": V3_BF_MIN_FAILURES},
+            "slow_brute_force": {"window_s": V3_SLOW_BF_WINDOW_SECONDS,
+                                 "min_failures": V3_SLOW_BF_MIN_FAILURES,
+                                 "min_spread_s": V3_SLOW_BF_MIN_SPREAD_SECONDS},
+            "credential_stuffing": {"window_s": V3_CS_WINDOW_SECONDS,
+                                    "min_accounts": V3_CS_MIN_ACCOUNTS},
+            "invalid_account_spraying": {"window_s": V3_INVALID_WINDOW_SECONDS,
+                                         "min_attempts": V3_INVALID_MIN_ATTEMPTS},
+            "distributed_brute_force": {"window_s": V3_DIST_WINDOW_SECONDS,
+                                        "min_ips": V3_DIST_MIN_IPS},
+            "success_after_failures": {"window_s": V3_SAF_WINDOW_SECONDS,
+                                       "min_failures": V3_SAF_MIN_FAILURES},
+            "multiple_ip_login": {"window_s": V3_MULTI_IP_WINDOW_SECONDS,
+                                  "exempt": list(V3_MULTI_IP_EXEMPT)},
+            "dedup_seconds": dict(V3_DEDUP_SECONDS),
+            "block_ttl_seconds": BLOCK_TTL_SECONDS,
+            "block_detectors": list(V3_BLOCK_DETECTORS),
+            "severity": dict(V3_SEVERITY_MAP),
+            "ml_failed_rate_window_days": ML_FAILED_RATE_WINDOW_DAYS,
+        },
     }

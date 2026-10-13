@@ -209,9 +209,9 @@ def replay(events, scorer=None, threshold=config.BRUTE_FORCE_THRESHOLD):
     if scorer is not None:
         scorer.prepare(events)
     agent = DetectionAgent(threshold=threshold, anomaly_detector=scorer, mode="legacy")
-    analysis = AnalysisAgent()
+    analysis = AnalysisAgent(mode="legacy")
     email = NullEmailAlerter()
-    response = ResponseAgent(email_alerter=email)
+    response = ResponseAgent(email_alerter=email, mode="legacy")
 
     n = len(events)
     types, sevs, confs = [None] * n, [None] * n, [None] * n

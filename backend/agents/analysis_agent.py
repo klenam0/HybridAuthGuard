@@ -16,9 +16,13 @@ class AnalysisAgent:
     - Feature-level ML explainability (for ML Anomaly alerts)
     """
 
-    def __init__(self):
+    def __init__(self, mode=None):
 
-        self.severity_mapping = config.SEVERITY_MAP
+        # "v3" takes severities from config.V3_SEVERITY_MAP and does not
+        # upgrade ML alerts by confidence (audit F10, F29).
+        self.mode = mode or config.RULES_MODE
+        self.severity_mapping = (config.V3_SEVERITY_MAP if self.mode == "v3"
+                                 else config.SEVERITY_MAP)
         self.mitre_mapping    = config.MITRE_MAPPING
 
     def evaluate_alert(self, alert):
@@ -27,7 +31,7 @@ class AnalysisAgent:
         severity   = self.severity_mapping.get(alert_type, config.DEFAULT_SEVERITY)
 
         # Upgrade ML anomaly severity if model confidence is High
-        if alert_type == "ML Anomaly Detected":
+        if alert_type == "ML Anomaly Detected" and self.mode != "v3":
             if alert.get("confidence") == config.ML_UPGRADE_CONFIDENCE:
                 severity = config.ML_UPGRADE_SEVERITY
 
@@ -101,6 +105,20 @@ class AnalysisAgent:
             "Credential Stuffing": (
                 f"HIGH: {ip} attempted logins across multiple accounts. "
                 f"Consistent with automated credential stuffing. Details: {desc}"
+            ),
+            "Invalid Account Spraying": (
+                f"{alert.get('severity', 'MEDIUM')}: {ip} is trying usernames that do not "
+                f"exist. Consistent with username guessing or spraying. Details: {desc}"
+            ),
+            "Distributed Brute Force": (
+                f"{alert.get('severity', 'MEDIUM')}: '{user}' is failing logins from many "
+                f"different IPs, latest {ip}. Consistent with a distributed password "
+                f"guessing campaign against this account. Details: {desc}"
+            ),
+            "Success After Failures": (
+                f"{alert.get('severity', 'MEDIUM')}: '{user}' logged in from {ip} right "
+                f"after repeated failures. The account may be compromised; verify with "
+                f"the user. Details: {desc}"
             ),
         }
         return templates.get(

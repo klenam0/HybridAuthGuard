@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 
 class MonitoringAgent:
 
-    def __init__(self, log_file=None, threshold=5, anomaly_detector=None):
+    def __init__(self, log_file=None, threshold=None, anomaly_detector=None):
         self.log_file        = log_file
         self.detector        = DetectionAgent(
             threshold=threshold,
@@ -27,6 +27,7 @@ class MonitoringAgent:
         self.alert_manager   = AlertManager()
         self.alerts_generated = 0
         self.events_processed = 0
+        self.blocked_source_events = 0   # v3: events from an IP on the block list
         self.start_time       = None
 
         self._stats_path = os.path.join(BASE, "data", "pipeline_stats.json")
@@ -37,8 +38,17 @@ class MonitoringAgent:
     # ── Shared event processor ────────────────────────────────────────────────
 
     def _process_event(self, event):
-        """Run a single log event through the full detection pipeline."""
-        alert = self.detector.analyze_event(event)
+        """
+        Run a single log event through the full detection pipeline. Every
+        alert the engine raises for the event is analysed, saved and acted
+        on. Under the v3 engine an event from an address on the response
+        layer's block list is still detected as usual; it is counted and
+        logged as "event from blocked source", and its alerts carry
+        blocked_source=True.
+        """
+        v3 = self.responder.mode == "v3"
+        blocked = v3 and self.responder.is_blocked(event.get("ip"), event.get("timestamp"))
+        alerts = self.detector.analyze_all(event)
         self.events_processed += 1
 
         ts   = event.get("timestamp", "")
@@ -46,9 +56,14 @@ class MonitoringAgent:
         ip   = event.get("ip", "?")
         st   = event.get("status", "?")
         log.info("🟢 %s | %s @ %s | %s", ts, user, ip, st)
+        if blocked:
+            self.blocked_source_events += 1
+            log.info("⛔ Event from blocked source %s (detection still applied)", ip)
 
-        if alert:
+        for alert in alerts:
             alert["timestamp"] = event.get("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            if v3:
+                alert["blocked_source"] = blocked
             analyzed = self.analyzer.evaluate_alert(alert)
             # Store what the response layer will do, then the real outcome
             # (e.g. whether the email was actually sent) once it has run.

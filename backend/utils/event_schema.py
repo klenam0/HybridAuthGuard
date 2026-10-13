@@ -52,6 +52,37 @@ def parse_timestamp(value):
     return dt.strftime(LEGACY_TS_FMT)
 
 
+def _days_from_civil(y, m, d):
+    """Days since 1970-01-01 of a proleptic Gregorian date (H. Hinnant)."""
+    y -= m <= 2
+    era = y // 400
+    yoe = y - era * 400
+    doy = (153 * (m + (-3 if m > 2 else 9)) + 2) // 5 + d - 1
+    doe = yoe * 365 + yoe // 4 - yoe // 100 + doy
+    return era * 146097 + doe - 719468
+
+
+def epoch_seconds(text):
+    """
+    Whole seconds since 1970-01-01 00:00:00 of a naive event timestamp
+    (no timezone is applied). The legacy format is parsed by slicing, which
+    is several times faster than strptime; anything else goes through
+    parse_timestamp() first. Raises ValueError on an invalid timestamp.
+    """
+    if not (isinstance(text, str) and len(text) == 19 and text[4] == "-"
+            and text[7] == "-" and text[10] == " " and text[13] == ":"
+            and text[16] == ":"):
+        text = parse_timestamp(text)
+    try:
+        y, mo, d = int(text[0:4]), int(text[5:7]), int(text[8:10])
+        h, mi, s = int(text[11:13]), int(text[14:16]), int(text[17:19])
+    except ValueError:
+        raise ValueError(f"invalid timestamp {text!r}") from None
+    if not (1 <= mo <= 12 and 1 <= d <= 31 and h < 24 and mi < 60 and s < 60):
+        raise ValueError(f"invalid timestamp {text!r}")
+    return _days_from_civil(y, mo, d) * 86400 + h * 3600 + mi * 60 + s
+
+
 def normalize_event(raw, now=None):
     if not isinstance(raw, dict):
         return None, "body must be a JSON object"

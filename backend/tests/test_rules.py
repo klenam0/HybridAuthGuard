@@ -162,8 +162,11 @@ def test_nat_ip_with_five_users_then_spread_out_typos(v3):
     evs += [ev(T + timedelta(hours=2 * i + 1), u, "8.8.8.8", "FAILED")
             for i, u in enumerate("abcde")]
     types = run(evs)
-    assert count(types, CS) == 0
-    assert all(not s for s in types), f"no alert expected, got {types}"
+    assert count(types, CS) == 0, "successes and spread-out typos are not stuffing"
+    assert count(types, BF) == 0
+    # Not asserted: whether four spaced failures from one IP within the
+    # Slow Brute Force window should alert. By the v3 definition they match
+    # Slow Brute Force; its parameters are a dev_val selection question.
 
 
 # ── F17: Slow Brute Force spacing, ordering, duplicate delivery ────────────

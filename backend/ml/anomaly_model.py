@@ -8,9 +8,10 @@ import numpy as np
 import joblib
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-from collections import defaultdict
+from collections import OrderedDict, defaultdict, deque
 from datetime import datetime
 from ml.explainer import AlertExplainer
+from utils.event_schema import epoch_seconds
 import config
 
 log = logging.getLogger(__name__)
@@ -22,6 +23,46 @@ def _sha256(path, chunk=1 << 20):
         for block in iter(lambda: f.read(chunk), b""):
             h.update(block)
     return h.hexdigest()
+
+
+class _DayBuckets:
+    """Per-IP (day, failures, events) buckets for the windowed failed_rate."""
+
+    __slots__ = ("b", "fails", "total", "wm")
+
+    def __init__(self):
+        self.b = deque()      # [day, failures, events], ascending by day
+        self.fails = 0
+        self.total = 0
+        self.wm = None        # latest day seen
+
+    def add(self, day, failed, keep):
+        b = self.b
+        if b and b[-1][0] == day:
+            b[-1][1] += failed
+            b[-1][2] += 1
+        elif not b or day > b[-1][0]:
+            b.append([day, failed, 1])
+        else:                 # a late event: find or insert its day
+            for i in range(len(b) - 1, -1, -1):
+                if b[i][0] == day:
+                    b[i][1] += failed
+                    b[i][2] += 1
+                    break
+                if b[i][0] < day:
+                    b.insert(i + 1, [day, failed, 1])
+                    break
+            else:
+                b.appendleft([day, failed, 1])
+        self.fails += failed
+        self.total += 1
+        if self.wm is None or day > self.wm:
+            self.wm = day
+        cut = self.wm - keep
+        while b and b[0][0] < cut:
+            _, f, n = b.popleft()
+            self.fails -= f
+            self.total -= n
 
 
 class AnomalyDetector:
@@ -81,6 +122,49 @@ class AnomalyDetector:
         # For 10‑feature model (sets of known values)
         self.known_ips_set       = set()
         self.known_countries_set = set()
+
+        # v3 (set_failed_rate_window): failed_rate per IP over the last N
+        # days of event time, in day buckets, instead of lifetime counters.
+        self.failed_rate_window_days = None
+        self._ip_windows = OrderedDict()
+        self._max_day = None
+
+    def set_failed_rate_window(self, days):
+        """
+        Count failed_rate per IP over the last `days` calendar days of event
+        time (day buckets, pruned; idle IPs evicted) instead of the lifetime
+        counters. Used by the v3 rule engine, which scores every event
+        (audit F20, F23). None or 0 restores the lifetime counters.
+        """
+        self.failed_rate_window_days = days or None
+        self._ip_windows = OrderedDict()
+        self._max_day = None
+
+    def _count_windowed(self, ip, timestamp, is_failed):
+        try:
+            day = epoch_seconds(timestamp) // 86400
+        except (TypeError, ValueError):
+            day = self._max_day if self._max_day is not None else 0
+        if self._max_day is None or day > self._max_day:
+            self._max_day = day
+        keep = self.failed_rate_window_days - 1
+        windows = self._ip_windows
+        w = windows.get(ip)
+        if w is None:
+            w = windows[ip] = _DayBuckets()
+        else:
+            windows.move_to_end(ip)
+        w.add(day, int(is_failed), keep)
+        cut = self._max_day - keep
+        while windows:
+            k = next(iter(windows))
+            if windows[k].wm >= cut:
+                break
+            del windows[k]
+
+    def _windowed_failed_rate(self, ip):
+        w = self._ip_windows.get(ip)
+        return w.fails / w.total if w is not None and w.total else 0.0
 
     # ── Feature Extraction (Synthetic / Legacy) ──────────────────────────
 
@@ -174,9 +258,12 @@ class AnomalyDetector:
             user_enc = -1
 
         # 6. Cumulative failure rate (using instance state)
-        total = self.ip_total_counts[ip]
-        failed = self.ip_failure_counts.get(ip, 0)
-        failed_rate = failed / total if total > 0 else 0.0
+        if self.failed_rate_window_days:
+            failed_rate = self._windowed_failed_rate(ip)
+        else:
+            total = self.ip_total_counts[ip]
+            failed = self.ip_failure_counts.get(ip, 0)
+            failed_rate = failed / total if total > 0 else 0.0
         
 
         # 7. Country encoding
@@ -241,9 +328,12 @@ class AnomalyDetector:
         country = str(log_event.get("country", "XX")).strip()
         device  = str(log_event.get("device_type", "Unknown")).strip()
 
-        total = self.ip_total_counts[ip]
-        failed = self.ip_failure_counts.get(ip, 0)
-        failed_rate = failed / total if total > 0 else 0.0
+        if self.failed_rate_window_days:
+            failed_rate = self._windowed_failed_rate(ip)
+        else:
+            total = self.ip_total_counts[ip]
+            failed = self.ip_failure_counts.get(ip, 0)
+            failed_rate = failed / total if total > 0 else 0.0
 
         ip_freq      = self.ip_freq_map.get(ip, 0.0)
         user_freq    = self.user_freq_map.get(user, 0.0)
@@ -477,9 +567,12 @@ class AnomalyDetector:
         # _extract_features_v2() a second time for anomalous events, which
         # would otherwise double-count.
         is_failed_event = log_event.get("status", "SUCCESS") == "FAILED"
-        self.ip_total_counts[ip] += 1
-        if is_failed_event:
-            self.ip_failure_counts[ip] += 1
+        if self.failed_rate_window_days:
+            self._count_windowed(ip, log_event.get("timestamp"), is_failed_event)
+        else:
+            self.ip_total_counts[ip] += 1
+            if is_failed_event:
+                self.ip_failure_counts[ip] += 1
 
         try:
             # Use frequency encoding if that's the loaded model's scheme,
