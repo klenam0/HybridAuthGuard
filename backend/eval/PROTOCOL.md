@@ -305,3 +305,135 @@ changed, why, and what had already been seen.
    **Gates.** The real v3 agents replayed at the chosen settings must
    reproduce the offline matches and alerts per detector with 0 mismatches
    on `val_a` and on `val_b`, or the selection is void.
+
+4. 2026-10-13, Phase 4, before any Phase 4 metric. ML redesign. Seen
+   before this amendment: every Phase 2, 3 and 3b result (including the
+   Phase 2 Isolation Forest's val_a and val_b alert precision in amendment
+   3's confirmation) and data counts of the development stream (1,509,483
+   users, 1,309,101 IPs, 153,387 user-agent strings, RTT missing on 96% of
+   rows). No Phase 4 feature, model score or metric had been computed. The
+   rule engine is frozen at the amendment 3 settings in `config.py`; no rule
+   parameter, grid or severity changes in this phase.
+
+   **Splits.** Fit on `dev_train` (2020-02-03 to 2020-03-29). Choose on
+   `val_a` only. `val_b` is computed by a separate `confirm` stage of
+   `eval/phase4.py` that reads the choice from disk, once; nothing is
+   re-tuned after `val_b`. Feature state (`ml/features_v4.py`) is built
+   causally from 2020-02-03 through `dev_train`, `val_a` and `val_b` in time
+   order; the halves only select which events are scored.
+
+   **Labels.** No label column (`Is Attack IP`, `Is Account Takeover`) feeds
+   any feature or any unsupervised model. Labels are used only for metrics
+   and for the supervised reference. Exception, inherited and unchanged:
+   the Phase 2 Isolation Forest (candidate 1) was fitted on the non-attack
+   rows of `dev_train` under the Phase 2 protocol; it is kept as the
+   baseline as it is, and this is stated wherever it is reported.
+
+   **Candidates eligible for deployment** (unsupervised, label-free), in
+   this order (the order breaks the last tie):
+   1. The Phase 2 Isolation Forest, unchanged: seed 42, contamination 0.3,
+      v3 `failed_rate`, cached decisions `phase3_cache/ml_decision_v3.npy`.
+      Not refitted. Score = -decision.
+   2. Isolation Forest on the Phase 4 features, for each feature set of the
+      ablation table: all groups A-E; A-E without one group (5 sets); each
+      group alone (5 sets); 11 sets, in that order. Hyperparameters
+      `n_estimators` in (100, 300) x `max_samples` in (256, 4096), in that
+      order, `max_features` 1.0, no scaling (the forest is invariant to
+      monotone per-feature scaling). Fitted on a uniform sample of 1,000,000
+      `dev_train` events drawn with `default_rng(seed)`, attacks included
+      (label-free). Every event is scored once; score =
+      -`decision_function`.
+   3. Freeman et al. (2016) per-user risk, label-free variant
+      (`ml/features_v4.py`; its docstring lists the simplifications): log
+      risk = sum over hierarchy levels of log p(value | population) - log
+      p(value | user), IP chain country -> ASN -> /24 (/64) -> IP and UA
+      chain browser family -> browser + OS -> UA string, nested.
+      p(. | population) is the distribution over all prior events with
+      add-one smoothing and one reserved unseen slot per node; p(. | user)
+      is the user's causal history smoothed towards p(. | population) with
+      strength beta, level by level. A user with no history gets the
+      population prior (log risk 0). beta in (0.5, 2, 8), computed in the
+      same pass, in that order.
+   4. New IP for the user (binary; score = 1 if the user has no prior event
+      from this IP).
+
+   **Reference only, never deployable:** `HistGradientBoostingClassifier` on
+   groups A-E and on A-C + E (without D), `class_weight="balanced"`, label =
+   `Is Attack IP` or `Is Account Takeover`, `random_state` 42. Fitted on the
+   first 90% of `dev_train` rows in time order with early stopping on the
+   last 10% (`n_iter_no_change` 20, loss, `max_iter` 500). Grid
+   `learning_rate` in (0.05, 0.1) x `max_leaf_nodes` in (15, 63); the
+   setting with the highest `val_a` event PR-AUC is reported. The labels
+   are a per-IP blocklist, so this shows a ceiling, not a deployable
+   detector.
+
+   **Thresholds.** For each scored model the alert thresholds are fixed
+   before `val_a`, from that model's scores on all `dev_train` events: for q
+   in (0.1, 0.5, 1, 2, 5, 10, 20, 30)%, the threshold is the `(1 - q)`
+   quantile (`numpy.quantile`, method `inverted_cdf`), and an event alerts
+   if its score >= the threshold. For discrete scores (new IP; Freeman for
+   users without history) ties at the threshold all alert, so the realised
+   share can exceed q; rows with identical alert sets are kept. ML alerts
+   are de-duplicated per IP with a 3600 s cooldown, as the ML step in
+   amendment 3 (one alert per IP per hour).
+
+   **Primary criterion (incremental value over the frozen rules).** The
+   frozen rules are the eight v3 rule detectors at their amendment 3
+   settings, including the two that fail its criterion (the "rules"
+   workload configuration). Incidents are per (source IP, calendar day), as
+   in amendment 3. An *incremental incident* is an incident with at least
+   one ML alert and no frozen-rule alert; it is an attack incident if any
+   event carrying one of its ML alerts is an attack event. *Attacking IPs in
+   incremental incidents* = `val_a` attacking IPs with at least one attack
+   incremental incident. Choose the (model, feature set, threshold) that
+   maximises attacking IPs in incremental incidents on `val_a`, subject to
+   (i) >= 30 incremental incidents on `val_a` and (ii) the lower bound of
+   the IP-clustered bootstrap of incremental-incident precision >= 0.2149
+   (2 x the `val_a` event base rate, fixed). The bootstrap is amendment 3's
+   with the incremental incident as the unit counted: the clusters are the
+   IPs with an incremental incident, 1,000 resamples, 95% percentile
+   interval, `default_rng(42)` re-created per row. Ties: higher lower bound,
+   then fewer ML alerts, then candidate order above (then feature-set,
+   hyperparameter and threshold order as listed).
+
+   **Holds on val_b** = >= 30 incremental incidents on `val_b` and lower
+   bound >= 0.1915 (2 x the `val_b` base rate); also reported against
+   0.2149.
+
+   **Pre-declared fallback.** If no candidate meets the criterion on
+   `val_a`, no ML configuration is enabled for alerting in v4: `ML_MODE =
+   "v4"` then runs the model but raises no ML alert. The candidate with the
+   highest lower bound (among rows with >= 30 incremental incidents; ties as
+   above) is reported, confirmed on `val_b` like a chosen one, and passed to
+   Phase 5 only as a possible ranking signal.
+
+   **Group D.** Aggregate reputation (prior failure ratio and prior event
+   count per ASN and per IP) is closest to how the blocklist label was
+   produced. Every headline result is reported with and without D, and the
+   chosen configuration is stated as "with D" or "without D".
+
+   **Secondary (reported, not used for choosing):** ML-alone alert precision
+   with its interval and the amendment 3 criterion; event ROC-AUC, PR-AUC
+   (average precision), TPR at 1% FPR; attacking IPs flagged; benign IPs
+   flagged and legitimate users alerted (non-placeholder users with an ML
+   alert on a non-attack event); ML-alone incident precision; and on
+   `val_b` the budget curves at B = 100, 500, 2,000 with amendment 3's
+   budget score, the ML detector being the chosen (or fallback) candidate
+   with its `val_a` ML-alone alert precision as its score.
+
+   **Strata** (only events in the stratum form alerts and incidents): all
+   events; excluding the placeholder ID; cold users (no `dev_train` row);
+   cold IPs (IP absent from `dev_train`); successful logins only;
+   user-history length 0, 1-4, 5-19, 20+ prior events of the user in the
+   stream.
+
+   **Seeds.** The stochastic models (the new Isolation Forests) use seeds
+   42, 43, 44. Choose on seed 42; seeds 43 and 44 are run for the chosen
+   configuration and reported as mean and range. The Phase 2 forest exists
+   only at seed 42 (cached, not refitted).
+
+   **Gates.** `ML_MODE = "v4"` (default `"legacy"`, unchanged) loads
+   `data/model_v4.pkl` and the chosen threshold. The real detection,
+   analysis and response agents replayed in v3 + v4 mode over `dev_train`,
+   `val_a` and `val_b` must reproduce the offline scores and ML alerts with
+   0 mismatches and place 0 blocks, or the integration is void.
