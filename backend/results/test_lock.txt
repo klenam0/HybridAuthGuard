@@ -1,0 +1,3 @@
+file: data/rba_locked/test_2020-05.parquet
+rows: 2158083
+sha256: 0b0e908bd8ac53c41a55b8207dc42f1109997bdd2ab12d75ee06d58808d62c1f
