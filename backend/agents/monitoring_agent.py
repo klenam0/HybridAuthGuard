@@ -62,16 +62,6 @@ class MonitoringAgent:
         Batch mode: read parsed_logs.json once and process all events.
         Used by: python main.py
         """
-        # Backup alerts before run
-        alerts_path = os.path.join(BASE, "data", "alerts.json")
-        backup_path = alerts_path + ".bak"
-        try:
-            if os.path.exists(alerts_path):
-                import shutil
-                shutil.copy2(alerts_path, backup_path)
-        except Exception as e:
-            print(f"⚠ Could not backup alerts.json: {e}")
-
         with open(self.log_file, "r") as f:
             logs = json.load(f)
 

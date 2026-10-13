@@ -1,6 +1,7 @@
 import { Shield, Cpu, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import PageHeader from "../components/PageHeader";
+import { shortAlertId } from "../utils/alertId";
 
 const DETECTOR_INFO = {
   "Suspicious Login Time": {
@@ -283,7 +284,7 @@ function DetectorCard({ name, info, alerts, detectorData }) {
                 className={`w-2 h-2 rounded-full flex-shrink-0 ${SEVERITY_DOT[lastAlert.severity] || "bg-slate-400"}`}
               />
               <span className="text-[10px] text-slate-500">
-                Last alert: #{lastAlert.alert_id} - {lastAlert.severity}{" "}
+                Last alert: #{shortAlertId(lastAlert.alert_id)} - {lastAlert.severity}{" "}
                 severity
               </span>
             </div>

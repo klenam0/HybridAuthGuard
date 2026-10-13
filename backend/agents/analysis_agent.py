@@ -33,7 +33,7 @@ class AnalysisAgent:
                 severity = config.ML_UPGRADE_SEVERITY
 
         alert["severity"]    = severity
-        alert["alert_id"]    = str(uuid.uuid4())[:8].upper()
+        alert["alert_id"]    = str(uuid.uuid4()).upper()   # full UUID (audit F38)
         alert["detected_at"] = alert.get(
             "timestamp",
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")

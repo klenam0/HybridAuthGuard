@@ -5,6 +5,7 @@ import { ShieldX, Bell, FileText } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 import SeverityBadge from "../components/SeverityBadge";
 import { FILTER_ACTIVE } from "../config/severity";
+import { shortAlertId } from "../utils/alertId";
 
 const ACTIONS = {
   HIGH: { Icon: ShieldX, color: "text-red-400", label: "IP Blocked" },
@@ -144,7 +145,7 @@ export default function LiveAlerts({ data }) {
                         {alert.type}
                       </p>
                       <p className="text-sm text-[color:var(--text-muted)] font-mono">
-                        ALT-{alert.alert_id || String(i).padStart(4, "0")}
+                        ALT-{alert.alert_id ? shortAlertId(alert.alert_id) : String(i).padStart(4, "0")}
                       </p>
                     </div>
                   </div>

@@ -19,6 +19,7 @@ import { getSeverity, getThreatLevel } from "../config/severity";
 import { highlightMatch, searchIndex } from "../utils/globalSearch";
 import { formatUtcTime, timeAgo } from "../utils/time";
 import SeverityBadge from "./SeverityBadge";
+import { shortAlertId } from "../utils/alertId";
 
 const PIPELINE = [
   { label: "Monitoring", color: "bg-blue-400" },
@@ -539,7 +540,7 @@ export default function Navbar({
                             {notif.message}
                           </p>
                           <p className="text-[9px] text-slate-600 mt-0.5">
-                            {timeAgo(notif.timestamp)} · #{notif.alert_id}
+                            {timeAgo(notif.timestamp)} · #{shortAlertId(notif.alert_id)}
                           </p>
                         </div>
                         {notif.type === "enriched" && (

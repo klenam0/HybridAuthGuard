@@ -9,14 +9,14 @@ from utils.log_generator import generate_logs, generate_training_data
 from utils.log_parser     import parse_logs
 from agents.monitoring_agent import MonitoringAgent
 from ml.anomaly_model        import AnomalyDetector
+from utils.alert_manager     import AlertManager
 import config
 
 
 def clear_alerts():
-    alerts_path = os.path.join(os.path.dirname(__file__), "data", "alerts.json")
-    with open(alerts_path, "w") as f:
-        f.write("[]")
-    print("🗑️  Cleared previous alerts.\n")
+    """Back up alerts.json to alerts.json.bak, then empty it (audit F25)."""
+    cleared = AlertManager().clear(backup=True)
+    print(f"🗑️  Cleared previous alerts ({cleared} backed up to alerts.json.bak).\n")
 
 
 def ensure_data_dir():
@@ -71,7 +71,9 @@ def run_batch(delay=0.5, threshold=5, fresh=True, retrain=False):
     ensure_data_dir()
 
     if fresh:
-        clear_alerts()
+        clear_alerts()            # backs up first
+    else:
+        AlertManager().backup()   # keep a restore point for this run
 
     if retrain and os.path.exists(model_path):
         os.remove(model_path)

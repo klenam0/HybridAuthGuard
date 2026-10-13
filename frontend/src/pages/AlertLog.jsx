@@ -18,6 +18,7 @@ import {
 import PageHeader from "../components/PageHeader";
 import SeverityBadge from "../components/SeverityBadge";
 import { FILTER_ACTIVE } from "../config/severity";
+import { shortAlertId } from "../utils/alertId";
 
 const SEVERITY_BORDER = {
   HIGH: "border-l-orange-500",
@@ -132,7 +133,7 @@ function AlertCard({
 
         {/* Alert ID */}
         <span className="text-[10px] text-slate-700 font-mono hidden md:block flex-shrink-0">
-          #{alert.alert_id || "-"}
+          #{shortAlertId(alert.alert_id)}
         </span>
 
         {/* IP */}

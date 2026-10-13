@@ -209,32 +209,13 @@ Write the explanation:"""
         return cleaned.strip()
 
     def _update_alert(self, alert_id, explanation):
-        """Update alerts.json - protected by cross-process file lock."""
-        from filelock import FileLock
-        lock_path = self.alerts_path + ".lock"
-
-        with FileLock(lock_path, timeout=15):
-            try:
-                with open(self.alerts_path, "r", encoding="utf-8") as f:
-                    content = f.read().strip()
-
-                try:
-                    alerts = json.loads(content)
-                except json.JSONDecodeError:
-                    print(f"⚠ alerts.json corrupted - skipping #{alert_id}")
-                    return
-
-                for alert in alerts:
-                    if alert.get("alert_id") == alert_id:
-                        alert["llm_explanation"] = explanation
-                        alert["enriched"]        = True
-                        break
-
-                with open(self.alerts_path, "w", encoding="utf-8") as f:
-                    json.dump(alerts, f, indent=4, ensure_ascii=False)
-
-            except Exception as e:
-                print(f"⚠ Could not update alert #{alert_id}: {e}")
+        """Write the explanation through the shared alert store (lock +
+        atomic replace), the same path every other writer uses."""
+        from utils.alert_manager import AlertManager
+        try:
+            AlertManager(self.alerts_path).update_explanation(alert_id, explanation)
+        except Exception as e:
+            print(f"⚠ Could not update alert #{alert_id}: {e}")
 
     def shutdown(self):
         self._shutdown.set()

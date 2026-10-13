@@ -20,6 +20,7 @@ from flask_cors import CORS
 from utils.llm_analyzer import LLMAnalyzer
 import config
 from utils.event_schema import normalize_event
+from utils.alert_manager import AlertManager
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = config.INGEST_MAX_BODY_BYTES
@@ -38,6 +39,17 @@ METRICS_PATH = os.path.join(BASE, "data", "model_metrics.json")
 QUEUE_PATH = os.path.join(BASE, "data", "live_queue.jsonl")
 
 SERVER_START_TIME = datetime.now(timezone.utc)
+
+_store = None
+
+
+def _alert_store():
+    """The alert store for ALERTS_PATH. All alert reads go through its
+    mtime cache and all writes through its lock + atomic replace (F07)."""
+    global _store
+    if _store is None or _store.file_path != ALERTS_PATH:
+        _store = AlertManager(ALERTS_PATH)
+    return _store
 
 # ── LLM enrichment service ─────────────────────────────────────────────────────
 # Defined AFTER ALERTS_PATH so the path is available when start_llm_service runs
@@ -108,28 +120,13 @@ def run_pipeline_thread(delay=0.3, threshold=5, fresh=False):
 @app.route("/api/alerts")
 def get_alerts():
     """Return all alerts from alerts.json."""
-    try:
-        with open(ALERTS_PATH, "r", encoding="utf-8") as f:
-            content = f.read().strip()
-        try:
-            alerts = json.loads(content)
-        except json.JSONDecodeError:
-            print("⚠ alerts.json corrupted - returning empty list")
-            return jsonify([])
-        return jsonify(alerts)
-    except FileNotFoundError:
-        return jsonify([])
+    return jsonify(_alert_store().load_cached())
 
 
 @app.route("/api/status")
 def get_status():
     """Return system status."""
-    try:
-        with open(ALERTS_PATH, "r", encoding="utf-8") as f:
-            alerts = json.load(f)
-        alert_count = len(alerts)
-    except Exception:
-        alert_count = 0
+    alert_count = len(_alert_store().load_cached())
 
     uptime_seconds = int(
         (datetime.now(timezone.utc) - SERVER_START_TIME).total_seconds()
@@ -198,11 +195,7 @@ def run_pipeline():
 @app.route("/api/stats")
 def get_stats():
     """Return aggregated stats for charts."""
-    try:
-        with open(ALERTS_PATH, "r", encoding="utf-8") as f:
-            alerts = json.load(f)
-    except Exception:
-        alerts = []
+    alerts = _alert_store().load_cached()
 
     severity_counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
     type_counts     = {}
@@ -235,11 +228,7 @@ def get_timeline():
     Returns alert counts grouped by hour for timeline chart.
     Always returns all 24 hours - empty hours return zero.
     """
-    try:
-        with open(ALERTS_PATH, "r", encoding="utf-8") as f:
-            alerts = json.load(f)
-    except Exception:
-        alerts = []
+    alerts = _alert_store().load_cached()
 
     hours = {
         h: {"hour": h, "total": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
@@ -285,11 +274,7 @@ def get_pipeline_stats():
 @app.route("/api/agents")
 def get_agents():
     """Return agent stats from pipeline stats + alerts."""
-    try:
-        with open(ALERTS_PATH, "r", encoding="utf-8") as f:
-            alerts = json.load(f)
-    except Exception:
-        alerts = []
+    alerts = _alert_store().load_cached()
 
     try:
         with open(STATS_PATH, "r", encoding="utf-8") as f:
@@ -338,11 +323,7 @@ def get_agents():
 @app.route("/api/detectors")
 def get_detectors():
     """Return per-detector stats from real alert data."""
-    try:
-        with open(ALERTS_PATH, "r", encoding="utf-8") as f:
-            alerts = json.load(f)
-    except Exception:
-        alerts = []
+    alerts = _alert_store().load_cached()
 
     DETECTOR_CONFIG = [
         ("Suspicious Login Time", False),
@@ -402,11 +383,7 @@ def get_detectors():
 @app.route("/api/threat-level")
 def get_threat_level():
     """Compute real threat level from current alerts."""
-    try:
-        with open(ALERTS_PATH, "r", encoding="utf-8") as f:
-            alerts = json.load(f)
-    except Exception:
-        alerts = []
+    alerts = _alert_store().load_cached()
 
     if not alerts:
         return jsonify({"level": "NORMAL", "color": "green"})
@@ -425,8 +402,7 @@ def get_threat_level():
 def get_enrichment_status():
     """Return how many alerts are pending LLM enrichment."""
     try:
-        with open(ALERTS_PATH, "r", encoding="utf-8") as f:
-            alerts = json.load(f)
+        alerts   = _alert_store().load_cached()
         total    = len(alerts)
         enriched = sum(1 for a in alerts if a.get("enriched"))
         pending  = total - enriched
@@ -445,11 +421,10 @@ def get_enrichment_status():
 @app.route("/api/clear-alerts", methods=["POST"])
 @require_token("admin")
 def clear_alerts():
-    """Clear all alerts - requires the admin token."""
+    """Clear all alerts (backed up first) - requires the admin token."""
     try:
-        with open(ALERTS_PATH, "w", encoding="utf-8") as f:
-            f.write("[]")
-        return jsonify({"message": "Alerts cleared"})
+        cleared = _alert_store().clear(backup=True)
+        return jsonify({"message": f"Alerts cleared ({cleared} backed up to alerts.json.bak)"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -457,17 +432,12 @@ def clear_alerts():
 @require_token("admin")
 def restore_alerts():
     """Restore alerts.json from the most recent backup."""
-    backup_path = ALERTS_PATH + ".bak"
+    store = _alert_store()
+    if not os.path.exists(store.backup_path):
+        return jsonify({"error": "No backup found"}), 404
     try:
-        if not os.path.exists(backup_path):
-            return jsonify({"error": "No backup found"}), 404
-        import shutil
-        shutil.copy2(backup_path, ALERTS_PATH)
-        with open(ALERTS_PATH, "r", encoding="utf-8") as f:
-            alerts = json.load(f)
-        return jsonify({
-            "message": f"Restored {len(alerts)} alerts from backup"
-        })
+        restored = store.restore()
+        return jsonify({"message": f"Restored {restored} alerts from backup"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
