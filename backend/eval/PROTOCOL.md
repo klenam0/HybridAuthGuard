@@ -123,3 +123,74 @@ changed, why, and what had already been seen.
    model score or metric on any split had been computed under this
    protocol (a smoke test on the first 300,000 February rows, with a
    stand-in split, checked only that the code runs).
+
+2. 2026-10-13, Phase 3, before any v3 metric. Selection of the v3 rule
+   engine's parameters (`agents/rules_v3.py`, `RULES_MODE = "v3"`). Seen
+   before this amendment: the Phase 2 baseline, the unit tests of the
+   engine (synthetic events only) and the legacy-mode gate. No v3 detector
+   had been run on any RBA row.
+
+   **Criterion.** For each detector, choose the parameter setting on
+   `dev_val` that maximises *attacking IPs flagged* subject to *alert
+   precision* >= 2 x the `dev_val` base rate (2 x 237,620 / 2,337,227 =
+   0.2033, i.e. >= 20.3%). If no setting meets it, the detector is
+   **advisory only** (it alerts, it never blocks); its reported setting is
+   the one with the highest precision, and that precision is reported.
+   Settings with fewer than 30 `dev_val` alerts are not eligible (either
+   way). Ties: more attacking IPs flagged, then higher precision, then
+   fewer alerts, then the earlier setting in grid order.
+
+   **Definitions.** An *alert* is what the engine emits after
+   de-duplication: one per (detector, key) per cooldown, where the key is
+   the IP, or (account, IP) for Distributed Brute Force, Success After
+   Failures and Multiple IP Login. *Alert precision* = share of a
+   detector's alerts on `dev_val` events that are on attack events.
+   *Attacking IPs flagged* = `dev_val` attacking IPs with at least one alert
+   of that detector on one of their `dev_val` attack events. Both are on all
+   of `dev_val`, placeholder included. State is built causally over the
+   whole development stream (dev_train then dev_val), as in the Phase 2
+   replay; replay events carry the CSV `index` as `event_id`, so no RBA row
+   is treated as a duplicate delivery.
+
+   **Grids** (seconds unless stated):
+
+   | Detector | Parameter | Values |
+   |---|---|---|
+   | Brute Force | window | 60, 300, 600, 1800, 3600 |
+   | | min failures | 3, 5, 10, 20, 50 |
+   | Slow Brute Force (with the chosen Brute Force setting) | window | 3600, 10800, 21600, 43200, 86400 |
+   | | min failures | 3, 4, 6, 10, 20 |
+   | | min spread | 300, 900, 1800 |
+   | Credential Stuffing | window | 300, 1800, 3600, 21600, 86400 |
+   | | min failing accounts | 2, 3, 5, 10, 20 |
+   | Invalid Account Spraying | window | 300, 1800, 3600, 21600, 86400 |
+   | | min attempts | 2, 3, 5, 10, 20 |
+   | Distributed Brute Force | window | 300, 1800, 3600, 21600, 86400 |
+   | | min distinct IPs | 2, 3, 5, 10, 20 |
+   | Success After Failures | window | 300, 1800, 3600, 21600, 86400 |
+   | | min failures (account or IP) | 1, 2, 3, 5, 10 |
+   | Multiple IP Login (window fixed at 120) | exemption | none, known IP, same /24 or /64, same ASN, all three |
+
+   Brute Force is chosen first, because Slow Brute Force only fires below
+   the Brute Force count. Suspicious Login Time is not tuned (per-user hour
+   profiles are Phase 4); it is only reported.
+
+   **Fixed, not tuned:** alert cooldown 3600 s (Suspicious Login Time keeps
+   600 s per IP), duplicate-delivery window 300 s, known-IP memory 30 days,
+   ML `failed_rate` window 30 days (day buckets, every event), block TTL
+   3600 s, `UNKNOWN_ACCOUNT_IDS = ["-4324475583306591935"]`.
+
+   **Method.** One pass records per-event window statistics for every grid
+   window; thresholds and de-duplication are then applied offline. The real
+   v3 agent is replayed once at the chosen settings over the development
+   stream, and its matches and alerts per detector must equal the offline
+   computation exactly, or the selection is void.
+
+   **Comparisons** (reported, not used for selection): rules-only legacy
+   (Phase 2 figures) vs rules-only v3; hybrid v3 (chosen rules + the Phase 2
+   Isolation Forest design refitted on dev_train at seed 42, contamination
+   0.3, scored on every event with the v3 `failed_rate`) vs the Phase 2
+   hybrid at seed 42; on all `dev_val`, without the placeholder, and on
+   `dev_val_cold`. Interim response policy: block, TTL 3600 s, only on
+   alerts of detectors that met the criterion (the ML step is checked
+   against the same criterion); everything else alerts only.
