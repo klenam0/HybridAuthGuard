@@ -1,5 +1,6 @@
 # backend/agents/monitoring_agent.py
 import json
+import logging
 import os
 import time
 from datetime import datetime
@@ -7,8 +8,10 @@ from .detection_agent import DetectionAgent
 from .analysis_agent  import AnalysisAgent
 from .response_agent  import ResponseAgent
 from utils.alert_manager import AlertManager
+from utils.event_schema import normalize_event
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+log = logging.getLogger(__name__)
 
 
 class MonitoringAgent:
@@ -29,6 +32,7 @@ class MonitoringAgent:
         self._stats_path = os.path.join(BASE, "data", "pipeline_stats.json")
         self._queue_path = os.path.join(BASE, "data", "live_queue.jsonl")
         self._cursor_path = self._queue_path + ".cursor"
+        self._deadletter_path = os.path.join(BASE, "data", "live_queue.deadletter.jsonl")
 
     # ── Shared event processor ────────────────────────────────────────────────
 
@@ -74,9 +78,14 @@ class MonitoringAgent:
         self.start_time = datetime.now()
         print(f"📡 MonitoringAgent: Streaming {len(logs)} log events...\n")
 
-        for log in logs:
+        for event in logs:
             time.sleep(delay)
-            self._process_event(log)
+            try:
+                self._process_event(event)
+            except Exception as e:
+                # One bad event must not end the run (audit F05).
+                log.error("Skipping event that failed processing: %s: %s",
+                          type(e).__name__, e)
 
         self._save_stats()
         print(f"\n📊 Processed {self.events_processed} events → {self.alerts_generated} alerts")
@@ -88,28 +97,25 @@ class MonitoringAgent:
         Live mode: continuously read new events from live_queue.jsonl.
         Runs indefinitely until Ctrl+C.
         Used by: python main.py --live
+
+        The cursor is a byte offset into the queue, saved after every event,
+        so a crash or restart resumes at the next unprocessed line. An event
+        that fails validation or processing is written to the dead-letter
+        file and skipped instead of stopping the loop (audit F05, F24).
         """
-        # Load cursor (how many lines have been processed)
-        cursor = self._load_cursor()
+        offset = self._load_cursor()
 
         self.start_time = datetime.now()
         print("📡 Live streaming mode active")
         print(f"   Queue file: {self._queue_path}")
-        print(f"   Resumed from event #{cursor}")
+        print(f"   Resumed from byte offset {offset}")
         print("   Press Ctrl+C to stop\n")
         print("-" * 55)
 
         try:
             while True:
-                new_events, cursor = self._read_queue(cursor)
-
-                if new_events:
-                    for event in new_events:
-                        self._process_event(event)
-                        cursor += 1
-                    self._save_cursor(cursor)
-                else:
-                    # No new events - wait before polling again
+                offset, handled = self._poll_queue(offset)
+                if not handled:
                     time.sleep(poll_interval)
 
         except KeyboardInterrupt:
@@ -119,54 +125,105 @@ class MonitoringAgent:
             print(f"   Alerts generated: {self.alerts_generated}")
             self._save_stats()
 
-    def _read_queue(self, cursor):
-        """Read unprocessed events from the queue file.
-        Returns (new_events, cursor) — cursor is echoed back unchanged
-        unless a mismatch was detected and corrected.
+    def _poll_queue(self, offset):
+        """
+        Process every complete line after `offset`. Returns (new_offset,
+        lines_handled). A trailing line without a newline is still being
+        written by /api/ingest and is left for the next poll.
         """
         try:
-            with open(self._queue_path, "r", encoding="utf-8") as f:
-                lines = f.readlines()
-
-            # Guard: if the queue file is shorter than our cursor, the file
-            # was reset externally (e.g. manual edit) without the cursor
-            # being reset in step. Recover instead of silently idling
-            # forever waiting for the file to grow back past the old cursor.
-            if cursor > len(lines):
-                print(
-                    f"⚠ Queue shorter than cursor ({len(lines)} < {cursor}) "
-                    f"— resetting cursor to 0"
-                )
-                cursor = 0
-                self._save_cursor(0)
-
-            new_events = []
-            for line in lines[cursor:]:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    new_events.append(json.loads(line))
-                except json.JSONDecodeError:
-                    print(f"⚠ Skipping malformed queue entry")
-            return new_events, cursor
-
+            size = os.path.getsize(self._queue_path)
         except FileNotFoundError:
-            return [], cursor
+            return offset, 0
+        if size < offset:
+            # The queue was truncated or replaced (e.g. /api/queue/clear).
+            log.warning("Queue shorter than cursor (%d < %d bytes); restarting at 0",
+                        size, offset)
+            offset = 0
+            self._save_cursor(0)
+
+        handled = 0
+        with open(self._queue_path, "rb") as f:
+            f.seek(offset)
+            for raw_line in f:
+                if not raw_line.endswith(b"\n"):
+                    break
+                line_start = offset
+                offset += len(raw_line)
+                handled += 1
+                text = raw_line.decode("utf-8", errors="replace").strip()
+                if text:
+                    self._handle_queue_line(text, line_start)
+                self._save_cursor(offset)
+        return offset, handled
+
+    def _handle_queue_line(self, text, line_start):
+        try:
+            raw = json.loads(text)
+        except json.JSONDecodeError as e:
+            self._dead_letter(text, line_start, f"invalid JSON: {e}")
+            return
+        event, error = normalize_event(raw)
+        if error:
+            self._dead_letter(raw, line_start, f"invalid event: {error}")
+            return
+        try:
+            self._process_event(event)
+        except Exception as e:
+            self._dead_letter(event, line_start, f"processing failed: {type(e).__name__}: {e}")
+
+    def _dead_letter(self, payload, line_start, reason):
+        log.warning("Dead-lettered queue entry at byte %d: %s", line_start, reason)
+        record = {
+            "dead_lettered_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "queue_offset": line_start,
+            "reason": reason,
+            "entry": payload,
+        }
+        try:
+            with open(self._deadletter_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
+        except OSError as e:
+            log.error("Could not write dead-letter file: %s", e)
 
     def _load_cursor(self):
+        """
+        Byte offset to resume from. Older versions stored a line count as a
+        bare integer; that is converted to the byte offset of the same line.
+        """
         try:
             with open(self._cursor_path, "r") as f:
-                return int(f.read().strip())
-        except Exception:
+                text = f.read().strip()
+        except OSError:
             return 0
-
-    def _save_cursor(self, cursor):
         try:
-            with open(self._cursor_path, "w") as f:
-                f.write(str(cursor))
-        except Exception:
+            return int(json.loads(text)["offset"])
+        except (ValueError, KeyError, TypeError):
             pass
+        try:
+            lines = int(text)
+        except ValueError:
+            return 0
+        offset = 0
+        try:
+            with open(self._queue_path, "rb") as f:
+                for _ in range(lines):
+                    line = f.readline()
+                    if not line:
+                        break
+                    offset += len(line)
+        except FileNotFoundError:
+            return 0
+        return offset
+
+    def _save_cursor(self, offset):
+        tmp = self._cursor_path + ".tmp"
+        try:
+            with open(tmp, "w") as f:
+                json.dump({"offset": offset}, f)
+            os.replace(tmp, self._cursor_path)
+        except OSError as e:
+            log.error("Could not save queue cursor: %s", e)
 
     # ── Stats ─────────────────────────────────────────────────────────────────
 

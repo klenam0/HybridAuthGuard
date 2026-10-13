@@ -111,6 +111,16 @@ SIMULATED_BLOCK_SEVERITIES = ("HIGH",)
 EMAIL_SEVERITIES = ("HIGH",)
 ADMIN_NOTIFY_SEVERITIES = ("MEDIUM",)
 
+# ── Live ingest (api.py /api/ingest, agents/monitoring_agent.py) ─────────
+INGEST_MAX_BODY_BYTES = 16 * 1024          # Flask MAX_CONTENT_LENGTH
+INGEST_MAX_FIELD_CHARS = {
+    "user": 256,
+    "ip": 64,
+    "status": 16,
+    "country": 64,
+    "device_type": 64,
+}
+
 DETECTORS = [
     "Suspicious Login Time",
     "Multiple IP Login",

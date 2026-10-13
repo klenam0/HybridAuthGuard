@@ -16,9 +16,16 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from utils.llm_analyzer import LLMAnalyzer
 import config
+from utils.event_schema import normalize_event
 
 app = Flask(__name__)
+app.config["MAX_CONTENT_LENGTH"] = config.INGEST_MAX_BODY_BYTES
 CORS(app)
+
+
+@app.errorhandler(413)
+def body_too_large(_e):
+    return jsonify({"error": f"Body larger than {config.INGEST_MAX_BODY_BYTES} bytes"}), 413
 
 BASE         = os.path.dirname(os.path.abspath(__file__))
 ALERTS_PATH  = os.path.join(BASE, "data", "alerts.json")
@@ -427,19 +434,14 @@ def ingest_event():
     Accept a single login event and append it to the live queue.
     Used by live_simulator.py and any external log source.
     """
-    event = request.get_json(silent=True)
-    if not event:
-        return jsonify({"error": "No JSON body"}), 400
+    raw = request.get_json(silent=True)
+    if raw is None:
+        return jsonify({"error": "Body must be JSON"}), 400
 
-    # Require minimum fields
-    required = {"user", "ip", "status"}
-    missing  = required - set(event.keys())
-    if missing:
-        return jsonify({"error": f"Missing fields: {missing}"}), 400
-
-    # Add server-side timestamp if not provided
-    if "timestamp" not in event:
-        event["timestamp"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Validate and normalise (utils/event_schema.py, audit F05/F32/F36).
+    event, error = normalize_event(raw)
+    if error:
+        return jsonify({"error": error}), 400
 
     try:
         from filelock import FileLock
@@ -460,11 +462,20 @@ def queue_stats():
     except FileNotFoundError:
         total_lines = 0
 
+    # The live consumer stores a byte offset ({"offset": N}); count the
+    # non-empty lines before it.
     try:
         with open(QUEUE_PATH + ".cursor", "r") as f:
-            processed = int(f.read().strip())
+            offset = int(json.loads(f.read())["offset"])
     except Exception:
-        processed = 0
+        offset = 0
+    processed = 0
+    try:
+        with open(QUEUE_PATH, "rb") as f:
+            consumed = f.read(offset)
+        processed = sum(1 for line in consumed.split(b"\n") if line.strip())
+    except FileNotFoundError:
+        pass
 
     return jsonify({
         "total_queued": total_lines,
@@ -485,7 +496,7 @@ def clear_queue():
         with open(QUEUE_PATH, "w") as f:
             f.write("")
         with open(QUEUE_PATH + ".cursor", "w") as f:
-            f.write("0")
+            json.dump({"offset": 0}, f)
         return jsonify({"message": "Queue cleared"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
