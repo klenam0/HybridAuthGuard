@@ -1,0 +1,229 @@
+{
+  "half": "val_b",
+  "days": 16,
+  "incident_score_val_a_precision": {
+    "Brute Force Attack": 0.296875,
+    "Slow Brute Force": 0.26303378128817795,
+    "Credential Stuffing": 0.2734399587994621,
+    "Invalid Account Spraying": 0.2312331060221457,
+    "Distributed Brute Force": 0.25163256421419244,
+    "Success After Failures": 0.24568661971830985,
+    "Multiple IP Login": 0.1455357142857143,
+    "Suspicious Login Time": 0.13086334010043807,
+    "ML Anomaly Detected": 0.22530135922622863
+  },
+  "configs": {
+    "rules_v3": {
+      "all": {
+        "alerts": 370179,
+        "alerts_per_day": 23136.1875,
+        "incidents": 116310,
+        "incidents_per_day": 7269.375,
+        "attack_incidents": 19083,
+        "incident_precision": 0.16407015733814806,
+        "attacking_ips": 9477,
+        "attacking_ips_flagged": 3525,
+        "benign_ips_flagged": 52487,
+        "budgets": {
+          "100": {
+            "incidents_taken": 1600,
+            "incidents_taken_per_day": 100.0,
+            "incident_precision": 0.24625,
+            "attacking_ips_caught": 309,
+            "attacking_ips_caught_share": 0.03260525482747705
+          },
+          "500": {
+            "incidents_taken": 8000,
+            "incidents_taken_per_day": 500.0,
+            "incident_precision": 0.26475,
+            "attacking_ips_caught": 770,
+            "attacking_ips_caught_share": 0.08124934050859976
+          },
+          "2000": {
+            "incidents_taken": 32000,
+            "incidents_taken_per_day": 2000.0,
+            "incident_precision": 0.28271875,
+            "attacking_ips_caught": 1193,
+            "attacking_ips_caught_share": 0.12588371847631108
+          }
+        }
+      },
+      "excl_placeholder": {
+        "alerts": 239881,
+        "alerts_per_day": 14992.5625,
+        "incidents": 81868,
+        "incidents_per_day": 5116.75,
+        "attack_incidents": 13887,
+        "incident_precision": 0.16962671617726097,
+        "attacking_ips": 6066,
+        "attacking_ips_flagged": 2397,
+        "benign_ips_flagged": 35126,
+        "budgets": {
+          "100": {
+            "incidents_taken": 1600,
+            "incidents_taken_per_day": 100.0,
+            "incident_precision": 0.25125,
+            "attacking_ips_caught": 311,
+            "attacking_ips_caught_share": 0.05126937026046818
+          },
+          "500": {
+            "incidents_taken": 8000,
+            "incidents_taken_per_day": 500.0,
+            "incident_precision": 0.265375,
+            "attacking_ips_caught": 781,
+            "attacking_ips_caught_share": 0.12875041213320146
+          },
+          "2000": {
+            "incidents_taken": 32000,
+            "incidents_taken_per_day": 2000.0,
+            "incident_precision": 0.274875,
+            "attacking_ips_caught": 1212,
+            "attacking_ips_caught_share": 0.19980217606330367
+          }
+        }
+      },
+      "cold": {
+        "alerts": 184402,
+        "alerts_per_day": 11525.125,
+        "incidents": 61310,
+        "incidents_per_day": 3831.875,
+        "attack_incidents": 12815,
+        "incident_precision": 0.20901973576904256,
+        "attacking_ips": 4770,
+        "attacking_ips_flagged": 2091,
+        "benign_ips_flagged": 21484,
+        "budgets": {
+          "100": {
+            "incidents_taken": 1600,
+            "incidents_taken_per_day": 100.0,
+            "incident_precision": 0.27,
+            "attacking_ips_caught": 337,
+            "attacking_ips_caught_share": 0.07064989517819706
+          },
+          "500": {
+            "incidents_taken": 8000,
+            "incidents_taken_per_day": 500.0,
+            "incident_precision": 0.265375,
+            "attacking_ips_caught": 783,
+            "attacking_ips_caught_share": 0.1641509433962264
+          },
+          "2000": {
+            "incidents_taken": 32000,
+            "incidents_taken_per_day": 2000.0,
+            "incident_precision": 0.27934375,
+            "attacking_ips_caught": 1288,
+            "attacking_ips_caught_share": 0.270020964360587
+          }
+        }
+      }
+    },
+    "rules_v3_plus_ml": {
+      "all": {
+        "alerts": 506651,
+        "alerts_per_day": 31665.6875,
+        "incidents": 167871,
+        "incidents_per_day": 10491.9375,
+        "attack_incidents": 21907,
+        "incident_precision": 0.1304990141239404,
+        "attacking_ips": 9477,
+        "attacking_ips_flagged": 4965,
+        "benign_ips_flagged": 86882,
+        "budgets": {
+          "100": {
+            "incidents_taken": 1600,
+            "incidents_taken_per_day": 100.0,
+            "incident_precision": 0.4375,
+            "attacking_ips_caught": 464,
+            "attacking_ips_caught_share": 0.048960641553234145
+          },
+          "500": {
+            "incidents_taken": 8000,
+            "incidents_taken_per_day": 500.0,
+            "incident_precision": 0.423375,
+            "attacking_ips_caught": 854,
+            "attacking_ips_caught_share": 0.09011290492771974
+          },
+          "2000": {
+            "incidents_taken": 32000,
+            "incidents_taken_per_day": 2000.0,
+            "incident_precision": 0.29221875,
+            "attacking_ips_caught": 1279,
+            "attacking_ips_caught_share": 0.13495832014350534
+          }
+        }
+      },
+      "excl_placeholder": {
+        "alerts": 301750,
+        "alerts_per_day": 18859.375,
+        "incidents": 108597,
+        "incidents_per_day": 6787.3125,
+        "attack_incidents": 15535,
+        "incident_precision": 0.14305183384439718,
+        "attacking_ips": 6066,
+        "attacking_ips_flagged": 3286,
+        "benign_ips_flagged": 53533,
+        "budgets": {
+          "100": {
+            "incidents_taken": 1600,
+            "incidents_taken_per_day": 100.0,
+            "incident_precision": 0.478125,
+            "attacking_ips_caught": 514,
+            "attacking_ips_caught_share": 0.08473458621826574
+          },
+          "500": {
+            "incidents_taken": 8000,
+            "incidents_taken_per_day": 500.0,
+            "incident_precision": 0.407125,
+            "attacking_ips_caught": 875,
+            "attacking_ips_caught_share": 0.1442466205077481
+          },
+          "2000": {
+            "incidents_taken": 32000,
+            "incidents_taken_per_day": 2000.0,
+            "incident_precision": 0.28553125,
+            "attacking_ips_caught": 1298,
+            "attacking_ips_caught_share": 0.21397955819320805
+          }
+        }
+      },
+      "cold": {
+        "alerts": 221837,
+        "alerts_per_day": 13864.8125,
+        "incidents": 76953,
+        "incidents_per_day": 4809.5625,
+        "attack_incidents": 14091,
+        "incident_precision": 0.1831117695216561,
+        "attacking_ips": 4770,
+        "attacking_ips_flagged": 2797,
+        "benign_ips_flagged": 33243,
+        "budgets": {
+          "100": {
+            "incidents_taken": 1600,
+            "incidents_taken_per_day": 100.0,
+            "incident_precision": 0.523125,
+            "attacking_ips_caught": 516,
+            "attacking_ips_caught_share": 0.10817610062893082
+          },
+          "500": {
+            "incidents_taken": 8000,
+            "incidents_taken_per_day": 500.0,
+            "incident_precision": 0.404375,
+            "attacking_ips_caught": 861,
+            "attacking_ips_caught_share": 0.18050314465408804
+          },
+          "2000": {
+            "incidents_taken": 32000,
+            "incidents_taken_per_day": 2000.0,
+            "incident_precision": 0.28146875,
+            "attacking_ips_caught": 1345,
+            "attacking_ips_caught_share": 0.28197064989517817
+          }
+        }
+      }
+    }
+  },
+  "timings_seconds": {
+    "incidents and budgets on val_b": 6.6,
+    "total": 6.6
+  }
+}
