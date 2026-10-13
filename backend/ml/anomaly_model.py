@@ -459,6 +459,14 @@ class AnomalyDetector:
             print(f"⚠ Scoring error for {ip}: {e}")
             return None
 
+        return self.classify_score(prediction, raw_score)
+
+    def classify_score(self, prediction, raw_score):
+        """
+        Turn one (predict, decision_function) pair into the score_event()
+        result. Shared with backend/eval/harness.py's PrecomputedScorer so the
+        live and batch paths cannot drift apart.
+        """
         # Determine confidence based on anomaly score (negative = more anomalous)
         if raw_score < config.CONFIDENCE_HIGH_CUTOFF:
             confidence = "High"

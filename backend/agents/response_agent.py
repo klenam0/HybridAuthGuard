@@ -23,9 +23,10 @@ class ResponseAgent:
     and a ticketing system (e.g. PagerDuty, ServiceNow).
     """
 
-    def __init__(self):
+    def __init__(self, email_alerter=None):
         self.actions_log  = []
-        self.email_alerter = EmailAlerter()
+        # Injectable so the evaluation harness can stub email out.
+        self.email_alerter = email_alerter if email_alerter is not None else EmailAlerter()
 
     def take_action(self, alert):
         severity = alert.get("severity", "LOW")
