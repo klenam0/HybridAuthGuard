@@ -74,5 +74,7 @@ desktop.ini
 # ── Local AI/editor tooling ─────────────────────────────────────────────
 .claude/
 frontend/.claude/
-frontend/skills-lock.json# Phase 3 evaluation intermediates (backend/eval/phase3_rules.py)
+frontend/skills-lock.json
+
+# Phase 3 evaluation intermediates (backend/eval/phase3_rules.py)
 backend/results/phase3_cache/
