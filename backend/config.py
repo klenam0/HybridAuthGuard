@@ -97,6 +97,15 @@ V3_DUPLICATE_WINDOW_SECONDS = 300
 # time (day buckets) instead of a lifetime counter (audit F20, F23).
 ML_FAILED_RATE_WINDOW_DAYS = 30
 
+# ── ML mode (Phase 4, eval/PROTOCOL.md amendment 4) ───────────────────────
+# "legacy" = the Phase 2 Isolation Forest (data/model.pkl, unchanged).
+# "v4" = ml/model_v4.V4Scorer: the causal features of ml/features_v4.py and
+# the model chosen on val_a, loaded from ML_V4_MODEL_PATH (never model.pkl)
+# with its threshold. Requires RULES_MODE = "v3". If the bundle says the
+# amendment 4 fallback applied, v4 scores every event but raises no ML alert.
+ML_MODE = "legacy"
+ML_V4_MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "model_v4.pkl")
+
 # ── ML (ml/anomaly_model.py, ml/train_from_dataset.py, main.py) ───────────
 ML_CONTAMINATION = 0.4                     # deployed RBA model (ADR-13)
 SYNTHETIC_FALLBACK_CONTAMINATION = 0.15    # main.py synthetic fallback
@@ -302,6 +311,7 @@ def public_config():
     """Read-only view served at /api/config. No secrets belong here."""
     return {
         "rules_mode": RULES_MODE,
+        "ml_mode": ML_MODE,
         "rules": {
             "brute_force_threshold": BRUTE_FORCE_THRESHOLD,
             "suspicious_hour_start": SUSPICIOUS_HOUR_START,

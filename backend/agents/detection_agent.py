@@ -351,14 +351,25 @@ def DetectionAgent(threshold=None, anomaly_detector=None, mode=None):
       "v3"      agents.rules_v3.V3DetectionAgent: windowed state, every
                 detector and the ML step on every event (Phase 3). Its
                 thresholds come from the V3_* settings in config.py;
-                threshold is ignored.
+                threshold is ignored. With config.ML_MODE = "v4" its ML
+                step is ml.model_v4.V4Scorer (Phase 4).
     """
     mode = mode or config.RULES_MODE
+    if mode == "legacy" and config.ML_MODE != "legacy":
+        raise ValueError("ML_MODE 'v4' requires RULES_MODE 'v3'")
     if mode == "legacy":
         return LegacyDetectionAgent(
             threshold=config.BRUTE_FORCE_THRESHOLD if threshold is None else threshold,
             anomaly_detector=anomaly_detector)
     if mode == "v3":
         from agents.rules_v3 import V3DetectionAgent
+        if config.ML_MODE == "v4":
+            # Phase 4 ML step: causal features + the val_a choice. A
+            # V4Scorer passed in (replays, tests) is used as it is.
+            from ml.model_v4 import V4Scorer
+            if not isinstance(anomaly_detector, V4Scorer):
+                anomaly_detector = V4Scorer.load(config.ML_V4_MODEL_PATH)
+        elif config.ML_MODE != "legacy":
+            raise ValueError(f"unknown ML_MODE {config.ML_MODE!r} (expected 'legacy' or 'v4')")
         return V3DetectionAgent(anomaly_detector=anomaly_detector)
     raise ValueError(f"unknown RULES_MODE {mode!r} (expected 'legacy' or 'v3')")
