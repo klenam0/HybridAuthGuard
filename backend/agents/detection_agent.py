@@ -1,8 +1,11 @@
 # backend/agents/detection_agent.py
+import logging
 from collections import defaultdict
 from datetime import datetime
 
 import config
+
+log = logging.getLogger(__name__)
 
 
 class DetectionAgent:
@@ -135,7 +138,8 @@ class DetectionAgent:
             self.ip_attempt_times[ip].append(timestamp)
             self.failed_attempts[ip] += 1
             unique_users = len(self.ip_users_tried[ip])
-            print(f"⚠ FAILED count for {ip}: {self.failed_attempts[ip]} | unique users: {unique_users}")
+            log.debug("FAILED count for %s: %d | unique users: %d",
+                      ip, self.failed_attempts[ip], unique_users)
 
            # ── 3. Slow Brute Force ────────────────────────────────────────
             # Checked BEFORE fast brute force and credential stuffing guards

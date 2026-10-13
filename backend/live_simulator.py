@@ -237,6 +237,10 @@ def run(event_interval=1.0, attack_interval=120, no_attacks=False):
 
 
 if __name__ == "__main__":
+    # Terminal output is this tool's UI, so it keeps print(); this stops
+    # emoji from crashing it on a non-UTF-8 console or pipe (audit F15).
+    from utils.logging_setup import configure_logging
+    configure_logging()
     parser = argparse.ArgumentParser(
         description="Live login event simulator for SOC system"
     )

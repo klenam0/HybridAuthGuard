@@ -1,5 +1,6 @@
 # backend/utils/email_alerter.py
 
+import logging
 import os
 import smtplib
 from html import escape as html_escape
@@ -8,6 +9,8 @@ from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 
 import config
+
+log = logging.getLogger(__name__)
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
@@ -31,7 +34,7 @@ class EmailAlerter:
         self.enabled  = all([self.sender, self.password, self.receiver])
 
         if not self.enabled:
-            print("⚠ Email alerting disabled - check .env file")
+            log.warning("⚠ Email alerting disabled - check .env file")
 
     def send_alert(self, alert):
         """
@@ -180,9 +183,9 @@ class EmailAlerter:
                 server.login(self.sender, self.password)
                 server.sendmail(self.sender, self.receiver, msg.as_string())
 
-            print(f"📧 Alert email sent → {self.receiver} [{alert.get('type')}]")
+            log.info(f"📧 Alert email sent → {self.receiver} [{alert.get('type')}]")
             return True
 
         except Exception as e:
-            print(f"⚠ Email failed: {e}")
+            log.warning(f"⚠ Email failed: {e}")
             return False

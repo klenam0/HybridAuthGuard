@@ -1,5 +1,6 @@
 # backend/api.py
 
+import logging
 import hmac
 import os
 import sys
@@ -21,6 +22,8 @@ from utils.llm_analyzer import LLMAnalyzer
 import config
 from utils.event_schema import normalize_event
 from utils.alert_manager import AlertManager
+
+log = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = config.INGEST_MAX_BODY_BYTES
@@ -60,7 +63,7 @@ def start_llm_service():
     try:
         _llm_analyzer = LLMAnalyzer(alerts_path=ALERTS_PATH)
     except Exception as e:
-        print(f"⚠ LLM service failed to start: {e}")
+        log.warning(f"⚠ LLM service failed to start: {e}")
 
 
 # ── Access control ─────────────────────────────────────────────────────────────
@@ -518,7 +521,9 @@ def clear_queue():
 # ── Startup ────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    print("🚀 HybridAuthGuard API running at http://localhost:5000")
-    print("   Open frontend in browser to view dashboard")
+    from utils.logging_setup import configure_logging
+    configure_logging()
+    log.info("🚀 HybridAuthGuard API running at http://localhost:5000")
+    log.info("   Open frontend in browser to view dashboard")
     start_llm_service()
     app.run(debug=False, port=5000)

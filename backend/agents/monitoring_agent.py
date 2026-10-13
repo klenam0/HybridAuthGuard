@@ -36,21 +36,21 @@ class MonitoringAgent:
 
     # ── Shared event processor ────────────────────────────────────────────────
 
-    def _process_event(self, log):
+    def _process_event(self, event):
         """Run a single log event through the full detection pipeline."""
-        alert = self.detector.analyze_event(log)
+        alert = self.detector.analyze_event(event)
         self.events_processed += 1
 
-        ts   = log.get("timestamp", "")
-        user = log.get("user", "?")
-        ip   = log.get("ip", "?")
-        st   = log.get("status", "?")
-        print(f"🟢 {ts} | {user} @ {ip} | {st}")
+        ts   = event.get("timestamp", "")
+        user = event.get("user", "?")
+        ip   = event.get("ip", "?")
+        st   = event.get("status", "?")
+        log.info("🟢 %s | %s @ %s | %s", ts, user, ip, st)
 
         if alert:
-            alert["timestamp"] = log.get("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            alert["timestamp"] = event.get("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             analyzed = self.analyzer.evaluate_alert(alert)
-            print(f"🚨 ALERT: {analyzed.get('type')} | {analyzed.get('severity')} | #{analyzed.get('alert_id','?')}")
+            log.info(f"🚨 ALERT: {analyzed.get('type')} | {analyzed.get('severity')} | #{analyzed.get('alert_id','?')}")
             self.alert_manager.save_alert(analyzed)
             self.responder.take_action(analyzed)
             self.alerts_generated += 1
@@ -66,7 +66,7 @@ class MonitoringAgent:
             logs = json.load(f)
 
         self.start_time = datetime.now()
-        print(f"📡 MonitoringAgent: Streaming {len(logs)} log events...\n")
+        log.info(f"📡 MonitoringAgent: Streaming {len(logs)} log events...\n")
 
         for event in logs:
             time.sleep(delay)
@@ -78,7 +78,7 @@ class MonitoringAgent:
                           type(e).__name__, e)
 
         self._save_stats()
-        print(f"\n📊 Processed {self.events_processed} events → {self.alerts_generated} alerts")
+        log.info(f"\n📊 Processed {self.events_processed} events → {self.alerts_generated} alerts")
 
     # ── Live streaming mode ───────────────────────────────────────────────────
 
@@ -96,11 +96,11 @@ class MonitoringAgent:
         offset = self._load_cursor()
 
         self.start_time = datetime.now()
-        print("📡 Live streaming mode active")
-        print(f"   Queue file: {self._queue_path}")
-        print(f"   Resumed from byte offset {offset}")
-        print("   Press Ctrl+C to stop\n")
-        print("-" * 55)
+        log.info("📡 Live streaming mode active")
+        log.info(f"   Queue file: {self._queue_path}")
+        log.info(f"   Resumed from byte offset {offset}")
+        log.info("   Press Ctrl+C to stop\n")
+        log.info("-" * 55)
 
         try:
             while True:
@@ -110,9 +110,9 @@ class MonitoringAgent:
 
         except KeyboardInterrupt:
             elapsed = (datetime.now() - self.start_time).seconds
-            print(f"\n\n⏹ Live streaming stopped after {elapsed}s")
-            print(f"   Events processed: {self.events_processed:,}")
-            print(f"   Alerts generated: {self.alerts_generated}")
+            log.info(f"\n\n⏹ Live streaming stopped after {elapsed}s")
+            log.info(f"   Events processed: {self.events_processed:,}")
+            log.info(f"   Alerts generated: {self.alerts_generated}")
             self._save_stats()
 
     def _poll_queue(self, offset):
@@ -238,4 +238,4 @@ class MonitoringAgent:
         os.makedirs(os.path.dirname(self._stats_path), exist_ok=True)
         with open(self._stats_path, "w") as f:
             json.dump(stats, f, indent=2)
-        print(f"📊 Pipeline stats saved")
+        log.info(f"📊 Pipeline stats saved")

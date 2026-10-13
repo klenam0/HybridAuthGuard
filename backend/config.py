@@ -109,6 +109,8 @@ MITRE_MAPPING = {
 
 # ── Response (agents/response_agent.py) ───────────────────────────────────
 # Severities that trigger the (simulated) IP block and the email.
+# In-memory history of response actions kept by ResponseAgent (audit F23).
+ACTIONS_LOG_MAX = 1000
 SIMULATED_BLOCK_SEVERITIES = ("HIGH",)
 EMAIL_SEVERITIES = ("HIGH",)
 ADMIN_NOTIFY_SEVERITIES = ("MEDIUM",)

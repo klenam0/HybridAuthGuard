@@ -1,5 +1,6 @@
 # backend/ml/anomaly_model.py
 
+import logging
 import os
 import json
 import numpy as np
@@ -10,6 +11,8 @@ from collections import defaultdict
 from datetime import datetime
 from ml.explainer import AlertExplainer
 import config
+
+log = logging.getLogger(__name__)
 
 # (Optional) If you have an explainer module, uncomment the next line
 # from ml.explainer import AlertExplainer
@@ -273,12 +276,12 @@ class AnomalyDetector:
             with open(training_file, "r") as f:
                 log_events = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            print(f"⚠ AnomalyDetector: Could not load {training_file} - {e}")
-            print("  Running in rules-only mode.")
+            log.warning(f"⚠ AnomalyDetector: Could not load {training_file} - {e}")
+            log.info("  Running in rules-only mode.")
             return False
 
         if len(log_events) < 10:
-            print("⚠ AnomalyDetector: Not enough training data.")
+            log.warning("⚠ AnomalyDetector: Not enough training data.")
             return False
 
         all_ips   = list({e["ip"]   for e in log_events})
@@ -293,8 +296,8 @@ class AnomalyDetector:
         self.model.fit(X)
         self.is_trained = True
 
-        print(f"✅ AnomalyDetector trained on {len(log_events)} synthetic events.")
-        print(f"   Known IPs: {len(all_ips)} | Known users: {len(all_users)}")
+        log.info(f"✅ AnomalyDetector trained on {len(log_events)} synthetic events.")
+        log.info(f"   Known IPs: {len(all_ips)} | Known users: {len(all_users)}")
         return True
 
     # ── Model Persistence ──────────────────────────────────────────────────
@@ -302,7 +305,7 @@ class AnomalyDetector:
     def save_model(self, model_path):
         """Save synthetic-trained model to disk."""
         if not self.is_trained:
-            print("⚠ Cannot save - model not trained yet.")
+            log.warning("⚠ Cannot save - model not trained yet.")
             return False
 
         os.makedirs(os.path.dirname(model_path), exist_ok=True)
@@ -320,7 +323,7 @@ class AnomalyDetector:
             "trained_at":     datetime.now().isoformat(),
         }
         joblib.dump(payload, model_path)
-        print(f"💾 Model saved → {model_path}")
+        log.info(f"💾 Model saved → {model_path}")
         return True
 
     def load_model(self, model_path):
@@ -360,14 +363,14 @@ class AnomalyDetector:
 
                 trained_on = payload.get("trained_on", "RBA Dataset")
                 metrics    = payload.get("metrics", {})
-                print(f"✅ RBA-trained model loaded from {model_path} (frequency encoding)")
-                print(f"   Training data: {trained_on}")
-                print(f"   Known IPs: {len(self.known_ips):,} | "
+                log.info(f"✅ RBA-trained model loaded from {model_path} (frequency encoding)")
+                log.info(f"   Training data: {trained_on}")
+                log.info(f"   Known IPs: {len(self.known_ips):,} | "
                       f"Users: {len(self.known_users):,} | "
                       f"Countries: {len(self.known_countries)} | "
                       f"Devices: {len(self.known_devices)}")
                 if metrics:
-                    print(f"   Evaluation - Precision: {metrics.get('precision',0):.1%} | "
+                    log.info(f"   Evaluation - Precision: {metrics.get('precision',0):.1%} | "
                           f"Recall: {metrics.get('recall',0):.1%} | "
                           f"F1: {metrics.get('f1',0):.1%}")
 
@@ -394,14 +397,14 @@ class AnomalyDetector:
 
                 trained_on = payload.get("trained_on", "RBA Dataset")
                 metrics    = payload.get("metrics", {})
-                print(f"✅ RBA-trained model loaded from {model_path}")
-                print(f"   Training data: {trained_on}")
-                print(f"   Known IPs: {len(self.known_ips):,} | "
+                log.info(f"✅ RBA-trained model loaded from {model_path}")
+                log.info(f"   Training data: {trained_on}")
+                log.info(f"   Known IPs: {len(self.known_ips):,} | "
                       f"Users: {len(self.known_users):,} | "
                       f"Countries: {len(self.known_countries)} | "
                       f"Devices: {len(self.known_devices)}")
                 if metrics:
-                    print(f"   Evaluation - Precision: {metrics.get('precision',0):.1%} | "
+                    log.info(f"   Evaluation - Precision: {metrics.get('precision',0):.1%} | "
                           f"Recall: {metrics.get('recall',0):.1%} | "
                           f"F1: {metrics.get('f1',0):.1%}")
             else:
@@ -409,8 +412,8 @@ class AnomalyDetector:
                 self.country_encoder = None
                 self.device_encoder  = None
                 self.feature_count   = payload.get("feature_count", 5)
-                print(f"✅ Synthetic model loaded from {model_path}")
-                print(f"   Known IPs: {len(self.known_ips)} | "
+                log.info(f"✅ Synthetic model loaded from {model_path}")
+                log.info(f"   Known IPs: {len(self.known_ips)} | "
                       f"Known users: {len(self.known_users)}")
 
             self.is_trained = True
@@ -420,7 +423,7 @@ class AnomalyDetector:
             # Any failure (missing file, missing keys, unpickling or version
             # errors) is reported to the caller, which must fail loudly
             # rather than silently fall back to another model (audit F14).
-            print(f"⚠ Could not load model from {model_path} - {type(e).__name__}: {e}")
+            log.warning(f"⚠ Could not load model from {model_path} - {type(e).__name__}: {e}")
             return False
 
     # ── Runtime Inference ──────────────────────────────────────────────────
@@ -494,7 +497,7 @@ class AnomalyDetector:
             prediction = -1 if raw_score < 0 else 1
 
         except Exception as e:
-            print(f"⚠ Scoring error for {ip}: {e}")
+            log.warning(f"⚠ Scoring error for {ip}: {e}")
             return None
 
         return self.classify_score(prediction, raw_score)
@@ -540,7 +543,7 @@ class AnomalyDetector:
                 raw_features = self._extract_features([log_event])
             return self.explainer.explain(raw_features, anomaly_score, confidence)
         except Exception as e:
-            print(f"⚠ Explainer error: {e}")
+            log.warning(f"⚠ Explainer error: {e}")
             return None
 
     # ── Credential Stuffing (Rule‑based) ──────────────────────────────────

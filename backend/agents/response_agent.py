@@ -1,5 +1,7 @@
 # backend/agents/response_agent.py
 
+import logging
+from collections import deque
 import os
 import sys
 
@@ -7,6 +9,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from utils.email_alerter import EmailAlerter
 import config
+
+log = logging.getLogger(__name__)
 
 
 class ResponseAgent:
@@ -24,7 +28,8 @@ class ResponseAgent:
     """
 
     def __init__(self, email_alerter=None):
-        self.actions_log  = []
+        # Bounded: a long live run must not keep every alert in memory (F23).
+        self.actions_log  = deque(maxlen=config.ACTIONS_LOG_MAX)
         # Injectable so the evaluation harness can stub email out.
         self.email_alerter = email_alerter if email_alerter is not None else EmailAlerter()
 
@@ -52,8 +57,8 @@ class ResponseAgent:
             "action": action
         })
 
-        print(f"🛡️ Response Action Taken: {action}")
+        log.info("🛡️ Response Action Taken: %s", action)
         return action
 
     def get_actions_log(self):
-        return self.actions_log
+        return list(self.actions_log)

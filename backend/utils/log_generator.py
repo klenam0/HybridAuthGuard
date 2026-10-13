@@ -7,9 +7,12 @@ Two modes:
   generate_training_data() - normal-only data for offline ML training
 """
 
+import logging
 import json
 import random
 from datetime import datetime, timedelta
+
+log = logging.getLogger(__name__)
 
 
 # ── Dedicated IPs - never shared between background and attack scenarios ────────
@@ -141,13 +144,13 @@ def generate_logs(output_path="backend/data/raw_logs.txt", n_background=300):
     logs.sort()
 
     with open(output_path, "w") as f:
-        for log in logs:
-            f.write(log + "\n")
+        for line in logs:
+            f.write(line + "\n")
 
     total = len(logs)
-    print(f"✅ {total} log events generated → {output_path}")
-    print(f"   Background: {n_background} events (capped at 3 failures/IP)")
-    print(f"   Attack scenarios: 6 planted (all guaranteed to fire)")
+    log.info(f"✅ {total} log events generated → {output_path}")
+    log.info(f"   Background: {n_background} events (capped at 3 failures/IP)")
+    log.info(f"   Attack scenarios: 6 planted (all guaranteed to fire)")
     return total
 
 
@@ -211,9 +214,9 @@ def generate_training_data(
     with open(output_path, "w") as f:
         json.dump(events, f, indent=2)
 
-    print(f"✅ Training dataset: {len(events):,} normal events → {output_path}")
-    print(f"   Users: {len(users)} | IPs: {len(internal_ips)} | Span: 90 days")
-    print(f"   Failure rate: ~8% (realistic enterprise baseline)")
+    log.info(f"✅ Training dataset: {len(events):,} normal events → {output_path}")
+    log.info(f"   Users: {len(users)} | IPs: {len(internal_ips)} | Span: 90 days")
+    log.info(f"   Failure rate: ~8% (realistic enterprise baseline)")
 
 
 if __name__ == "__main__":

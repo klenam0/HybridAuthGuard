@@ -1,4 +1,5 @@
 # backend/main.py
+import logging
 import os
 import sys
 import json
@@ -12,13 +13,16 @@ from utils.log_parser     import parse_logs
 from agents.monitoring_agent import MonitoringAgent
 from ml.anomaly_model        import AnomalyDetector
 from utils.alert_manager     import AlertManager
+from utils.logging_setup     import configure_logging
 import config
+
+log = logging.getLogger(__name__)
 
 
 def clear_alerts():
     """Back up alerts.json to alerts.json.bak, then empty it (audit F25)."""
     cleared = AlertManager().clear(backup=True)
-    print(f"🗑️  Cleared previous alerts ({cleared} backed up to alerts.json.bak).\n")
+    log.info(f"🗑️  Cleared previous alerts ({cleared} backed up to alerts.json.bak).\n")
 
 
 def ensure_data_dir():
@@ -51,7 +55,7 @@ def sync_model_metrics(detector, metrics_path):
     if current != wanted:
         with open(metrics_path, "w", encoding="utf-8") as f:
             json.dump(wanted, f, indent=2)
-        print(f"📝 model_metrics.json updated to match the loaded model "
+        log.info(f"📝 model_metrics.json updated to match the loaded model "
               f"({wanted.get('trained_on')}, trained {wanted.get('trained_at')})")
 
 
@@ -72,7 +76,7 @@ def get_or_train_model(base):
             "   or a synthetic demo model:  python main.py --retrain"
         )
 
-    print("🔄 Loading pre-trained anomaly model...")
+    log.info("🔄 Loading pre-trained anomaly model...")
     if not detector.load_model(model_path):
         raise ModelError(
             f"❌ {model_path} exists but could not be loaded (see the error above).\n"
@@ -81,7 +85,7 @@ def get_or_train_model(base):
             "   python main.py --retrain --force for the synthetic demo model)."
         )
     sync_model_metrics(detector, metrics_path)
-    print("🧠 Model ready (offline-trained, inference only).\n")
+    log.info("🧠 Model ready (offline-trained, inference only).\n")
     return detector
 
 
@@ -108,12 +112,12 @@ def train_synthetic_model(base, force=False):
             )
         aside = f"{model_path}.replaced-{datetime.now():%Y%m%d-%H%M%S}"
         os.replace(model_path, aside)
-        print(f"📦 Existing model moved to {aside}")
+        log.info(f"📦 Existing model moved to {aside}")
 
     detector = AnomalyDetector(contamination=config.SYNTHETIC_FALLBACK_CONTAMINATION)
-    print("📚 Generating synthetic training dataset...")
+    log.info("📚 Generating synthetic training dataset...")
     generate_training_data(output_path=training_path, n=10000)
-    print("\n🏋️  Training synthetic anomaly model...")
+    log.info("\n🏋️  Training synthetic anomaly model...")
     if not detector.train(training_path):
         raise ModelError("❌ Synthetic training failed; no model written.")
     detector.save_model(model_path)
@@ -121,7 +125,7 @@ def train_synthetic_model(base, force=False):
                          "trained_on": "Synthetic fallback data (utils/log_generator.py)",
                          "trained_at": datetime.now().isoformat()}
     sync_model_metrics(detector, metrics_path)
-    print("🧠 Synthetic model trained and saved.\n")
+    log.info("🧠 Synthetic model trained and saved.\n")
 
 
 def run_batch(delay=0.5, threshold=5, fresh=True, retrain=False, force=False):
@@ -142,28 +146,28 @@ def run_batch(delay=0.5, threshold=5, fresh=True, retrain=False, force=False):
     if retrain:
         train_synthetic_model(base, force=force)
 
-    print("=" * 55)
-    print("  HYBRIDAUTHGUARD")
-    print("=" * 55)
+    log.info("=" * 55)
+    log.info("  HYBRIDAUTHGUARD")
+    log.info("=" * 55)
 
-    print("\n[1/3] Generating synthetic log data...")
+    log.info("\n[1/3] Generating synthetic log data...")
     generate_logs(output_path=raw_logs_path)
 
-    print("\n[2/3] Parsing logs to structured JSON...")
+    log.info("\n[2/3] Parsing logs to structured JSON...")
     parse_logs(input_file=raw_logs_path, output_file=parsed_logs_path)
 
-    print(f"\n[3/3] Starting Monitoring Agent (delay={delay}s, threshold={threshold})...")
+    log.info(f"\n[3/3] Starting Monitoring Agent (delay={delay}s, threshold={threshold})...")
     detector = get_or_train_model(base)
 
-    print("-" * 55)
+    log.info("-" * 55)
     agent = MonitoringAgent(
         log_file=parsed_logs_path,
         threshold=threshold,
         anomaly_detector=detector,
     )
     agent.stream_logs(delay=delay)
-    print("-" * 55)
-    print("\n✅ Pipeline complete. Check data/alerts.json for saved alerts.")
+    log.info("-" * 55)
+    log.info("\n✅ Pipeline complete. Check data/alerts.json for saved alerts.")
 
 
 def run_live(threshold=5):
@@ -175,13 +179,13 @@ def run_live(threshold=5):
     ensure_data_dir()
     clear_alerts()
 
-    print("=" * 55)
-    print("  HYBRIDAUTHGUARD — LIVE MODE")
-    print("=" * 55)
+    log.info("=" * 55)
+    log.info("  HYBRIDAUTHGUARD — LIVE MODE")
+    log.info("=" * 55)
 
     detector = get_or_train_model(base)
 
-    print("-" * 55)
+    log.info("-" * 55)
     agent = MonitoringAgent(
         threshold=threshold,
         anomaly_detector=detector,
@@ -190,6 +194,7 @@ def run_live(threshold=5):
 
 
 if __name__ == "__main__":
+    configure_logging()
     parser = argparse.ArgumentParser(
         description="HybridAuthGuard: hybrid rule-based and Isolation Forest authentication threat detection"
     )
