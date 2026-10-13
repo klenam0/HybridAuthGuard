@@ -1,0 +1,27 @@
+{
+  "csv_path": "C:\\Users\\Dell\\Downloads\\rbadataset\\rba-dataset.csv",
+  "csv_bytes": 9052907531,
+  "rows_total": 31269264,
+  "rows_per_month": {
+    "2020-02": 2004450,
+    "2020-03": 2214823,
+    "2020-04": 2173311,
+    "2020-05": 2158083,
+    "2020-06": 2185601,
+    "2020-07": 2221046,
+    "2020-08": 2171500,
+    "2020-09": 2162510,
+    "2020-10": 2313404,
+    "2020-11": 3090246,
+    "2020-12": 3270165,
+    "2021-01": 3100885,
+    "2021-02": 2203240
+  },
+  "null_timestamps": 0,
+  "time_order_inversions": 0,
+  "max_backward_step_ms": 0,
+  "csv_time_ordered": true,
+  "block_size_bytes": 67108864,
+  "pyarrow_version": "26.0.0",
+  "seconds": 405.4
+}

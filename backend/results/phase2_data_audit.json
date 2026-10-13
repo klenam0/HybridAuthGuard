@@ -1,0 +1,684 @@
+{
+  "loaded_rows": 6392584,
+  "load_seconds": 2.2,
+  "index_increasing": true,
+  "timestamps_non_decreasing": true,
+  "splits": {
+    "dev_train": {
+      "rows": 4055357,
+      "users": 1061753,
+      "ips": 947226,
+      "attack_events": 382391,
+      "attack_prevalence": 0.09429280825337942,
+      "is_attack_ip_events": 382377,
+      "account_takeover_events": 31,
+      "failed_share": 0.5263031096892333,
+      "time_range": [
+        "2020-02-03 12:43:30.772000",
+        "2020-03-29 23:59:53.453000"
+      ]
+    },
+    "dev_val": {
+      "rows": 2337227,
+      "users": 697587,
+      "ips": 595926,
+      "attack_events": 237620,
+      "attack_prevalence": 0.10166748886607933,
+      "is_attack_ip_events": 237615,
+      "account_takeover_events": 13,
+      "failed_share": 0.5609082900377242,
+      "time_range": [
+        "2020-03-30 00:00:02.685000",
+        "2020-04-30 23:59:57.980000"
+      ]
+    },
+    "dev_val_cold": {
+      "rows": 827475,
+      "users": 447730,
+      "ips": 271044,
+      "attack_events": 97666,
+      "attack_prevalence": 0.11802894347261246,
+      "is_attack_ip_events": 97661,
+      "account_takeover_events": 11,
+      "failed_share": 0.33935526753074113,
+      "time_range": [
+        "2020-03-30 00:00:17.425000",
+        "2020-04-30 23:59:57.980000"
+      ]
+    }
+  },
+  "failures_non_attack": {
+    "overall": {
+      "events": 5772573,
+      "users": 1392309,
+      "failed_share_events": 0.5219686264686475,
+      "failed_share_mean_over_users": 0.2770053153385636,
+      "users_all_failed": 261885,
+      "users_never_failed": 828121
+    },
+    "by_split": {
+      "dev_train": {
+        "events": 3672966,
+        "users": 985535,
+        "failed_share_events": 0.5089908264873674,
+        "failed_share_mean_over_users": 0.2607417298263816,
+        "users_all_failed": 176417,
+        "users_never_failed": 615145
+      },
+      "dev_val": {
+        "events": 2099607,
+        "users": 643496,
+        "failed_share_events": 0.5446714551818507,
+        "failed_share_mean_over_users": 0.25982053999932536,
+        "users_all_failed": 121911,
+        "users_never_failed": 417245
+      }
+    },
+    "per_user_share_quantiles": {
+      "p50": 0.0,
+      "p90": 1.0,
+      "p99": 1.0,
+      "p99.9": 1.0,
+      "min": 0.0,
+      "mean": 0.2770053153385636,
+      "max": 1.0
+    },
+    "per_user_share_quantiles_users_with_10plus_events": {
+      "p50": 0.1,
+      "p90": 0.5714285714285714,
+      "p99": 1.0,
+      "p99.9": 1.0,
+      "min": 0.0,
+      "mean": 0.20464041411771952,
+      "max": 1.0
+    },
+    "top20_users": [
+      {
+        "user": "-4324475583306591935",
+        "events": 2091465,
+        "failed": 2091463,
+        "failed_share": 0.9999990437325033,
+        "share_of_benign_events": 0.3623107061617064,
+        "distinct_ips": 623664,
+        "distinct_countries": 217,
+        "device_types": ",bot,desktop,mobile,tablet,unknown"
+      },
+      {
+        "user": "6998943612473066845",
+        "events": 11627,
+        "failed": 11626,
+        "failed_share": 0.9999139932914768,
+        "share_of_benign_events": 0.0020141798120179685,
+        "distinct_ips": 1,
+        "distinct_countries": 1,
+        "device_types": "desktop"
+      },
+      {
+        "user": "8306338755768072775",
+        "events": 723,
+        "failed": 26,
+        "failed_share": 0.035961272475795295,
+        "share_of_benign_events": 0.0001252474416521021,
+        "distinct_ips": 8,
+        "distinct_countries": 1,
+        "device_types": "mobile"
+      },
+      {
+        "user": "-4736161563343562900",
+        "events": 583,
+        "failed": 15,
+        "failed_share": 0.025728987993138937,
+        "share_of_benign_events": 0.00010099482501130778,
+        "distinct_ips": 10,
+        "distinct_countries": 1,
+        "device_types": "desktop"
+      },
+      {
+        "user": "-720528843671416737",
+        "events": 529,
+        "failed": 25,
+        "failed_share": 0.04725897920604915,
+        "share_of_benign_events": 9.16402443070014e-05,
+        "distinct_ips": 2,
+        "distinct_countries": 1,
+        "device_types": "desktop"
+      },
+      {
+        "user": "3723586841560935698",
+        "events": 529,
+        "failed": 1,
+        "failed_share": 0.001890359168241966,
+        "share_of_benign_events": 9.16402443070014e-05,
+        "distinct_ips": 10,
+        "distinct_countries": 1,
+        "device_types": "mobile,tablet"
+      },
+      {
+        "user": "-1897467855360717077",
+        "events": 509,
+        "failed": 10,
+        "failed_share": 0.019646365422396856,
+        "share_of_benign_events": 8.817558478688793e-05,
+        "distinct_ips": 46,
+        "distinct_countries": 1,
+        "device_types": "desktop,mobile"
+      },
+      {
+        "user": "5055768838620154054",
+        "events": 495,
+        "failed": 2,
+        "failed_share": 0.00404040404040404,
+        "share_of_benign_events": 8.57503231228085e-05,
+        "distinct_ips": 28,
+        "distinct_countries": 1,
+        "device_types": "desktop,mobile,tablet"
+      },
+      {
+        "user": "-3662916180523725003",
+        "events": 448,
+        "failed": 3,
+        "failed_share": 0.006696428571428571,
+        "share_of_benign_events": 7.760837325054184e-05,
+        "distinct_ips": 91,
+        "distinct_countries": 1,
+        "device_types": "desktop"
+      },
+      {
+        "user": "-8296667206273764769",
+        "events": 442,
+        "failed": 45,
+        "failed_share": 0.10180995475113122,
+        "share_of_benign_events": 7.656897539450779e-05,
+        "distinct_ips": 17,
+        "distinct_countries": 1,
+        "device_types": "mobile"
+      },
+      {
+        "user": "-7778651698454481045",
+        "events": 394,
+        "failed": 11,
+        "failed_share": 0.027918781725888325,
+        "share_of_benign_events": 6.825379254623545e-05,
+        "distinct_ips": 2,
+        "distinct_countries": 1,
+        "device_types": "desktop"
+      },
+      {
+        "user": "4588325308801696666",
+        "events": 384,
+        "failed": 14,
+        "failed_share": 0.036458333333333336,
+        "share_of_benign_events": 6.65214627861787e-05,
+        "distinct_ips": 16,
+        "distinct_countries": 1,
+        "device_types": "desktop,mobile"
+      },
+      {
+        "user": "-7955135358862007287",
+        "events": 362,
+        "failed": 19,
+        "failed_share": 0.052486187845303865,
+        "share_of_benign_events": 6.271033731405389e-05,
+        "distinct_ips": 3,
+        "distinct_countries": 1,
+        "device_types": "desktop"
+      },
+      {
+        "user": "-2894367365566592989",
+        "events": 334,
+        "failed": 22,
+        "failed_share": 0.0658682634730539,
+        "share_of_benign_events": 5.785981398589503e-05,
+        "distinct_ips": 1,
+        "distinct_countries": 1,
+        "device_types": "desktop"
+      },
+      {
+        "user": "-3031272205102765641",
+        "events": 334,
+        "failed": 1,
+        "failed_share": 0.0029940119760479044,
+        "share_of_benign_events": 5.785981398589503e-05,
+        "distinct_ips": 1,
+        "distinct_countries": 1,
+        "device_types": "desktop"
+      },
+      {
+        "user": "3655726384780064025",
+        "events": 294,
+        "failed": 13,
+        "failed_share": 0.04421768707482993,
+        "share_of_benign_events": 5.093049494566808e-05,
+        "distinct_ips": 4,
+        "distinct_countries": 1,
+        "device_types": "desktop"
+      },
+      {
+        "user": "5553524088959053637",
+        "events": 290,
+        "failed": 5,
+        "failed_share": 0.017241379310344827,
+        "share_of_benign_events": 5.023756304164538e-05,
+        "distinct_ips": 21,
+        "distinct_countries": 2,
+        "device_types": "desktop,mobile"
+      },
+      {
+        "user": "2574395483771838836",
+        "events": 290,
+        "failed": 4,
+        "failed_share": 0.013793103448275862,
+        "share_of_benign_events": 5.023756304164538e-05,
+        "distinct_ips": 6,
+        "distinct_countries": 1,
+        "device_types": "desktop"
+      },
+      {
+        "user": "-6253458408323028249",
+        "events": 285,
+        "failed": 15,
+        "failed_share": 0.05263157894736842,
+        "share_of_benign_events": 4.937139816161701e-05,
+        "distinct_ips": 5,
+        "distinct_countries": 1,
+        "device_types": "desktop,mobile,tablet"
+      },
+      {
+        "user": "-4865363730317176028",
+        "events": 275,
+        "failed": 7,
+        "failed_share": 0.025454545454545455,
+        "share_of_benign_events": 4.763906840156028e-05,
+        "distinct_ips": 104,
+        "distinct_countries": 1,
+        "device_types": "desktop"
+      }
+    ],
+    "top20_events_share": 0.3656241332937669,
+    "failed_share_without_top20": 0.24843793564193806
+  },
+  "old_sample_question5": {
+    "sample_rows": 700000,
+    "sample_time_range": [
+      "2020-02-03 12:43:30.772000",
+      "2020-02-13 15:07:46.398000"
+    ],
+    "sample_users": 248724,
+    "train": {
+      "events": 561464,
+      "users": 174107,
+      "failed_share_events": 0.5641376829146659,
+      "failed_share_mean_over_users": 0.23116949357311314,
+      "users_all_failed": 29569,
+      "users_never_failed": 120073
+    },
+    "held_out": {
+      "events": 138536,
+      "users": 74617,
+      "failed_share_events": 0.23795258994052088,
+      "failed_share_mean_over_users": 0.22865835796173095,
+      "users_all_failed": 12408,
+      "users_never_failed": 51538
+    },
+    "train_failed_share_without_top_users": [
+      {
+        "exclude_top_k_train_users": 1,
+        "train_events_left": 321657,
+        "train_failed_share": 0.23918646259835788
+      },
+      {
+        "exclude_top_k_train_users": 2,
+        "train_events_left": 321566,
+        "train_failed_share": 0.23917018590273847
+      },
+      {
+        "exclude_top_k_train_users": 3,
+        "train_events_left": 321478,
+        "train_failed_share": 0.23920765962212034
+      },
+      {
+        "exclude_top_k_train_users": 5,
+        "train_events_left": 321320,
+        "train_failed_share": 0.23927548860948586
+      },
+      {
+        "exclude_top_k_train_users": 10,
+        "train_events_left": 320956,
+        "train_failed_share": 0.23931006119218834
+      },
+      {
+        "exclude_top_k_train_users": 20,
+        "train_events_left": 320312,
+        "train_failed_share": 0.2393947151527261
+      }
+    ],
+    "top10_users_in_sample": [
+      {
+        "user": "-4324475583306591935",
+        "events": 239807,
+        "failed_share": 1.0,
+        "share_of_sample_events": 0.3425814285714286,
+        "side": "train"
+      },
+      {
+        "user": "-1527109053794272566",
+        "events": 91,
+        "failed_share": 0.2967032967032967,
+        "share_of_sample_events": 0.00013,
+        "side": "train"
+      },
+      {
+        "user": "-4151654422853642864",
+        "events": 89,
+        "failed_share": 1.0,
+        "share_of_sample_events": 0.00012714285714285714,
+        "side": "held_out"
+      },
+      {
+        "user": "-7283843392815213795",
+        "events": 88,
+        "failed_share": 0.10227272727272728,
+        "share_of_sample_events": 0.00012571428571428572,
+        "side": "train"
+      },
+      {
+        "user": "-7095173164571071135",
+        "events": 87,
+        "failed_share": 0.20689655172413793,
+        "share_of_sample_events": 0.00012428571428571428,
+        "side": "held_out"
+      },
+      {
+        "user": "2574395483771838836",
+        "events": 85,
+        "failed_share": 0.0,
+        "share_of_sample_events": 0.00012142857142857143,
+        "side": "held_out"
+      },
+      {
+        "user": "5690256351371047051",
+        "events": 81,
+        "failed_share": 0.1111111111111111,
+        "share_of_sample_events": 0.00011571428571428571,
+        "side": "held_out"
+      },
+      {
+        "user": "-8326952427839706274",
+        "events": 81,
+        "failed_share": 0.14814814814814814,
+        "share_of_sample_events": 0.00011571428571428571,
+        "side": "held_out"
+      },
+      {
+        "user": "1886377334423741684",
+        "events": 81,
+        "failed_share": 0.2716049382716049,
+        "share_of_sample_events": 0.00011571428571428571,
+        "side": "held_out"
+      },
+      {
+        "user": "1813132742934070912",
+        "events": 80,
+        "failed_share": 0.3375,
+        "share_of_sample_events": 0.00011428571428571428,
+        "side": "held_out"
+      }
+    ]
+  },
+  "weekly": [
+    {
+      "week": 0,
+      "start": "2020-02-03",
+      "split": "dev_train",
+      "rows": 473749,
+      "attack_events": 44573,
+      "prevalence": 0.09408568672440469,
+      "is_attack_ip_events": 44569,
+      "ato_events": 5
+    },
+    {
+      "week": 1,
+      "start": "2020-02-10",
+      "split": "dev_train",
+      "rows": 548090,
+      "attack_events": 56412,
+      "prevalence": 0.10292470214745754,
+      "is_attack_ip_events": 56412,
+      "ato_events": 6
+    },
+    {
+      "week": 2,
+      "start": "2020-02-17",
+      "split": "dev_train",
+      "rows": 526178,
+      "attack_events": 51465,
+      "prevalence": 0.09780910642406182,
+      "is_attack_ip_events": 51462,
+      "ato_events": 6
+    },
+    {
+      "week": 3,
+      "start": "2020-02-24",
+      "split": "dev_train",
+      "rows": 525860,
+      "attack_events": 50149,
+      "prevalence": 0.09536568668466892,
+      "is_attack_ip_events": 50147,
+      "ato_events": 5
+    },
+    {
+      "week": 4,
+      "start": "2020-03-02",
+      "split": "dev_train",
+      "rows": 500815,
+      "attack_events": 47183,
+      "prevalence": 0.09421243373301519,
+      "is_attack_ip_events": 47181,
+      "ato_events": 2
+    },
+    {
+      "week": 5,
+      "start": "2020-03-09",
+      "split": "dev_train",
+      "rows": 475136,
+      "attack_events": 42620,
+      "prevalence": 0.08970063308189655,
+      "is_attack_ip_events": 42618,
+      "ato_events": 3
+    },
+    {
+      "week": 6,
+      "start": "2020-03-16",
+      "split": "dev_train",
+      "rows": 498922,
+      "attack_events": 39802,
+      "prevalence": 0.07977599704963902,
+      "is_attack_ip_events": 39801,
+      "ato_events": 3
+    },
+    {
+      "week": 7,
+      "start": "2020-03-23",
+      "split": "dev_train",
+      "rows": 506607,
+      "attack_events": 50187,
+      "prevalence": 0.09906495567570128,
+      "is_attack_ip_events": 50187,
+      "ato_events": 1
+    },
+    {
+      "week": 8,
+      "start": "2020-03-30",
+      "split": "dev_val",
+      "rows": 536878,
+      "attack_events": 56310,
+      "prevalence": 0.10488416362749078,
+      "is_attack_ip_events": 56309,
+      "ato_events": 2
+    },
+    {
+      "week": 9,
+      "start": "2020-04-06",
+      "split": "dev_val",
+      "rows": 485158,
+      "attack_events": 55332,
+      "prevalence": 0.1140494436863867,
+      "is_attack_ip_events": 55330,
+      "ato_events": 5
+    },
+    {
+      "week": 10,
+      "start": "2020-04-13",
+      "split": "dev_val",
+      "rows": 512162,
+      "attack_events": 50959,
+      "prevalence": 0.09949781514442696,
+      "is_attack_ip_events": 50959,
+      "ato_events": 1
+    },
+    {
+      "week": 11,
+      "start": "2020-04-20",
+      "split": "dev_val",
+      "rows": 498107,
+      "attack_events": 47170,
+      "prevalence": 0.09469852862939088,
+      "is_attack_ip_events": 47168,
+      "ato_events": 4
+    },
+    {
+      "week": 12,
+      "start": "2020-04-27",
+      "split": "dev_val",
+      "rows": 304922,
+      "attack_events": 27849,
+      "prevalence": 0.09133155364322679,
+      "is_attack_ip_events": 27849,
+      "ato_events": 1
+    }
+  ],
+  "attacks": {
+    "label_composition": {
+      "attack_ip_only": 619967,
+      "account_takeover_only": 19,
+      "both": 25
+    },
+    "attacking_ips": 29776,
+    "events_per_attacking_ip": {
+      "p50": 2.0,
+      "p90": 21.0,
+      "p99": 519.0,
+      "p99.9": 596.2250000000022,
+      "min": 1.0,
+      "mean": 20.8225080601827,
+      "max": 1905.0
+    },
+    "attacking_ips_with_1_event": 11952,
+    "attacked_users": 174068,
+    "attack_events_per_attacked_user": {
+      "p50": 1.0,
+      "p90": 3.0,
+      "p99": 9.0,
+      "p99.9": 23.0,
+      "min": 1.0,
+      "mean": 3.5618896063607326,
+      "max": 300987.0
+    },
+    "attack_success_share": 0.3028914003138654,
+    "attack_ip_success_share": 0.3028700370327359,
+    "ato": {
+      "events": 44,
+      "users": 44,
+      "ips": 37,
+      "successful": 44,
+      "also_attack_ip": 25
+    },
+    "attacking_ips_also_in_non_attack_events": 8,
+    "non_attack_events_on_attacking_ips": 34,
+    "ips_with_inconsistent_is_attack_ip_flag": 0,
+    "attacked_users_with_benign_events": 56894,
+    "attacked_users_attack_only": 117174
+  },
+  "history": {
+    "users_dev": 1509483,
+    "events_per_user_dev": {
+      "p50": 2.0,
+      "p90": 5.0,
+      "p99": 16.0,
+      "p99.9": 46.0,
+      "min": 1.0,
+      "mean": 4.2349493170840615,
+      "max": 2392452.0
+    },
+    "users_with_1_event": 731549,
+    "users_with_le_5_events": 1371676,
+    "users_with_ge_20_events": 9415,
+    "events_per_user_dev_train": {
+      "p50": 1.0,
+      "p90": 5.0,
+      "p99": 14.0,
+      "p99.9": 40.0,
+      "min": 1.0,
+      "mean": 3.819491915728046,
+      "max": 1476106.0
+    },
+    "dev_val_prior_events_of_user": {
+      "p50": 6.0,
+      "p90": 2158728.4,
+      "p99": 2369078.7399999998,
+      "p99.9": 2390113.774,
+      "min": 0.0,
+      "mean": 758392.7129286116,
+      "max": 2392451.0
+    },
+    "dev_val_events_with_0_prior": 0.19156461909775988,
+    "dev_val_events_with_lt_5_prior": 0.46003832747097306,
+    "dev_val_events_with_ge_20_prior": 0.4249501653027284,
+    "dev_val_benign_events_with_0_prior": 0.18853861698879837,
+    "dev_val_attack_events_with_0_prior": 0.21830233145358136,
+    "events_per_ip_dev": {
+      "p50": 2.0,
+      "p90": 7.0,
+      "p99": 36.0,
+      "p99.9": 520.0,
+      "min": 1.0,
+      "mean": 4.8831862476615635,
+      "max": 11628.0
+    }
+  },
+  "dominant_user": {
+    "user": "-4324475583306591935",
+    "events": 2392452,
+    "share_of_dev_events": 0.3742542921610416,
+    "share_of_dev_val_events": 0.39206546903659767,
+    "attack_events": 300987,
+    "share_of_all_attack_events": 0.4854542903271071,
+    "benign_events": 2091465,
+    "failed_share_benign": 0.9999990437325033,
+    "failed_share_attack": 1.0,
+    "successful_events": 2,
+    "distinct_ips": 647649,
+    "distinct_countries": 217,
+    "attack_prevalence_without_user": {
+      "dev_train": 0.07560218063305975,
+      "dev_val": 0.08728880180676636
+    },
+    "benign_failed_share_without_user": {
+      "dev_train": 0.24359611014598276,
+      "dev_val": 0.26282372572394425
+    },
+    "dev_val_prior_events_of_user_excluding_it": {
+      "p50": 2.0,
+      "p90": 11.0,
+      "p99": 122.0,
+      "p99.9": 10205.120000000112,
+      "min": 0.0,
+      "mean": 47.5471900884029,
+      "max": 11626.0
+    },
+    "dev_val_events_with_0_prior_excluding_it": 0.3151073172207947,
+    "dev_val_events_with_lt_5_prior_excluding_it": 0.7567234694531069,
+    "dev_val_events_with_ge_20_prior_excluding_it": 0.05409249613444053
+  },
+  "seconds": 14.5
+}

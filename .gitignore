@@ -35,6 +35,10 @@ backend/data/.alerts-*.tmp
 backend/data/alerts.json.corrupt-*
 backend/data/live_queue.deadletter.jsonl
 backend/data/model.pkl.replaced-*
+# Month-partitioned Parquet of the RBA CSV and the locked test month
+# (backend/eval/convert_rba.py, backend/eval/PROTOCOL.md)
+backend/data/rba_parquet/
+backend/data/rba_locked/
 
 #results 
 backend/results/batch4_results.json

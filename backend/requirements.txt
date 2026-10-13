@@ -7,3 +7,4 @@ joblib==1.5.3
 filelock==3.32.2
 requests==2.34.2
 python-dotenv==1.2.2
+pyarrow==26.0.0
