@@ -194,3 +194,114 @@ changed, why, and what had already been seen.
    `dev_val_cold`. Interim response policy: block, TTL 3600 s, only on
    alerts of detectors that met the criterion (the ML step is checked
    against the same criterion); everything else alerts only.
+
+3. 2026-10-13, Phase 3b, before any metric on the halves below. Corrects
+   the Phase 3 selection protocol, which chose and reported on the same
+   rows. Seen before this amendment: every Phase 3 result (amendment 2
+   selection and comparisons), all computed on the whole of `dev_val`, so
+   on both halves defined here. The val_b confirmation below is therefore
+   independent of the parameter *choice* but not of the decisions that
+   shaped this amendment (the grid extensions follow from where Phase 3's
+   whole-`dev_val` choices landed). No metric had been computed on either
+   half on its own.
+
+   **Split of `dev_val` in time.** `val_a` = 2020-03-30 00:00 <= t <
+   2020-04-15 00:00 (tuning); `val_b` = 2020-04-15 00:00 <= t < 2020-05-01
+   00:00 (confirmation); 16 calendar days each. State is always built
+   causally from the start of the development stream (2020-02-03), through
+   `dev_train`, `val_a` and `val_b`; the halves only select which events are
+   scored. Parameters are chosen on `val_a` only. `val_b` is evaluated once
+   per configuration, after the choice is written to disk, and is never
+   used for choosing or re-tuning. Phase 4 uses the same split.
+   `dev_val_cold` keeps its definition (User ID with no row in `dev_train`),
+   restricted to each half.
+
+   **Alert-tier criterion** (replaces amendment 2's criterion; units,
+   de-duplication, keys and "attacking IPs flagged" are as in amendment 2,
+   measured on `val_a`). For each detector, choose the setting that
+   maximises attacking IPs flagged on `val_a`, subject to (i) >= 30 alerts
+   on `val_a` and (ii) the *lower bound* of a 95% bootstrap interval of
+   alert precision on `val_a` >= 2 x the `val_a` base rate. Ties: higher
+   lower bound, then fewer alerts, then the earlier setting in grid order.
+   If no setting qualifies, the detector *fails the criterion* and is
+   reported at its eligible (>= 30 alerts) setting with the highest lower
+   bound.
+
+   **Bootstrap.** Clustered by source IP: the units are the IPs with at
+   least one of the detector's alerts on the half's events; each resample
+   draws that many IPs with replacement and computes precision as (attack
+   alerts) / (alerts) summed over the drawn IPs. 1,000 resamples; 95%
+   percentile interval (2.5th and 97.5th percentiles). Random numbers:
+   `numpy.random.default_rng(42)`, re-created for every (detector, setting,
+   half), resamples drawn in a fixed order.
+
+   **Confirmation on `val_b`.** For the chosen setting (and the ML step)
+   the same alert precision, interval, attacking and benign IPs flagged are
+   computed on `val_b`. The detector *holds on val_b* if it has >= 30
+   alerts there and its lower bound is >= 2 x the `val_b` base rate.
+   Failing on `val_b` is reported; it does not trigger re-tuning.
+
+   **No blocking in this phase.** Every detector, the ML step included,
+   is alert-only; the response and blocking policy is deferred to Phase 5.
+   The amendment 2 interim block policy is removed from the evaluation
+   (`V3_BLOCK_DETECTORS` is empty; the TTL block-list code path stays).
+   The criterion decides each detector's parameters and whether it is in
+   the alert tier; it no longer decides blocking.
+
+   **Grids.** Extended only where Phase 3 chose an edge of that dimension:
+   windows add 172800 and 604800 where 86400 was chosen; counts add 1 where
+   the chosen count was the grid minimum 2. Brute Force chose the lower
+   edges (60 s, 3); the extension rule does not cover a lower edge, so its
+   grid is unchanged. Final grids (seconds):
+
+   | Detector | Parameter | Values |
+   |---|---|---|
+   | Brute Force | window | 60, 300, 600, 1800, 3600 |
+   | | min failures | 3, 5, 10, 20, 50 |
+   | Slow Brute Force (with the chosen Brute Force setting) | window | 3600, 10800, 21600, 43200, 86400, 172800, 604800 |
+   | | min failures | 3, 4, 6, 10, 20 |
+   | | min spread | 300, 900, 1800 |
+   | Credential Stuffing | window | 300, 1800, 3600, 21600, 86400, 172800, 604800 |
+   | | min failing accounts | 1, 2, 3, 5, 10, 20 |
+   | Invalid Account Spraying | window | 300, 1800, 3600, 21600, 86400, 172800, 604800 |
+   | | min attempts | 2, 3, 5, 10, 20 |
+   | Distributed Brute Force | window | 300, 1800, 3600, 21600, 86400, 172800, 604800 |
+   | | min distinct IPs | 1, 2, 3, 5, 10, 20 |
+   | Success After Failures | window | 300, 1800, 3600, 21600, 86400, 172800, 604800 |
+   | | min failures (account or IP) | 1, 2, 3, 5, 10 |
+   | Multiple IP Login (window fixed at 120) | exemption | none, known IP, same /24 or /64, same ASN, all three |
+
+   289 settings. Suspicious Login Time is still not tuned, only reported.
+   Fixed, as in amendment 2: cooldown 3600 s (600 s per IP for Suspicious
+   Login Time), duplicate window 300 s, known-IP memory 30 days, ML
+   `failed_rate` window 30 days. The ML step is the unchanged Phase 2
+   Isolation Forest design at seed 42, contamination 0.3, its alerts
+   de-duplicated per IP with a 3600 s cooldown as in Phase 3; it is not
+   tuned, only checked against the criterion.
+
+   **Incidents.** Alerts are grouped into incidents per (source IP,
+   calendar day, UTC as in the data). An incident is *attack* if any event
+   carrying one of its alerts is an attack event. Incident precision = attack
+   incidents / incidents. For a subset (all events, without the
+   placeholder, cold users), only alerts on events in the subset form
+   incidents.
+
+   **Workload on `val_b`** (reported, never used for choosing). Two
+   configurations: v3 rules alone (every rule detector at its reported
+   setting, including those failing the criterion), and v3 rules + the ML
+   step. Reported: alerts/day, incidents/day, incident precision, on all
+   `val_b` events, without the placeholder's events, and on cold users.
+
+   **Budget curves.** Each incident gets a score = the highest `val_a`
+   alert precision (point estimate, chosen setting) among the detectors
+   with an alert in it; ties go to the incident with more distinct
+   detectors, remaining ties are broken uniformly at random
+   (`numpy.random.default_rng(42)`). Each calendar day the top B incidents
+   are taken, for B = 100, 500 and 2,000 incidents/day. Reported per
+   budget: incidents taken, incident precision, and attacking IPs caught
+   (`val_b` attacking IPs with at least one attack incident taken), also as
+   a share of the subset's `val_b` attacking IPs.
+
+   **Gates.** The real v3 agents replayed at the chosen settings must
+   reproduce the offline matches and alerts per detector with 0 mismatches
+   on `val_a` and on `val_b`, or the selection is void.
