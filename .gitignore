@@ -78,3 +78,5 @@ frontend/skills-lock.json
 
 # Phase 3 evaluation intermediates (backend/eval/phase3_rules.py)
 backend/results/phase3_cache/
+# Phase 3b evaluation intermediates (backend/eval/phase3b.py)
+backend/results/phase3b_cache/

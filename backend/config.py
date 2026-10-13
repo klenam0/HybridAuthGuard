@@ -46,8 +46,9 @@ INTERNAL_NETWORKS = ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
 
 # ── v3 rules (agents/rules_v3.py; RULES_MODE = "v3") ──────────────────────
 # Every window is a sliding window over event time, in seconds. "Failures"
-# are FAILED logins against real accounts. Values chosen on dev_val under
-# eval/PROTOCOL.md amendment 2 (see audit_scratch/PHASE3_REPORT.md).
+# are FAILED logins against real accounts. Values chosen on val_a (dev_val,
+# 30 Mar to 14 Apr 2020) under eval/PROTOCOL.md amendment 3 (see
+# audit_scratch/PHASE3B_REPORT.md). Every v3 detector is alert-only.
 
 # User IDs that stand for "no such account" (the RBA dataset's apparent
 # pseudonym for unknown usernames, 37% of rows). Attempts on them never
@@ -56,29 +57,29 @@ INTERNAL_NETWORKS = ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
 UNKNOWN_ACCOUNT_IDS = ["-4324475583306591935"]
 
 V3_BF_WINDOW_SECONDS = 60              # Brute Force: failures from one IP
-V3_BF_MIN_FAILURES = 3
+V3_BF_MIN_FAILURES = 5
 
-V3_SLOW_BF_WINDOW_SECONDS = 24 * 3600  # Slow Brute Force: failures from one
+V3_SLOW_BF_WINDOW_SECONDS = 7 * 86400  # Slow Brute Force: failures from one
 V3_SLOW_BF_MIN_FAILURES = 3            # IP over the longer window, spread
 V3_SLOW_BF_MIN_SPREAD_SECONDS = 300    # out, below the Brute Force count
 
-V3_CS_WINDOW_SECONDS = 86400           # Credential Stuffing: distinct real
+V3_CS_WINDOW_SECONDS = 7 * 86400       # Credential Stuffing: distinct real
 V3_CS_MIN_ACCOUNTS = 2                 # accounts with FAILED logins, one IP
 
-V3_INVALID_WINDOW_SECONDS = 86400      # Invalid Account Spraying: unknown-
+V3_INVALID_WINDOW_SECONDS = 7 * 86400  # Invalid Account Spraying: unknown-
 V3_INVALID_MIN_ATTEMPTS = 3            # account attempts from one IP
 
-V3_DIST_WINDOW_SECONDS = 86400         # Distributed Brute Force: distinct IPs
-V3_DIST_MIN_IPS = 2                    # failing against one real account
+V3_DIST_WINDOW_SECONDS = 2 * 86400     # Distributed Brute Force: distinct IPs
+V3_DIST_MIN_IPS = 3                    # failing against one real account
 
-V3_SAF_WINDOW_SECONDS = 86400          # Success After Failures: a SUCCESS with
+V3_SAF_WINDOW_SECONDS = 7 * 86400      # Success After Failures: a SUCCESS with
 V3_SAF_MIN_FAILURES = 3                # this many failures before it on the
                                        # account or from the IP
 
 V3_MULTI_IP_WINDOW_SECONDS = 120       # Multiple IP Login (legacy rule)
 # Pairs exempted: "known_ip" (second IP had a SUCCESS on the account within
 # V3_KNOWN_IP_TTL_SECONDS), "same_prefix" (same /24 or /64), "same_asn".
-V3_MULTI_IP_EXEMPT = ("known_ip",)       # advisory only (precision 13.5%)
+V3_MULTI_IP_EXEMPT = ("known_ip",)     # fails the criterion (val_a 14.6%)
 V3_KNOWN_IP_TTL_SECONDS = 30 * 86400
 
 # Alert de-duplication per (detector, key): a match inside the cooldown
@@ -213,20 +214,13 @@ ADMIN_NOTIFY_SEVERITIES = ("MEDIUM",)
 # v3 response policy (RULES_MODE = "v3"). Blocking is a response-layer
 # block list with a TTL in event time; detection never consults it. Only
 # alerts from V3_BLOCK_DETECTORS place a (simulated) block; every other
-# detector alerts only. Interim policy of Phase 3: a detector blocks only if
-# it met the dev_val precision criterion of eval/PROTOCOL.md amendment 2.
+# detector alerts only. Empty: under eval/PROTOCOL.md amendment 3 every
+# detector, ML included, is alert-only; the blocking policy is Phase 5's.
 BLOCK_TTL_SECONDS = 3600
-V3_BLOCK_DETECTORS = (
-    "Brute Force Attack",
-    "Slow Brute Force",
-    "Credential Stuffing",
-    "Invalid Account Spraying",
-    "Distributed Brute Force",
-    "Success After Failures",
-    "ML Anomaly Detected",
-)
+V3_BLOCK_DETECTORS = ()
 # Severity per v3 alert type (email for HIGH, admin notice for MEDIUM):
-# HIGH for the detectors that block, MEDIUM for the advisory ones.
+# HIGH for the detectors that blocked under the Phase 3 interim policy,
+# MEDIUM for the advisory ones (to be revisited with the Phase 5 policy).
 V3_SEVERITY_MAP = {
     "Brute Force Attack":       "HIGH",
     "Slow Brute Force":         "HIGH",

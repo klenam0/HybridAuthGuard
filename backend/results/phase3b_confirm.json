@@ -1,0 +1,278 @@
+{
+  "base_rate": {
+    "val_a": 0.1074382539498799,
+    "val_b": 0.09574763155385668
+  },
+  "precision_threshold": {
+    "val_a": 0.2148765078997598,
+    "val_b": 0.19149526310771336
+  },
+  "events": {
+    "val_a": 1183517,
+    "val_b": 1153710
+  },
+  "detectors": {
+    "Brute Force Attack": {
+      "params": {
+        "window": 60,
+        "min": 5
+      },
+      "status_val_a": "meets criterion (alert tier)",
+      "val_a": {
+        "alerts": 256,
+        "attack_alerts": 76,
+        "precision": 0.296875,
+        "ci_low": 0.24404981829194428,
+        "ci_high": 0.35799670300294056,
+        "attacking_ips_flagged": 72,
+        "benign_ips_flagged": 173
+      },
+      "val_a_meets": true,
+      "val_b": {
+        "alerts": 263,
+        "attack_alerts": 56,
+        "precision": 0.21292775665399238,
+        "ci_low": 0.15968069478050467,
+        "ci_high": 0.2676646559584765,
+        "attacking_ips_flagged": 52,
+        "benign_ips_flagged": 195
+      },
+      "val_b_holds": false,
+      "val_b_meets_val_a_threshold": false
+    },
+    "Slow Brute Force": {
+      "params": {
+        "window": 604800,
+        "min": 3,
+        "spread": 300
+      },
+      "status_val_a": "meets criterion (alert tier)",
+      "val_a": {
+        "alerts": 70394,
+        "attack_alerts": 18516,
+        "precision": 0.26303378128817795,
+        "ci_low": 0.24838928836622606,
+        "ci_high": 0.2778134237599931,
+        "attacking_ips_flagged": 1398,
+        "benign_ips_flagged": 8596
+      },
+      "val_a_meets": true,
+      "val_b": {
+        "alerts": 62490,
+        "attack_alerts": 15815,
+        "precision": 0.25308049287886064,
+        "ci_low": 0.23756773944821763,
+        "ci_high": 0.2672173712079603,
+        "attacking_ips_flagged": 1332,
+        "benign_ips_flagged": 8572
+      },
+      "val_b_holds": true,
+      "val_b_meets_val_a_threshold": true
+    },
+    "Credential Stuffing": {
+      "params": {
+        "window": 604800,
+        "min": 2
+      },
+      "status_val_a": "meets criterion (alert tier)",
+      "val_a": {
+        "alerts": 69902,
+        "attack_alerts": 19114,
+        "precision": 0.2734399587994621,
+        "ci_low": 0.2591007131373358,
+        "ci_high": 0.28898903614251437,
+        "attacking_ips_flagged": 1621,
+        "benign_ips_flagged": 8072
+      },
+      "val_a_meets": true,
+      "val_b": {
+        "alerts": 62534,
+        "attack_alerts": 16333,
+        "precision": 0.2611859148623149,
+        "ci_low": 0.24687389852204536,
+        "ci_high": 0.27649164608630267,
+        "attacking_ips_flagged": 1515,
+        "benign_ips_flagged": 8479
+      },
+      "val_b_holds": true,
+      "val_b_meets_val_a_threshold": true
+    },
+    "Invalid Account Spraying": {
+      "params": {
+        "window": 604800,
+        "min": 3
+      },
+      "status_val_a": "meets criterion (alert tier)",
+      "val_a": {
+        "alerts": 145762,
+        "attack_alerts": 33705,
+        "precision": 0.2312331060221457,
+        "ci_low": 0.21894880104990636,
+        "ci_high": 0.2436134415721388,
+        "attacking_ips_flagged": 2745,
+        "benign_ips_flagged": 24374
+      },
+      "val_a_meets": true,
+      "val_b": {
+        "alerts": 130298,
+        "attack_alerts": 28654,
+        "precision": 0.219911280295937,
+        "ci_low": 0.20762674064905454,
+        "ci_high": 0.23325569215831887,
+        "attacking_ips_flagged": 2717,
+        "benign_ips_flagged": 24454
+      },
+      "val_b_holds": true,
+      "val_b_meets_val_a_threshold": false
+    },
+    "Distributed Brute Force": {
+      "params": {
+        "window": 172800,
+        "min": 3
+      },
+      "status_val_a": "meets criterion (alert tier)",
+      "val_a": {
+        "alerts": 2297,
+        "attack_alerts": 578,
+        "precision": 0.25163256421419244,
+        "ci_low": 0.2285976965710561,
+        "ci_high": 0.2739251881525163,
+        "attacking_ips_flagged": 414,
+        "benign_ips_flagged": 1405
+      },
+      "val_a_meets": true,
+      "val_b": {
+        "alerts": 2290,
+        "attack_alerts": 530,
+        "precision": 0.2314410480349345,
+        "ci_low": 0.20080995613052907,
+        "ci_high": 0.26222665133005446,
+        "attacking_ips_flagged": 355,
+        "benign_ips_flagged": 1460
+      },
+      "val_b_holds": true,
+      "val_b_meets_val_a_threshold": false
+    },
+    "Success After Failures": {
+      "params": {
+        "window": 604800,
+        "min": 3
+      },
+      "status_val_a": "meets criterion (alert tier)",
+      "val_a": {
+        "alerts": 79520,
+        "attack_alerts": 19537,
+        "precision": 0.24568661971830985,
+        "ci_low": 0.22941375237138403,
+        "ci_high": 0.26118018488477207,
+        "attacking_ips_flagged": 1272,
+        "benign_ips_flagged": 7832
+      },
+      "val_a_meets": true,
+      "val_b": {
+        "alerts": 72232,
+        "attack_alerts": 16566,
+        "precision": 0.22934433492081072,
+        "ci_low": 0.21302458937114918,
+        "ci_high": 0.24576751671943967,
+        "attacking_ips_flagged": 1200,
+        "benign_ips_flagged": 8081
+      },
+      "val_b_holds": true,
+      "val_b_meets_val_a_threshold": false
+    },
+    "Multiple IP Login": {
+      "params": {
+        "exempt": [
+          "known_ip"
+        ]
+      },
+      "status_val_a": "fails criterion (reported at the best lower bound)",
+      "val_a": {
+        "alerts": 1120,
+        "attack_alerts": 163,
+        "precision": 0.1455357142857143,
+        "ci_low": 0.12320292498719919,
+        "ci_high": 0.16710659724924015,
+        "attacking_ips_flagged": 151,
+        "benign_ips_flagged": 936
+      },
+      "val_a_meets": false,
+      "val_b": {
+        "alerts": 1066,
+        "attack_alerts": 132,
+        "precision": 0.12382739212007504,
+        "ci_low": 0.1046680150648626,
+        "ci_high": 0.14542320020215724,
+        "attacking_ips_flagged": 131,
+        "benign_ips_flagged": 910
+      },
+      "val_b_holds": false,
+      "val_b_meets_val_a_threshold": false
+    },
+    "Suspicious Login Time": {
+      "params": {
+        "hours": [
+          0,
+          5
+        ],
+        "cooldown": 600
+      },
+      "status_val_a": "not tuned; fails criterion (reported at the best lower bound)",
+      "val_a": {
+        "alerts": 37436,
+        "attack_alerts": 4899,
+        "precision": 0.13086334010043807,
+        "ci_low": 0.12365435991067521,
+        "ci_high": 0.13799856893054735,
+        "attacking_ips_flagged": 1804,
+        "benign_ips_flagged": 21371
+      },
+      "val_a_meets": false,
+      "val_b": {
+        "alerts": 39006,
+        "attack_alerts": 4415,
+        "precision": 0.11318771471055734,
+        "ci_low": 0.10686943803274186,
+        "ci_high": 0.12004310298150467,
+        "attacking_ips_flagged": 1775,
+        "benign_ips_flagged": 23929
+      },
+      "val_b_holds": false,
+      "val_b_meets_val_a_threshold": false
+    },
+    "ML Anomaly Detected": {
+      "params": {
+        "seed": 42,
+        "contamination": 0.3,
+        "dedup_s": 3600
+      },
+      "status_val_a": "fixed; fails criterion (reported at the best lower bound)",
+      "val_a": {
+        "alerts": 132649,
+        "attack_alerts": 29886,
+        "precision": 0.22530135922622863,
+        "ci_low": 0.21461489717093857,
+        "ci_high": 0.23706793215975105,
+        "attacking_ips_flagged": 4040,
+        "benign_ips_flagged": 56430
+      },
+      "val_a_meets": false,
+      "val_b": {
+        "alerts": 136472,
+        "attack_alerts": 27076,
+        "precision": 0.19839967172753387,
+        "ci_low": 0.1886017243836984,
+        "ci_high": 0.20924988834203942,
+        "attacking_ips_flagged": 4203,
+        "benign_ips_flagged": 60433
+      },
+      "val_b_holds": false,
+      "val_b_meets_val_a_threshold": false
+    }
+  },
+  "timings_seconds": {
+    "total": 7.6,
+    "val_b metrics": 7.6
+  }
+}
