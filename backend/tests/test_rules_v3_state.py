@@ -181,3 +181,20 @@ def test_legacy_mode_is_unchanged_engine(monkeypatch):
     agent = DetectionAgent()
     assert agent.__class__.__name__ == "LegacyDetectionAgent"
     assert AnalysisAgent().mode == "legacy" and ResponseAgent(email_alerter=_NoEmail()).mode == "legacy"
+
+
+def test_config_holds_the_dev_val_selection():
+    """config.py's V3_* values are the ones chosen on dev_val (Phase 3.6)."""
+    path = os.path.join(BACKEND, "results", "phase3_selection.json")
+    if not os.path.exists(path):
+        pytest.skip("results/phase3_selection.json not present")
+    from eval.phase3_rules import chosen_settings
+    _, settings = chosen_settings()
+    for k, v in settings.items():
+        got = getattr(config, k)
+        assert (tuple(got) if isinstance(v, tuple) else got) == v, k
+    replay = os.path.join(BACKEND, "results", "phase3_replay_check.json")
+    if os.path.exists(replay):
+        import json
+        with open(replay, encoding="utf-8") as f:
+            assert list(config.V3_BLOCK_DETECTORS) == json.load(f)["block_detectors"]

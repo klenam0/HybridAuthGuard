@@ -55,30 +55,30 @@ INTERNAL_NETWORKS = ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
 # counted per IP for Invalid Account Spraying only.
 UNKNOWN_ACCOUNT_IDS = ["-4324475583306591935"]
 
-V3_BF_WINDOW_SECONDS = 600             # Brute Force: failures from one IP
-V3_BF_MIN_FAILURES = 5
+V3_BF_WINDOW_SECONDS = 60              # Brute Force: failures from one IP
+V3_BF_MIN_FAILURES = 3
 
-V3_SLOW_BF_WINDOW_SECONDS = 6 * 3600   # Slow Brute Force: failures from one
-V3_SLOW_BF_MIN_FAILURES = 4            # IP over the longer window, spread
+V3_SLOW_BF_WINDOW_SECONDS = 24 * 3600  # Slow Brute Force: failures from one
+V3_SLOW_BF_MIN_FAILURES = 3            # IP over the longer window, spread
 V3_SLOW_BF_MIN_SPREAD_SECONDS = 300    # out, below the Brute Force count
 
-V3_CS_WINDOW_SECONDS = 3600            # Credential Stuffing: distinct real
-V3_CS_MIN_ACCOUNTS = 5                 # accounts with FAILED logins, one IP
+V3_CS_WINDOW_SECONDS = 86400           # Credential Stuffing: distinct real
+V3_CS_MIN_ACCOUNTS = 2                 # accounts with FAILED logins, one IP
 
-V3_INVALID_WINDOW_SECONDS = 3600       # Invalid Account Spraying: unknown-
-V3_INVALID_MIN_ATTEMPTS = 5            # account attempts from one IP
+V3_INVALID_WINDOW_SECONDS = 86400      # Invalid Account Spraying: unknown-
+V3_INVALID_MIN_ATTEMPTS = 3            # account attempts from one IP
 
-V3_DIST_WINDOW_SECONDS = 3600          # Distributed Brute Force: distinct IPs
-V3_DIST_MIN_IPS = 5                    # failing against one real account
+V3_DIST_WINDOW_SECONDS = 86400         # Distributed Brute Force: distinct IPs
+V3_DIST_MIN_IPS = 2                    # failing against one real account
 
-V3_SAF_WINDOW_SECONDS = 3600           # Success After Failures: a SUCCESS with
+V3_SAF_WINDOW_SECONDS = 86400          # Success After Failures: a SUCCESS with
 V3_SAF_MIN_FAILURES = 3                # this many failures before it on the
                                        # account or from the IP
 
 V3_MULTI_IP_WINDOW_SECONDS = 120       # Multiple IP Login (legacy rule)
 # Pairs exempted: "known_ip" (second IP had a SUCCESS on the account within
 # V3_KNOWN_IP_TTL_SECONDS), "same_prefix" (same /24 or /64), "same_asn".
-V3_MULTI_IP_EXEMPT = ()
+V3_MULTI_IP_EXEMPT = ("known_ip",)       # advisory only (precision 13.5%)
 V3_KNOWN_IP_TTL_SECONDS = 30 * 86400
 
 # Alert de-duplication per (detector, key): a match inside the cooldown
@@ -216,18 +216,27 @@ ADMIN_NOTIFY_SEVERITIES = ("MEDIUM",)
 # detector alerts only. Interim policy of Phase 3: a detector blocks only if
 # it met the dev_val precision criterion of eval/PROTOCOL.md amendment 2.
 BLOCK_TTL_SECONDS = 3600
-V3_BLOCK_DETECTORS = ()
-# Severity per v3 alert type (email for HIGH, admin notice for MEDIUM).
+V3_BLOCK_DETECTORS = (
+    "Brute Force Attack",
+    "Slow Brute Force",
+    "Credential Stuffing",
+    "Invalid Account Spraying",
+    "Distributed Brute Force",
+    "Success After Failures",
+    "ML Anomaly Detected",
+)
+# Severity per v3 alert type (email for HIGH, admin notice for MEDIUM):
+# HIGH for the detectors that block, MEDIUM for the advisory ones.
 V3_SEVERITY_MAP = {
-    "Brute Force Attack":       "MEDIUM",
-    "Slow Brute Force":         "MEDIUM",
-    "Credential Stuffing":      "MEDIUM",
-    "Invalid Account Spraying": "MEDIUM",
-    "Distributed Brute Force":  "MEDIUM",
-    "Success After Failures":   "MEDIUM",
+    "Brute Force Attack":       "HIGH",
+    "Slow Brute Force":         "HIGH",
+    "Credential Stuffing":      "HIGH",
+    "Invalid Account Spraying": "HIGH",
+    "Distributed Brute Force":  "HIGH",
+    "Success After Failures":   "HIGH",
     "Multiple IP Login":        "MEDIUM",
     "Suspicious Login Time":    "MEDIUM",
-    "ML Anomaly Detected":      "MEDIUM",
+    "ML Anomaly Detected":      "HIGH",
 }
 
 # ── Email (utils/email_alerter.py) ────────────────────────────────────────

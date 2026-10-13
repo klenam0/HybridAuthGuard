@@ -1,0 +1,26 @@
+{
+  "seed": 42,
+  "contamination": 0.3,
+  "threshold_offset": -0.4811768262120696,
+  "ml_alert_margin": -0.02,
+  "feature_check_vs_harness_first_200k": true,
+  "refit_check": {
+    "phase2_if_only_roc_auc_seed42": 0.7487722767693988,
+    "this_refit_lifetime_failed_rate_roc_auc": 0.7487722767693988,
+    "match_6dp": true
+  },
+  "v3_failed_rate_roc_auc_dev_val": 0.7566636190281749,
+  "events_with_different_failed_rate": {
+    "all": 1928849,
+    "dev_val": 1208630,
+    "dev_val_share": 0.5171213579168819
+  },
+  "ml_flag_flips_dev_val_vs_lifetime": 87804,
+  "timings_seconds": {
+    "load dev stream": 4.9,
+    "frequency maps, scaler, v3 raw features (every event)": 33.3,
+    "feature check vs harness.build_features (first 200,000 events)": 2.2,
+    "fit seed 42 + score every event twice (v3 and lifetime failed_rate)": 178.2,
+    "total": 220.4
+  }
+}

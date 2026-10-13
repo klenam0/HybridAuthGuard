@@ -1,0 +1,142 @@
+{
+  "equivalent": true,
+  "settings": {
+    "V3_BF_WINDOW_SECONDS": 60,
+    "V3_BF_MIN_FAILURES": 3,
+    "V3_SLOW_BF_WINDOW_SECONDS": 86400,
+    "V3_SLOW_BF_MIN_FAILURES": 3,
+    "V3_SLOW_BF_MIN_SPREAD_SECONDS": 300,
+    "V3_CS_WINDOW_SECONDS": 86400,
+    "V3_CS_MIN_ACCOUNTS": 2,
+    "V3_INVALID_WINDOW_SECONDS": 86400,
+    "V3_INVALID_MIN_ATTEMPTS": 3,
+    "V3_DIST_WINDOW_SECONDS": 86400,
+    "V3_DIST_MIN_IPS": 2,
+    "V3_SAF_WINDOW_SECONDS": 86400,
+    "V3_SAF_MIN_FAILURES": 3,
+    "V3_MULTI_IP_WINDOW_SECONDS": 120,
+    "V3_MULTI_IP_EXEMPT": [
+      "known_ip"
+    ],
+    "V3_KNOWN_IP_TTL_SECONDS": 2592000,
+    "V3_DEDUP_SECONDS": {
+      "default": 3600,
+      "Suspicious Login Time": 600
+    },
+    "V3_DUPLICATE_WINDOW_SECONDS": 300,
+    "ML_FAILED_RATE_WINDOW_DAYS": 30,
+    "BLOCK_TTL_SECONDS": 3600
+  },
+  "block_detectors": [
+    "Brute Force Attack",
+    "Slow Brute Force",
+    "Credential Stuffing",
+    "Invalid Account Spraying",
+    "Distributed Brute Force",
+    "Success After Failures",
+    "ML Anomaly Detected"
+  ],
+  "ml_meets_criterion": true,
+  "per_detector": {
+    "Brute Force Attack": {
+      "offline_matches": 12609,
+      "replay_matches": 12609,
+      "match_mismatches": 0,
+      "offline_alerts": 6301,
+      "replay_alerts": 6301,
+      "alert_mismatches": 0
+    },
+    "Slow Brute Force": {
+      "offline_matches": 232117,
+      "replay_matches": 232117,
+      "match_mismatches": 0,
+      "offline_alerts": 159222,
+      "replay_alerts": 159222,
+      "alert_mismatches": 0
+    },
+    "Credential Stuffing": {
+      "offline_matches": 283356,
+      "replay_matches": 283356,
+      "match_mismatches": 0,
+      "offline_alerts": 213893,
+      "replay_alerts": 213893,
+      "alert_mismatches": 0
+    },
+    "Invalid Account Spraying": {
+      "offline_matches": 982317,
+      "replay_matches": 982317,
+      "match_mismatches": 0,
+      "offline_alerts": 482984,
+      "replay_alerts": 482984,
+      "alert_mismatches": 0
+    },
+    "Distributed Brute Force": {
+      "offline_matches": 70841,
+      "replay_matches": 70841,
+      "match_mismatches": 0,
+      "offline_alerts": 53075,
+      "replay_alerts": 53075,
+      "alert_mismatches": 0
+    },
+    "Success After Failures": {
+      "offline_matches": 186276,
+      "replay_matches": 186276,
+      "match_mismatches": 0,
+      "offline_alerts": 127082,
+      "replay_alerts": 127082,
+      "alert_mismatches": 0
+    },
+    "Multiple IP Login": {
+      "offline_matches": 6685,
+      "replay_matches": 6685,
+      "match_mismatches": 0,
+      "offline_alerts": 6685,
+      "replay_alerts": 6685,
+      "alert_mismatches": 0
+    },
+    "Suspicious Login Time": {
+      "offline_matches": 252661,
+      "replay_matches": 252661,
+      "match_mismatches": 0,
+      "offline_alerts": 188929,
+      "replay_alerts": 188929,
+      "alert_mismatches": 0
+    },
+    "ML Anomaly Detected": {
+      "offline_matches": 1361281,
+      "replay_matches": 1361281,
+      "match_mismatches": 0,
+      "offline_alerts": 724577,
+      "replay_alerts": 724577,
+      "alert_mismatches": 0
+    }
+  },
+  "blocked_source_mismatches": 0,
+  "blocked_source_events": 1419419,
+  "ml_scored_events": 6392584,
+  "events": 6392584,
+  "attack_events_reaching_ml_share": 1.0,
+  "dev_val_attack_events_reaching_ml_share": 1.0,
+  "dev_val_benign_events_reaching_ml_share": 1.0,
+  "state_sizes_end": {
+    "ips": 38338,
+    "accounts": 9585,
+    "account_history": 523774,
+    "cooldowns": 2229,
+    "recent_events": 2968
+  },
+  "state_sizes_peak_sampled_every_500k": {
+    "ips": 36225,
+    "accounts": 9443,
+    "account_history": 544587,
+    "cooldowns": 2603,
+    "recent_events": 3710
+  },
+  "replay_seconds": 257.9,
+  "replay_us_per_event": 40.4,
+  "timings_seconds": {
+    "load stream, chosen setting, ML decisions": 12.6,
+    "real v3 replay (detection + analysis + response) over the dev stream": 257.9,
+    "total": 275.7
+  }
+}

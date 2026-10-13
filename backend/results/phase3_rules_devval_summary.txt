@@ -1,0 +1,121 @@
+Phase 3 v3 rule engine on dev_val (eval/PROTOCOL.md amendment 2)
+base rate 0.1017; precision threshold 0.2033
+block detectors (interim policy, TTL 3600 s): ['Brute Force Attack', 'Slow Brute Force', 'Credential Stuffing', 'Invalid Account Spraying', 'Distributed Brute Force', 'Success After Failures', 'ML Anomaly Detected']
+ML (seed 42, c=0.3) alerts on dev_val: {'alerts': 269121, 'attack_alerts': 56962, 'precision': 0.2116594394343065, 'attacking_ips_flagged': 5853, 'benign_ips_flagged': 103157}
+
+[dev_val]
+  metric                              legacy rules      v3 rules     v3 hybrid  P2 hybrid s42
+  alerted_event_recall                      0.0461        0.3767        0.4910         0.0644
+  alerted_fpr                               0.0503        0.1706        0.2424         0.1025
+  alerted_event_precision                   0.0940        0.1999        0.1865         0.0664
+  alerted_campaign_coverage                 0.2576        0.3199        0.4758         0.3889
+  alerted_attacking_ips_flagged               3794          4712          7007           5728
+  alerted_benign_ips_flagged                 75274         84231        145601         133221
+  alerts                                    116600        517581        786702         230600
+  alert_precision                           0.0940        0.2089        0.2098         0.0664
+  detected_event_recall                     0.0461        0.5425        0.7013               
+  detected_fpr                              0.0503        0.2966        0.3912               
+  detected_event_precision                  0.0940        0.1715        0.1687               
+  detected_attacking_ips_flagged              3794          4713          7008               
+  detected_benign_ips_flagged                75274         84232        145602               
+  response benign_ips_blocked                37217         49982        125766          85158
+  response attack_ips_blocked                 1415          3767          6691           5307
+  response legitimate_users_affected        273003         71000        106215         280383
+  response benign_events_from_blocked_source        991110        367455        474914        1018797
+  response attack_events_from_blocked_source        212406         68932         87648               
+  per detector (alerts, precision, attacking IPs, benign IPs): v3 hybrid
+    Brute Force Attack             3118 0.2184     495     1907
+    Slow Brute Force              70666 0.2364    1276    10483
+    Credential Stuffing           92628 0.2700    1401     7125
+    Invalid Account Spraying     201304 0.2065    3282    35896
+    Distributed Brute Force       19733 0.2037    1346     9077
+    Success After Failures        51504 0.2041    1097     8222
+    Multiple IP Login              2186 0.1349     271     1813
+    Suspicious Login Time         76442 0.1218    2581    41728
+    ML Anomaly Detected          269121 0.2117    5853   103157
+  per detector: legacy rules
+    Brute Force Attack            25293 0.0393     995    24298
+    Credential Stuffing            6961 0.0329     229     6732
+    Multiple IP Login              2179 0.1152     237     1831
+    Slow Brute Force               5725 0.0306     175     5550
+    Suspicious Login Time         76442 0.1218    2581    41728
+
+[dev_val_excl_placeholder]
+  metric                              legacy rules      v3 rules     v3 hybrid  P2 hybrid s42
+  alerted_event_recall                      0.0794        0.3865        0.4752         0.0916
+  alerted_fpr                               0.0622        0.1531        0.2064         0.0962
+  alerted_event_precision                   0.1089        0.1945        0.1805         0.0835
+  alerted_campaign_coverage                 0.3185        0.3668        0.5193         0.4236
+  alerted_attacking_ips_flagged               2846          3277          4640           3785
+  alerted_benign_ips_flagged                 52944         58195         91407          82472
+  alerts                                     90452        316277        437092         136120
+  alert_precision                           0.1089        0.2104        0.2122         0.0835
+  detected_event_recall                     0.0794        0.4971        0.6380               
+  detected_fpr                              0.0622        0.2039        0.2788               
+  detected_event_precision                  0.1089        0.1891        0.1795               
+  detected_attacking_ips_flagged              2846          3277          4764               
+  detected_benign_ips_flagged                52944         58195         94924               
+  response benign_ips_blocked                29366         38446        102929          70415
+  response attack_ips_blocked                  966          3019          5252           4249
+  response legitimate_users_affected        273003         71000        106215         280382
+  response benign_events_from_blocked_source        526795        146990        215247         548660
+  response attack_events_from_blocked_source        111915         36650         47461               
+  per detector (alerts, precision, attacking IPs, benign IPs): v3 hybrid
+    Brute Force Attack             3118 0.2184     495     1907
+    Slow Brute Force              70666 0.2364    1276    10483
+    Credential Stuffing           92628 0.2700    1401     7125
+    Invalid Account Spraying          0 0.0000       0        0
+    Distributed Brute Force       19733 0.2037    1346     9077
+    Success After Failures        51504 0.2041    1097     8222
+    Multiple IP Login              2186 0.1349     271     1813
+    Suspicious Login Time         76442 0.1218    2581    41728
+    ML Anomaly Detected          120815 0.2170    3835    56990
+  per detector: legacy rules
+    Brute Force Attack             6531 0.0242     158     6373
+    Credential Stuffing            3551 0.0253      90     3461
+    Multiple IP Login              2179 0.1152     237     1831
+    Slow Brute Force               1749 0.0206      36     1713
+    Suspicious Login Time         76442 0.1218    2581    41728
+
+[dev_val_cold]
+  metric                              legacy rules      v3 rules     v3 hybrid  P2 hybrid s42
+  alerted_event_recall                      0.0797        0.4030        0.4940         0.0897
+  alerted_fpr                               0.0641        0.1904        0.2407         0.1007
+  alerted_event_precision                   0.1427        0.2208        0.2155         0.1065
+  alerted_campaign_coverage                 0.3370        0.3948        0.5548         0.4288
+  alerted_attacking_ips_flagged               2300          2694          3786           2926
+  alerted_benign_ips_flagged                 29264         33927         55129          47664
+  alerts                                     54568        235789        306932          82252
+  alert_precision                           0.1427        0.2323        0.2482         0.1065
+  detected_event_recall                     0.0797        0.5158        0.6599               
+  detected_fpr                              0.0641        0.2506        0.3234               
+  detected_event_precision                  0.1427        0.2160        0.2145               
+  detected_attacking_ips_flagged              2300          2697          3899               
+  detected_benign_ips_flagged                29264         33993         57731               
+  response benign_ips_blocked                21983         30971         73693          51546
+  response attack_ips_blocked                  811          2815          4528           3847
+  response legitimate_users_affected        189612         55258         76695         192831
+  response benign_events_from_blocked_source        336618        105193        145778         342752
+  response attack_events_from_blocked_source         90433         29997         38526               
+  per detector (alerts, precision, attacking IPs, benign IPs): v3 hybrid
+    Brute Force Attack             2554 0.2291     440     1566
+    Slow Brute Force              56178 0.2476    1164     7436
+    Credential Stuffing           76839 0.2718    1323     5682
+    Invalid Account Spraying          0 0.0000       0        0
+    Distributed Brute Force       14437 0.2178    1175     6530
+    Success After Failures        38301 0.2254    1012     5898
+    Multiple IP Login              1611 0.1440     218     1336
+    Suspicious Login Time         45869 0.1610    2105    22129
+    ML Anomaly Detected           71143 0.3008    3197    35216
+  per detector: legacy rules
+    Brute Force Attack             3603 0.0297     107     3496
+    Credential Stuffing            2208 0.0299      66     2142
+    Multiple IP Login              1574 0.1258     191     1316
+    Slow Brute Force               1314 0.0228      30     1284
+    Suspicious Login Time         45869 0.1610    2105    22129
+
+TTL 86400 s variant, dev_val response: rules {'blocks_placed': 377941, 'benign_ips_blocked': 49982, 'attack_ips_blocked': 3767, 'benign_events_from_blocked_source': 619280, 'benign_successes_from_blocked_source': 146409, 'attack_events_from_blocked_source': 154539, 'legitimate_users_affected': 138795, 'placeholder_benign_events_from_blocked_source': 348899}
+                                      hybrid {'blocks_placed': 573034, 'benign_ips_blocked': 125766, 'attack_ips_blocked': 6691, 'benign_events_from_blocked_source': 767829, 'benign_successes_from_blocked_source': 224257, 'attack_events_from_blocked_source': 182527, 'legitimate_users_affected': 186771, 'placeholder_benign_events_from_blocked_source': 396687}
+label noise: {"benign_alerted_events": 358212, "benign_alerted_ips": 84231, "event_share_no_success_in_dev": 0.1387586122184628, "ip_share_no_success_in_dev": 0.1799218814925621, "event_share_only_placeholder": 0.11565497526604357, "ip_share_only_placeholder": 0.11531383932281464, "event_share_five_plus_accounts": 0.6588835661563543, "ip_share_five_plus_accounts": 0.21251083330365306, "event_share_any": 0.7947081616472926, "ip_share_any": 0.3922308888651447}
+ML reach share (real replay): 1.0
+timings (s): {'load': 5.6, 'metrics': 20.4, 'total': 26.1}
