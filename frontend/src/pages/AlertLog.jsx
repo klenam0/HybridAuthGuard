@@ -207,6 +207,13 @@ function AlertCard({
                 <span className="text-[9px] bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded px-2 py-0.5">
                   🤖 AI Generated
                 </span>
+              ) : alert.enrichment_failed ? (
+                <span
+                  className="text-[9px] bg-slate-500/20 text-slate-500 border border-slate-500/30 rounded px-2 py-0.5"
+                  title={alert.enrichment_error || undefined}
+                >
+                  AI analysis unavailable
+                </span>
               ) : alert.enriched === false ? (
                 <span className="text-[9px] bg-slate-500/20 text-slate-500 border border-slate-500/30 rounded px-2 py-0.5 animate-pulse">
                   ⏳ AI Enriching...

@@ -152,6 +152,29 @@ class AlertManager:
                     return True
         return False
 
+    def mark_enrichment_failed(self, alert_id, reason, final_after):
+        """
+        Record a failed enrichment attempt without marking the alert as
+        enriched. After `final_after` attempts it is flagged
+        enrichment_failed so the scanner stops retrying. Returns the
+        attempt count, or None if the alert no longer exists.
+        """
+        with self._lock():
+            alerts = self._read_for_write()
+            for alert in alerts:
+                if alert.get("alert_id") == alert_id:
+                    attempts = alert.get("enrichment_attempts", 0) + 1
+                    alert["enrichment_attempts"]  = attempts
+                    alert["enrichment_error"]     = str(reason)[:300]
+                    alert["enrichment_failed_at"] = datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+                    if attempts >= final_after:
+                        alert["enrichment_failed"] = True
+                    atomic_write_json(self.file_path, alerts)
+                    return attempts
+        return None
+
     def backup(self):
         """Copy the current store to alerts.json.bak. Returns alerts backed up."""
         with self._lock():

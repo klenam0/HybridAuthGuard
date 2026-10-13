@@ -405,16 +405,20 @@ def get_enrichment_status():
         alerts   = _alert_store().load_cached()
         total    = len(alerts)
         enriched = sum(1 for a in alerts if a.get("enriched"))
-        pending  = total - enriched
+        failed   = sum(1 for a in alerts
+                       if not a.get("enriched") and a.get("enrichment_failed"))
+        pending  = total - enriched - failed
         return jsonify({
             "total":         total,
             "enriched":      enriched,
             "pending":       pending,
+            "failed":        failed,
             "llm_available": _llm_analyzer.available if _llm_analyzer else False,
         })
     except Exception:
         return jsonify({
-            "total": 0, "enriched": 0, "pending": 0, "llm_available": False
+            "total": 0, "enriched": 0, "pending": 0, "failed": 0,
+            "llm_available": False
         })
 
 

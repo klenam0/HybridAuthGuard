@@ -118,6 +118,16 @@ SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 465                            # implicit TLS (SMTP_SSL)
 SMTP_TIMEOUT_SECONDS = 10                  # connect/read timeout per email
 
+# ── LLM enrichment (utils/llm_analyzer.py) ────────────────────────────────
+OLLAMA_BASE_URL = "http://localhost:11434"
+OLLAMA_MODEL = "phi3:mini"
+LLM_TIMEOUT_SECONDS = 300                  # per generate request
+LLM_MAX_CONCURRENT = 2
+LLM_SCAN_INTERVAL_SECONDS = 10
+LLM_RECHECK_SECONDS = 60                   # re-check Ollama while unavailable
+LLM_MAX_ATTEMPTS = 3                       # then the alert is marked failed
+LLM_RETRY_AFTER_SECONDS = 60               # doubled after each failure
+
 # ── API access (api.py) ───────────────────────────────────────────────────
 # Browser origins allowed by CORS. Override with a comma-separated
 # DASHBOARD_ORIGINS environment variable.
