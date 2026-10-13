@@ -23,7 +23,7 @@ def is_internal_ip(ip):
     return any(addr in net for net in _INTERNAL_NETWORKS if net.version == addr.version)
 
 
-class DetectionAgent:
+class LegacyDetectionAgent:
     """
     Reviewer-revision fixes applied here (see docs/DECISIONS.md, ADR-16 on
     the block-state split for Fixes A-B and ADR-17 on cooldown and the
@@ -333,3 +333,32 @@ class DetectionAgent:
                     }
 
         return None
+
+    def analyze_all(self, log_event):
+        """The alerts for one event as a list (the legacy engine raises at
+        most one). Same call shape as the v3 engine's analyze_all()."""
+        alert = self.analyze_event(log_event)
+        return [alert] if alert else []
+
+
+def DetectionAgent(threshold=None, anomaly_detector=None, mode=None):
+    """
+    The rule engine selected by config.RULES_MODE (or mode):
+
+      "legacy"  LegacyDetectionAgent above: the Phase 0-2 rules, unchanged,
+                kept for the reproduction gate. threshold is its lifetime
+                Brute Force count (default config.BRUTE_FORCE_THRESHOLD).
+      "v3"      agents.rules_v3.V3DetectionAgent: windowed state, every
+                detector and the ML step on every event (Phase 3). Its
+                thresholds come from the V3_* settings in config.py;
+                threshold is ignored.
+    """
+    mode = mode or config.RULES_MODE
+    if mode == "legacy":
+        return LegacyDetectionAgent(
+            threshold=config.BRUTE_FORCE_THRESHOLD if threshold is None else threshold,
+            anomaly_detector=anomaly_detector)
+    if mode == "v3":
+        from agents.rules_v3 import V3DetectionAgent
+        return V3DetectionAgent(anomaly_detector=anomaly_detector)
+    raise ValueError(f"unknown RULES_MODE {mode!r} (expected 'legacy' or 'v3')")

@@ -108,7 +108,8 @@ def dry_pass(events):
                     "confidence": "Low", "feature_count": 10}
 
     stub = _Stub()
-    agent = DetectionAgent(threshold=config.BRUTE_FORCE_THRESHOLD, anomaly_detector=stub)
+    agent = DetectionAgent(threshold=config.BRUTE_FORCE_THRESHOLD, anomaly_detector=stub,
+                           mode="legacy")
     with contextlib.redirect_stdout(io.StringIO()):
         for i, e in enumerate(events):
             d = dict(e)

@@ -101,7 +101,8 @@ class PrecomputedScorer:
 
     def prepare(self, events):
         stub = _RecordingStub()
-        agent = DetectionAgent(threshold=self.threshold, anomaly_detector=stub)
+        agent = DetectionAgent(threshold=self.threshold, anomaly_detector=stub,
+                               mode="legacy")
         with contextlib.redirect_stdout(io.StringIO()):
             for e in events:
                 agent.analyze_event(dict(e))
@@ -202,10 +203,12 @@ def replay(events, scorer=None, threshold=config.BRUTE_FORCE_THRESHOLD):
     """
     Run events (dicts with timestamp/user/ip/status[/country/device_type],
     already time-sorted) through the real agents. scorer=None runs rules only.
+    Always the legacy rule engine (config.RULES_MODE "legacy"); the v3
+    engine is replayed by eval/rules_v3_replay.py.
     """
     if scorer is not None:
         scorer.prepare(events)
-    agent = DetectionAgent(threshold=threshold, anomaly_detector=scorer)
+    agent = DetectionAgent(threshold=threshold, anomaly_detector=scorer, mode="legacy")
     analysis = AnalysisAgent()
     email = NullEmailAlerter()
     response = ResponseAgent(email_alerter=email)

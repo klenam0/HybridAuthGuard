@@ -13,6 +13,12 @@ evaluation (backend/eval/harness.py) after doing so.
 import os
 
 # ── Rules (agents/detection_agent.py) ──────────────────────────────────────
+# Rule engine: "legacy" = the Phase 0-2 rules (agents/detection_agent.py
+# LegacyDetectionAgent), kept unchanged for the reproduction gate; "v3" =
+# the Phase 3 engine (agents/rules_v3.py, V3_* settings below). The legacy
+# settings directly below apply to "legacy" only.
+RULES_MODE = "legacy"
+
 BRUTE_FORCE_THRESHOLD = 5              # lifetime FAILED events from one IP
 
 SUSPICIOUS_HOUR_START = 0              # SUCCESS logins in [START:00, END:59]
@@ -190,6 +196,7 @@ DETECTORS = [
 def public_config():
     """Read-only view served at /api/config. No secrets belong here."""
     return {
+        "rules_mode": RULES_MODE,
         "rules": {
             "brute_force_threshold": BRUTE_FORCE_THRESHOLD,
             "suspicious_hour_start": SUSPICIOUS_HOUR_START,
