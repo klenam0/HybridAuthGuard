@@ -1,0 +1,2 @@
+# Test-only dependencies (python -m pytest)
+pytest==9.1.1
