@@ -437,3 +437,105 @@ changed, why, and what had already been seen.
    analysis and response agents replayed in v3 + v4 mode over `dev_train`,
    `val_a` and `val_b` must reproduce the offline scores and ML alerts with
    0 mismatches and place 0 blocks, or the integration is void.
+
+5. 2026-10-13, Phase 4b, before any Phase 4b metric. Open ML questions
+   from Phase 4. Seen before this amendment: every Phase 2, 3, 3b and 4
+   result, including all Phase 4 val_a rows and the val_b rows that Phase 4's
+   `confirm` computed (fallback, best with and without D, Phase 2 forest's
+   best row, the two HGB references). Rules, thresholds' definition, bars
+   and the test-set lock are unchanged.
+
+   **Why this phase exists.** Phase 4 raised three questions on `val_a`:
+   (1) the Phase 2 forest's frequency maps and known-IP set were built from
+   `dev_train`'s non-attack rows, and the forest was fitted on those rows,
+   so its 0.763 `val_a` ROC-AUC may come partly from label information
+   rather than from label-free anomaly signal; (2) the Freeman model scored
+   the placeholder ID (`config.UNKNOWN_ACCOUNT_IDS`) as a user, and at
+   q = 1% every one of its alerts was on that ID; (3) the supervised
+   reference clears the bar, so it matters whether it generalises to IPs it
+   never saw. **The new candidates below were proposed after seeing Phase
+   4's `val_a` results.** `val_b` has not been computed for any of them.
+   This is a second look at the same `val_a`, so a qualifying candidate here
+   carries more selection risk than one chosen in Phase 4, and `val_b` is
+   the only half that can confirm it.
+
+   **Diagnostic D1 (measurement, not selection).** The Phase 2 forest is
+   rebuilt with its exact code and hyperparameters
+   (`eval/phase2_baseline.Prepared`, `ml/train_from_dataset.fit_frequency_maps`
+   and `extract_features_freq`, `StandardScaler`, `IsolationForest` with 200
+   trees, `max_samples` 100000, contamination 0.4, seed 42; events scored
+   with the vectorised v3 features of `eval/phase3_rules.raw_features`,
+   30-day `failed_rate`), in three variants:
+   - (a) original: maps, known sets, scaler and fit from the non-attack
+     `dev_train` rows. Its scores are the cached
+     `phase3_cache/ml_decision_v3.npy` (not refitted).
+   - (b) maps and known sets from **all** `dev_train` rows; scaler and fit
+     on the non-attack rows (features of those rows computed with the
+     all-rows maps).
+   - (c) maps, known sets, scaler and fit from **all** `dev_train` rows:
+     fully label-free.
+   Score = -`score_samples` (a constant shift of -decision, so the quantile
+   thresholds select the same events). Reported for each on `val_a` and
+   `val_b`: event ROC-AUC, PR-AUC and TPR at 1% FPR. (b) - (a) isolates the
+   leakage through the maps and known sets; (c) - (b) the leakage through
+   the fit rows (including the training rows' cumulative `failed_rate`).
+   D1 chooses nothing; its `val_b` numbers are measurements of an
+   ineligible diagnostic for (a) and (b), and for (c) they are reported only
+   in the `confirm` stage below, after the choice is on disk.
+
+   **New eligible candidates (label-free)**, in this order (the order breaks
+   the last tie):
+   - C1: variant (c) of D1, seed 42.
+   - C2: Freeman, same beta grid (0.5, 2, 8), with every event whose user is
+     in `UNKNOWN_ACCOUNT_IDS` given the minimum risk score, so it never
+     alerts (the same treatment group C already gives that ID). The minimum
+     is the smallest value of that beta's column over all development
+     events (a constant, label-free). Other events keep their cached
+     Phase 4 risk.
+   - C3: reputation scores with the direction fixed a priori (a higher
+     prior failure ratio is riskier): `d_asn_fail_ratio` alone,
+     `d_ip_fail_ratio` alone, and their elementwise maximum, taken from the
+     cached Phase 4 feature matrix exactly as computed (group D, so all
+     three are "with D"; C1 and C2 are "without D").
+
+   **Thresholds, criterion and confirmation:** identical to amendment 4.
+   Each new score gets the dev_train `(1 - q)` quantile thresholds for q in
+   (0.1, 0.5, 1, 2, 5, 10, 20, 30)% (`inverted_cdf`, score >= threshold
+   alerts, ties all alert, identical alert sets kept), ML alerts
+   de-duplicated per IP with a 3600 s cooldown, the same
+   incremental-incident criterion against the same frozen rule incidents,
+   the same bars (>= 30 incremental incidents and lower bound >= 0.2149 on
+   `val_a`; holds on `val_b` = >= 30 and lower bound >= 0.1915, also
+   reported against 0.2149) and the same ties (higher lower bound, fewer ML
+   alerts, the candidate order above, then beta / score and threshold
+   order). The choice is made on `val_a` among C1 to C3 only; the Phase 4
+   rows are not re-entered. The `select` stage computes no `val_b` metric.
+   `confirm` reads the choice from disk and computes `val_b` once for the
+   chosen row (or, if none qualifies, the best-by-lower-bound row, as in
+   amendment 4's fallback rule), plus the best row of each of C1, C2 and C3
+   by the same rule within that family.
+
+   **If a candidate qualifies,** it replaces the Phase 4 fallback in
+   `data/model_v4.pkl` with `alerting = True`, the `workload` stage is
+   rerun with it, and (for C2 or C3) the real-agent replay in v3 + v4 mode
+   with alerting on must reproduce it over `dev_train`, `val_a` and `val_b`
+   with 0 mismatches, or the integration is void. **If none qualifies,** the
+   Phase 4 fallback stays in `model_v4.pkl` unchanged (`alerting = False`).
+
+   **Supervised generalisation (measurement, not selection).** The existing
+   HGB reference fits are scored from their cached Phase 4 scores (no
+   refit): all eight fits (two feature sets x four settings), the two
+   Phase 4 reference settings marked. Each fit uses the dev_train threshold
+   at its feature set's reference-row quantile (20% for A-E, 10% for
+   without D). On `val_a` and on `val_b`, within each subset below, reported:
+   event ROC-AUC, PR-AUC, TPR at 1% FPR, ML alert precision with its
+   IP-clustered CI, and incremental-incident precision with its CI (rule
+   coverage over all of the half's events, as for amendment 4's strata;
+   only alerts on events in the subset form incidents). Subsets:
+   - cold IPs: events whose IP has no `dev_train` event;
+   - new attackers: events whose IP has no attack-labelled `dev_train`
+     event (so the attacking IPs left are ones the blocklist label had not
+     shown the model; benign events stay as negatives);
+   - excluding the placeholder ID's events.
+   This answers whether a model trained on a historical blocklist flags
+   new attacking IPs.
