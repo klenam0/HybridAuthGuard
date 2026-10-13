@@ -1,0 +1,284 @@
+{
+  "equivalent": true,
+  "settings": {
+    "V3_BF_WINDOW_SECONDS": 60,
+    "V3_BF_MIN_FAILURES": 5,
+    "V3_SLOW_BF_WINDOW_SECONDS": 604800,
+    "V3_SLOW_BF_MIN_FAILURES": 3,
+    "V3_SLOW_BF_MIN_SPREAD_SECONDS": 300,
+    "V3_CS_WINDOW_SECONDS": 604800,
+    "V3_CS_MIN_ACCOUNTS": 2,
+    "V3_INVALID_WINDOW_SECONDS": 604800,
+    "V3_INVALID_MIN_ATTEMPTS": 3,
+    "V3_DIST_WINDOW_SECONDS": 172800,
+    "V3_DIST_MIN_IPS": 3,
+    "V3_SAF_WINDOW_SECONDS": 604800,
+    "V3_SAF_MIN_FAILURES": 3,
+    "V3_MULTI_IP_WINDOW_SECONDS": 120,
+    "V3_MULTI_IP_EXEMPT": [
+      "known_ip"
+    ],
+    "V3_KNOWN_IP_TTL_SECONDS": 2592000,
+    "V3_DEDUP_SECONDS": {
+      "default": 3600,
+      "Suspicious Login Time": 600
+    },
+    "V3_DUPLICATE_WINDOW_SECONDS": 300,
+    "ML_FAILED_RATE_WINDOW_DAYS": 30,
+    "V3_BLOCK_DETECTORS": []
+  },
+  "blocks_placed": 0,
+  "blocked_source_events": 0,
+  "ml_scored_events": 6392584,
+  "events": 6392584,
+  "per_detector": {
+    "Brute Force Attack": {
+      "dev_train": {
+        "offline_matches": 841,
+        "replay_matches": 841,
+        "match_mismatches": 0,
+        "offline_alerts": 329,
+        "replay_alerts": 329,
+        "alert_mismatches": 0
+      },
+      "val_a": {
+        "offline_matches": 671,
+        "replay_matches": 671,
+        "match_mismatches": 0,
+        "offline_alerts": 256,
+        "replay_alerts": 256,
+        "alert_mismatches": 0
+      },
+      "val_b": {
+        "offline_matches": 664,
+        "replay_matches": 664,
+        "match_mismatches": 0,
+        "offline_alerts": 263,
+        "replay_alerts": 263,
+        "alert_mismatches": 0
+      }
+    },
+    "Slow Brute Force": {
+      "dev_train": {
+        "offline_matches": 262244,
+        "replay_matches": 262244,
+        "match_mismatches": 0,
+        "offline_alerts": 194402,
+        "replay_alerts": 194402,
+        "alert_mismatches": 0
+      },
+      "val_a": {
+        "offline_matches": 99293,
+        "replay_matches": 99293,
+        "match_mismatches": 0,
+        "offline_alerts": 70394,
+        "replay_alerts": 70394,
+        "alert_mismatches": 0
+      },
+      "val_b": {
+        "offline_matches": 88451,
+        "replay_matches": 88451,
+        "match_mismatches": 0,
+        "offline_alerts": 62490,
+        "replay_alerts": 62490,
+        "alert_mismatches": 0
+      }
+    },
+    "Credential Stuffing": {
+      "dev_train": {
+        "offline_matches": 253646,
+        "replay_matches": 253646,
+        "match_mismatches": 0,
+        "offline_alerts": 197230,
+        "replay_alerts": 197230,
+        "alert_mismatches": 0
+      },
+      "val_a": {
+        "offline_matches": 93209,
+        "replay_matches": 93209,
+        "match_mismatches": 0,
+        "offline_alerts": 69902,
+        "replay_alerts": 69902,
+        "alert_mismatches": 0
+      },
+      "val_b": {
+        "offline_matches": 83674,
+        "replay_matches": 83674,
+        "match_mismatches": 0,
+        "offline_alerts": 62534,
+        "replay_alerts": 62534,
+        "alert_mismatches": 0
+      }
+    },
+    "Invalid Account Spraying": {
+      "dev_train": {
+        "offline_matches": 748337,
+        "replay_matches": 748337,
+        "match_mismatches": 0,
+        "offline_alerts": 417593,
+        "replay_alerts": 417593,
+        "alert_mismatches": 0
+      },
+      "val_a": {
+        "offline_matches": 277668,
+        "replay_matches": 277668,
+        "match_mismatches": 0,
+        "offline_alerts": 145762,
+        "replay_alerts": 145762,
+        "alert_mismatches": 0
+      },
+      "val_b": {
+        "offline_matches": 253412,
+        "replay_matches": 253412,
+        "match_mismatches": 0,
+        "offline_alerts": 130298,
+        "replay_alerts": 130298,
+        "alert_mismatches": 0
+      }
+    },
+    "Distributed Brute Force": {
+      "dev_train": {
+        "offline_matches": 10456,
+        "replay_matches": 10456,
+        "match_mismatches": 0,
+        "offline_alerts": 7265,
+        "replay_alerts": 7265,
+        "alert_mismatches": 0
+      },
+      "val_a": {
+        "offline_matches": 3627,
+        "replay_matches": 3627,
+        "match_mismatches": 0,
+        "offline_alerts": 2297,
+        "replay_alerts": 2297,
+        "alert_mismatches": 0
+      },
+      "val_b": {
+        "offline_matches": 3424,
+        "replay_matches": 3424,
+        "match_mismatches": 0,
+        "offline_alerts": 2290,
+        "replay_alerts": 2290,
+        "alert_mismatches": 0
+      }
+    },
+    "Success After Failures": {
+      "dev_train": {
+        "offline_matches": 352603,
+        "replay_matches": 352603,
+        "match_mismatches": 0,
+        "offline_alerts": 255641,
+        "replay_alerts": 255641,
+        "alert_mismatches": 0
+      },
+      "val_a": {
+        "offline_matches": 109370,
+        "replay_matches": 109370,
+        "match_mismatches": 0,
+        "offline_alerts": 79520,
+        "replay_alerts": 79520,
+        "alert_mismatches": 0
+      },
+      "val_b": {
+        "offline_matches": 98973,
+        "replay_matches": 98973,
+        "match_mismatches": 0,
+        "offline_alerts": 72232,
+        "replay_alerts": 72232,
+        "alert_mismatches": 0
+      }
+    },
+    "Multiple IP Login": {
+      "dev_train": {
+        "offline_matches": 4499,
+        "replay_matches": 4499,
+        "match_mismatches": 0,
+        "offline_alerts": 4499,
+        "replay_alerts": 4499,
+        "alert_mismatches": 0
+      },
+      "val_a": {
+        "offline_matches": 1120,
+        "replay_matches": 1120,
+        "match_mismatches": 0,
+        "offline_alerts": 1120,
+        "replay_alerts": 1120,
+        "alert_mismatches": 0
+      },
+      "val_b": {
+        "offline_matches": 1066,
+        "replay_matches": 1066,
+        "match_mismatches": 0,
+        "offline_alerts": 1066,
+        "replay_alerts": 1066,
+        "alert_mismatches": 0
+      }
+    },
+    "Suspicious Login Time": {
+      "dev_train": {
+        "offline_matches": 153007,
+        "replay_matches": 153007,
+        "match_mismatches": 0,
+        "offline_alerts": 112487,
+        "replay_alerts": 112487,
+        "alert_mismatches": 0
+      },
+      "val_a": {
+        "offline_matches": 49290,
+        "replay_matches": 49290,
+        "match_mismatches": 0,
+        "offline_alerts": 37436,
+        "replay_alerts": 37436,
+        "alert_mismatches": 0
+      },
+      "val_b": {
+        "offline_matches": 50364,
+        "replay_matches": 50364,
+        "match_mismatches": 0,
+        "offline_alerts": 39006,
+        "replay_alerts": 39006,
+        "alert_mismatches": 0
+      }
+    },
+    "ML Anomaly Detected": {
+      "dev_train": {
+        "offline_matches": 846349,
+        "replay_matches": 846349,
+        "match_mismatches": 0,
+        "offline_alerts": 455456,
+        "replay_alerts": 455456,
+        "alert_mismatches": 0
+      },
+      "val_a": {
+        "offline_matches": 253626,
+        "replay_matches": 253626,
+        "match_mismatches": 0,
+        "offline_alerts": 132649,
+        "replay_alerts": 132649,
+        "alert_mismatches": 0
+      },
+      "val_b": {
+        "offline_matches": 261306,
+        "replay_matches": 261306,
+        "match_mismatches": 0,
+        "offline_alerts": 136472,
+        "replay_alerts": 136472,
+        "alert_mismatches": 0
+      }
+    }
+  },
+  "state_sizes_end": {
+    "ips": 177317,
+    "accounts": 57646,
+    "account_history": 523774,
+    "cooldowns": 2809,
+    "recent_events": 2968
+  },
+  "replay_seconds": 276.3,
+  "replay_us_per_event": 43.2,
+  "timings_seconds": {
+    "load stream, chosen settings, ML decisions": 13.7,
+    "real v3 replay (detection + analysis + response), no blocking": 276.3,
+    "total": 293.0
+  }
+}
