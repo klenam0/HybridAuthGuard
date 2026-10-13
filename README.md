@@ -64,12 +64,12 @@ This project explores a **hybrid** answer: deterministic rules for known attack 
 | -------------------------------------------------- | ---------------------------------------------------- |
 | ![Alert Detail](docs/screenshots/alert-detail.png) | ![MITRE Mapping](docs/screenshots/mitre-mapping.png) |
 
-| Detection Engine                                         | System Health                                      |
-| -------------------------------------------------------- | -------------------------------------------------- |
+| Detection Engine                                           | System Health                                        |
+| ---------------------------------------------------------- | ---------------------------------------------------- |
 | ![Detection Engine](docs/screenshots/detection-engine.png) | ![System Health](docs/screenshots/system-health.png) |
 
-| Live Mode (terminal)                                            |
-| --------------------------------------------------------------- |
+| Live Mode (terminal)                                           |
+| -------------------------------------------------------------- |
 | ![Live Mode Terminal](docs/screenshots/live-mode-terminal.png) |
 
 ## Architecture
@@ -127,16 +127,16 @@ Evaluated on a held-out, user-disjoint test split of the RBA Dataset (a privacy-
 These figures score an event as anomalous when `predict() == -1` (decision score below 0), which is how the model was evaluated. The running system alerts only below a stricter margin of -0.02 (`ML_ALERT_MARGIN` in `backend/config.py`); at that margin the same model gives precision 58.0% and recall 59.1% (seed 42, Batch 5b).
 
 | Metric (score < 0) | Deployed model (dashboard) | 10-seed mean |
-| ------------- | -------------------------- | ------------ |
-| Precision     | 53.5%                      | 53.8%        |
-| Recall        | 77.9%                      | 77.9%        |
-| F1-Score      | 63.4%                      | 63.7%        |
-| ROC-AUC       | 0.750                      | 0.755        |
+| --------- | -------------------------- | ------------ |
+| Precision | 53.5%                      | 53.8%        |
+| Recall    | 77.9%                      | 77.9%        |
+| F1-Score  | 63.4%                      | 63.7%        |
+| ROC-AUC   | 0.750                      | 0.755        |
 
-| Setting       | Value                                                                                                                 |
-| ------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Training size | 561,464 normal login events from 174,107 users                                                                        |
-| Algorithm     | Isolation Forest, contamination=0.4 (chosen on validation only), 200 estimators, StandardScaler                       |
+| Setting       | Value                                                                                                                    |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Training size | 561,464 normal login events from 174,107 users                                                                           |
+| Algorithm     | Isolation Forest, contamination=0.4 (chosen on validation only), 200 estimators, StandardScaler                          |
 | Features      | 10 (cyclic hour encoding, IP/user/country/device frequency in training, cumulative failure rate, novel-IP/country flags) |
 
 These figures replace earlier, higher figures that were computed with `contamination` tuned on the test set and with raw identity IDs as features; see ADR-13 to ADR-15 in [`docs/DECISIONS.md`](docs/DECISIONS.md).
@@ -246,11 +246,11 @@ The ML model is trained on the **RBA (Risk-Based Authentication) Dataset**, intr
 
 This project samples 700,000 normal and 70,000 attack events and splits them **user-disjoint**, holding out 30% of users entirely:
 
-| Partition  | Size                                          |
-| ---------- | --------------------------------------------- |
-| Train      | 561,464 normal events (174,107 users)         |
-| Validation | 104,268 events                                |
-| Test       | 104,268 events                                |
+| Partition  | Size                                  |
+| ---------- | ------------------------------------- |
+| Train      | 561,464 normal events (174,107 users) |
+| Validation | 104,268 events                        |
+| Test       | 104,268 events                        |
 
 > Wiefling, S., Lo Iacono, L., & Dürmuth, M. (2019). Is this really you? An empirical study on risk-based authentication applied in the wild. _IFIP International Conference on ICT Systems Security and Privacy Protection._
 

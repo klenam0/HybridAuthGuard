@@ -36,6 +36,11 @@ backend/data/alerts.json.corrupt-*
 backend/data/live_queue.deadletter.jsonl
 backend/data/model.pkl.replaced-*
 
+#results 
+backend/results/batch4_results.json
+backend/results/batch5_results.json
+backend/results/batch5b_results.json
+
 # Pickled caches and models are never committed: they are large, and
 # loading a pickle runs code from it (audit F31).
 *.pkl
