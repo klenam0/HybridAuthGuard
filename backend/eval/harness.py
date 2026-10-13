@@ -110,8 +110,8 @@ class PrecomputedScorer:
         self.raw = build_features(reached, self.detector)
         d = self.detector
         X = d.scaler.transform(self.raw) if d.scaler is not None else self.raw
-        self.pred = d.model.predict(X)
         self.decision = d.model.decision_function(X)
+        self.pred = np.where(self.decision < 0, -1, 1)   # == model.predict(X)
         self._i = 0
         return self
 

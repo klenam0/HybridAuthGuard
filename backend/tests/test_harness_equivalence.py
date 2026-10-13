@@ -72,6 +72,12 @@ def compare(test, events):
     test.assertEqual(bad_rows[:5].tolist(), [], f"{len(bad_rows)} feature rows differ")
     bad_dec = np.where(np.array(spy.decisions) != pre_scorer.decision)[0]
     test.assertEqual(bad_dec[:5].tolist(), [], f"{len(bad_dec)} decision values differ")
+    # Score-once (audit F21): the flag derived from decision_function must
+    # equal what model.predict() returns for the same rows.
+    det = pre_scorer.detector
+    if len(pre_scorer.raw):
+        predicted = det.model.predict(det.scaler.transform(pre_scorer.raw))
+        test.assertTrue(np.array_equal(predicted, pre_scorer.pred), "derived flag != predict()")
     test.assertEqual(len(live.scorer_calls), len(pre.scorer_calls), "scored-event count")
     mismatches = [
         (i, a, b) for i, ((ka, a), (kb, b))

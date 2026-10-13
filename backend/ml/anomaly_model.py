@@ -452,8 +452,11 @@ class AnomalyDetector:
             if self.scaler is not None:
                 features = self.scaler.transform(features)
 
-            prediction = self.model.predict(features)[0]
+            # One pass over the forest (audit F21). IsolationForest.predict()
+            # is defined as decision_function() < 0 -> -1, so deriving it here
+            # is exact and halves the per-event cost.
             raw_score  = self.model.decision_function(features)[0]
+            prediction = -1 if raw_score < 0 else 1
 
         except Exception as e:
             print(f"⚠ Scoring error for {ip}: {e}")
