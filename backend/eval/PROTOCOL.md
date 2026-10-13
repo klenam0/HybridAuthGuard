@@ -60,14 +60,16 @@ changed, why, and what had already been seen.
 - The Phase 2 baseline keeps the current design: the same 10 features
   (`ml/train_from_dataset.py: extract_features_freq`), 200 trees,
   `max_samples=100000`, `max_features=1.0`, StandardScaler.
-- Contamination: the eleven-point grid of Batch 3.7
-  (0.02, 0.05, 0.10, ..., 0.50) and its F1 rule (policy A: highest hybrid
-  event F1 on validation). Contamination moves only the threshold, not the
-  trees, so for each grid value the model's `offset_` is set to the
-  `100*c` percentile of the training `score_samples` (what scikit-learn does
-  for `contamination=c`). The sweep runs at seed 42 through the harness with
-  the current rules and runtime config; the chosen value is then used for
-  seeds 42, 43 and 44. Because contamination is chosen on `dev_val` and the
+- Contamination (amended, see Amendment 1): the eleven-point grid of
+  Batch 3.7 (0.02, 0.05, 0.10, ..., 0.50), choosing the value with the
+  highest Isolation Forest event-level F1 (`predict == -1`) on `dev_val`,
+  which is the rule that selected the deployed 0.4
+  (`ml/train_from_dataset_v3.py`, `_v3_extend.py`). Contamination moves only
+  the threshold, not the trees, so for each grid value the threshold is the
+  `100*c` percentile of the training `score_samples` (what scikit-learn sets
+  as `offset_` for `contamination=c`), evaluated vectorised at seed 42. The
+  chosen value is then used for seeds 42, 43 and 44, and the hybrid is
+  replayed only at that value. Because contamination is chosen on `dev_val` and the
   baseline is reported on `dev_val`, the baseline is slightly optimistic;
   later phases are compared with it on the same footing.
 
@@ -104,6 +106,20 @@ changed, why, and what had already been seen.
   events only.
 - Seeds 42, 43, 44 for every ML configuration: mean and per-seed values.
 
+- Reporting addition (not a protocol change): every `dev_val` metric is
+  also reported without the events of user ID `-4324475583306591935`, the
+  apparent placeholder for unknown usernames (37% of development rows; see
+  the Phase 2 data report). The replay itself always includes it. For that
+  ID the baseline also reports its `dev_val` event count, attack share and
+  alerts by type, and how many Credential Stuffing alerts involve it.
+
 ## Amendments
 
-None.
+1. 2026-10-13, before the baseline run. The contamination rule changed from
+   "highest hybrid event F1 (11 hybrid replays)" to "highest Isolation
+   Forest event-level F1, vectorised", at the project owner's instruction,
+   to match the rule that originally chose the deployed value. Seen before
+   the change: the dev-only data audit and timing probes of the replay. No
+   model score or metric on any split had been computed under this
+   protocol (a smoke test on the first 300,000 February rows, with a
+   stand-in split, checked only that the code runs).
