@@ -90,22 +90,34 @@ MITRE_MAPPING = {
     "Multiple IP Login": {
         "technique_id":   "T1078",
         "technique_name": "Valid Accounts",
-        "tactic":         "Defense Evasion / Persistence",
+        "tactic":         "Initial Access",
         "url":            "https://attack.mitre.org/techniques/T1078/",
     },
     "Suspicious Login Time": {
         "technique_id":   "T1078",
         "technique_name": "Valid Accounts",
-        "tactic":         "Persistence",
+        "tactic":         "Initial Access",
         "url":            "https://attack.mitre.org/techniques/T1078/",
     },
     "ML Anomaly Detected": {
         "technique_id":   "T1078",
         "technique_name": "Valid Accounts",
-        "tactic":         "Persistence",
+        "tactic":         "Initial Access",
         "url":            "https://attack.mitre.org/techniques/T1078/",
     },
 }
+
+# An ML alert on a FAILED login is not use of a valid account; it is
+# evidence of password guessing (audit F28).
+MITRE_ML_FAILED = {
+    "technique_id":   "T1110",
+    "technique_name": "Brute Force",
+    "tactic":         "Credential Access",
+    "url":            "https://attack.mitre.org/techniques/T1110/",
+}
+
+# /api/threat-level considers alerts saved within this many minutes.
+THREAT_LEVEL_WINDOW_MINUTES = 60
 
 # ── Response (agents/response_agent.py) ───────────────────────────────────
 # Severities that trigger the (simulated) IP block and the email.
@@ -200,6 +212,8 @@ def public_config():
             "ml_upgrade_severity": ML_UPGRADE_SEVERITY,
         },
         "mitre": {k: dict(v) for k, v in MITRE_MAPPING.items()},
+        "mitre_ml_failed": dict(MITRE_ML_FAILED),
+        "threat_level_window_minutes": THREAT_LEVEL_WINDOW_MINUTES,
         "response": {
             "simulated_block_severities": list(SIMULATED_BLOCK_SEVERITIES),
             "email_severities": list(EMAIL_SEVERITIES),

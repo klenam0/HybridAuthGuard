@@ -7,7 +7,7 @@ import sys
 import json
 import subprocess
 import threading
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -40,6 +40,7 @@ ALERTS_PATH  = os.path.join(BASE, "data", "alerts.json")
 STATS_PATH   = os.path.join(BASE, "data", "pipeline_stats.json")
 METRICS_PATH = os.path.join(BASE, "data", "model_metrics.json")
 QUEUE_PATH = os.path.join(BASE, "data", "live_queue.jsonl")
+DEADLETTER_PATH = os.path.join(BASE, "data", "live_queue.deadletter.jsonl")
 
 SERVER_START_TIME = datetime.now(timezone.utc)
 
@@ -203,6 +204,9 @@ def get_stats():
     severity_counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
     type_counts     = {}
     blocked_ips     = set()
+    # Recorded email outcomes. "unknown" = alerts saved before outcomes
+    # were recorded, which would have been emailed under the policy.
+    email = {"sent": 0, "failed": 0, "disabled": 0, "pending": 0, "unknown": 0}
 
     for alert in alerts:
         severity = alert.get("severity", "LOW")
@@ -211,8 +215,17 @@ def get_stats():
         alert_type = alert.get("type", "Unknown")
         type_counts[alert_type] = type_counts.get(alert_type, 0) + 1
 
-        if severity == "HIGH":
-            blocked_ips.add(alert.get("ip", ""))
+        response = alert.get("response")
+        if response:
+            if response.get("simulated_block"):
+                blocked_ips.add(alert.get("ip", ""))
+            if response.get("email") in email:
+                email[response["email"]] += 1
+        else:
+            if severity in config.SIMULATED_BLOCK_SEVERITIES:
+                blocked_ips.add(alert.get("ip", ""))
+            if severity in config.EMAIL_SEVERITIES:
+                email["unknown"] += 1
 
     return jsonify({
         "severity_counts": severity_counts,
@@ -220,7 +233,10 @@ def get_stats():
             {"name": k, "count": v}
             for k, v in type_counts.items()
         ],
-        "blocked_ips":  list(blocked_ips),
+        # IPs whose alerts triggered the (simulated, not enforced) block.
+        "simulated_block_ips": list(blocked_ips),
+        "blocked_ips":  list(blocked_ips),   # deprecated alias
+        "email":        email,
         "total_alerts": len(alerts),
     })
 
@@ -289,35 +305,37 @@ def get_agents():
     generated = stats.get("alerts_generated", len(alerts))
     last_run  = stats.get("last_run", "-")
 
+    # Measured values only (audit F26): no constant status/queue/success.
+    queue = _live_queue_state()
+    live_recent = (queue["cursor_mtime"] is not None
+                   and (datetime.now().timestamp() - queue["cursor_mtime"]) < 30)
+    status = "running" if (pipeline_status["running"] or live_recent) else "idle"
+
     return jsonify([
         {
             "name":     "Monitoring Stage",
             "role":     "Orchestrator",
-            "status":   "active",
+            "status":   status,
             "processed": processed,
             "alerts":   generated,
-            "queue":    0,
-            "success":  100,
+            "queue":    queue["pending"],
+            "dead_lettered": queue["dead_lettered"],
             "last_run": last_run,
         },
         {
             "name":     "Detection Stage",
             "role":     "Threat Detection Engine",
-            "status":   "active",
+            "status":   status,
             "processed": processed,
             "alerts":   generated,
-            "queue":    0,
-            "success":  100,
             "last_run": last_run,
         },
         {
             "name":     "Analysis Stage",
             "role":     "Alert Intelligence",
-            "status":   "active",
+            "status":   status,
             "processed": generated,
             "alerts":   generated,
-            "queue":    0,
-            "success":  100,
             "last_run": last_run,
         },
     ])
@@ -385,20 +403,32 @@ def get_detectors():
 
 @app.route("/api/threat-level")
 def get_threat_level():
-    """Compute real threat level from current alerts."""
-    alerts = _alert_store().load_cached()
+    """
+    Threat level from alerts saved in the last THREAT_LEVEL_WINDOW_MINUTES
+    (audit F27: it used to stay HIGH forever after one HIGH alert).
+    """
+    window = config.THREAT_LEVEL_WINDOW_MINUTES
+    cutoff = datetime.now() - timedelta(minutes=window)
+    recent = []
+    for a in _alert_store().load_cached():
+        stamp = a.get("saved_at") or a.get("detected_at")
+        try:
+            if stamp and datetime.strptime(stamp, "%Y-%m-%d %H:%M:%S") >= cutoff:
+                recent.append(a)
+        except ValueError:
+            continue
 
-    if not alerts:
-        return jsonify({"level": "NORMAL", "color": "green"})
-
-    severities = {a.get("severity", "LOW") for a in alerts}
-
-    if "HIGH" in severities:
-        return jsonify({"level": "HIGH",   "color": "orange"})
+    severities = {a.get("severity", "LOW") for a in recent}
+    if not recent:
+        level, color = "NORMAL", "green"
+    elif "HIGH" in severities:
+        level, color = "HIGH", "orange"
     elif "MEDIUM" in severities:
-        return jsonify({"level": "MEDIUM", "color": "amber"})
+        level, color = "MEDIUM", "amber"
     else:
-        return jsonify({"level": "LOW",    "color": "blue"})
+        level, color = "LOW", "blue"
+    return jsonify({"level": level, "color": color,
+                    "window_minutes": window, "recent_alerts": len(recent)})
 
 
 @app.route("/api/enrichment-status")
@@ -474,9 +504,8 @@ def ingest_event():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/api/queue/stats")
-def queue_stats():
-    """Return live queue statistics."""
+def _live_queue_state():
+    """Queued, processed and pending live events, from the byte cursor."""
     try:
         with open(QUEUE_PATH, "r", encoding="utf-8") as f:
             total_lines = sum(1 for line in f if line.strip())
@@ -498,11 +527,34 @@ def queue_stats():
     except FileNotFoundError:
         pass
 
+    try:
+        cursor_mtime = os.path.getmtime(QUEUE_PATH + ".cursor")
+    except OSError:
+        cursor_mtime = None
+    try:
+        with open(DEADLETTER_PATH, "r", encoding="utf-8") as f:
+            dead = sum(1 for line in f if line.strip())
+    except FileNotFoundError:
+        dead = 0
+    return {
+        "total_queued":  total_lines,
+        "processed":     processed,
+        "pending":       max(0, total_lines - processed),
+        "dead_lettered": dead,
+        "cursor_mtime":  cursor_mtime,
+    }
+
+
+@app.route("/api/queue/stats")
+def queue_stats():
+    """Return live queue statistics."""
+    state = _live_queue_state()
     return jsonify({
-        "total_queued": total_lines,
-        "processed":    processed,
-        "pending":      max(0, total_lines - processed),
-        "live_mode":    True,
+        "total_queued":  state["total_queued"],
+        "processed":     state["processed"],
+        "pending":       state["pending"],
+        "dead_lettered": state["dead_lettered"],
+        "live_mode":     True,
     })
 
 

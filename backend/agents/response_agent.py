@@ -32,29 +32,55 @@ class ResponseAgent:
         self.actions_log  = deque(maxlen=config.ACTIONS_LOG_MAX)
         # Injectable so the evaluation harness can stub email out.
         self.email_alerter = email_alerter if email_alerter is not None else EmailAlerter()
+        self.last_response = None
 
-    def take_action(self, alert):
+    def decide(self, alert):
+        """
+        The response policy for an alert, before anything is executed.
+        email is "pending" (will be sent), "disabled" (would be sent but
+        email is not configured) or "not_required".
+        """
         severity = alert.get("severity", "LOW")
         ip       = alert.get("ip",       "Unknown IP")
         user     = alert.get("user",     "Unknown User")
-        alert_type = alert.get("type",   "Unknown")
 
         if severity in config.SIMULATED_BLOCK_SEVERITIES:
             # Simulate firewall block
             action = f"Simulated: Block IP {ip} temporarily."
-
         elif severity in config.ADMIN_NOTIFY_SEVERITIES:
             action = f"Simulated: Notify admin about {user} at {ip}."
-
         else:
             action = f"Simulated: Log low severity alert for {ip}."
 
         if severity in config.EMAIL_SEVERITIES:
-            self.email_alerter.send_alert(alert)
+            email = "pending" if getattr(self.email_alerter, "enabled", True) else "disabled"
+        else:
+            email = "not_required"
 
+        return {
+            "action":            action,
+            "simulated_block":   severity in config.SIMULATED_BLOCK_SEVERITIES,
+            "admin_notify_simulated": severity in config.ADMIN_NOTIFY_SEVERITIES,
+            "email":             email,
+        }
+
+    def take_action(self, alert):
+        """
+        Execute the response. Returns the action text; the full outcome,
+        with email "sent" or "failed" once attempted, is in last_response.
+        """
+        response = self.decide(alert)
+        action = response["action"]
+
+        if response["email"] == "pending":
+            sent = self.email_alerter.send_alert(alert)
+            response["email"] = "sent" if sent else "failed"
+
+        self.last_response = response
         self.actions_log.append({
-            "alert":  alert,
-            "action": action
+            "alert":    alert,
+            "action":   action,
+            "response": response,
         })
 
         log.info("🛡️ Response Action Taken: %s", action)

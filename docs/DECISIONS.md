@@ -64,6 +64,8 @@ This document captures the significant design decisions made during development,
 
 **Consequences:** Preserves the more specific and actionable rule-based classifications (brute force, credential stuffing) instead of having every attack scenario collapse into a single generic "ML Anomaly" label.
 
+**Clarification (2026-10, audit F08):** "block" in this decision means the detector stops raising further ML alerts on successful logins from that IP (`ml_blocked_ips`). It is not a network block and does not depend on severity. The response layer applies a separate, simulated IP block only to HIGH-severity alerts, so a Medium-confidence ML alert on a successful login is suppressed for later SUCCESS events from that IP but does not trigger even the simulated block.
+
 ---
 
 ### ADR-7: Cross-process file locking via `filelock`

@@ -39,8 +39,11 @@ class AnalysisAgent:
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
 
-        # MITRE ATT&CK mapping
+        # MITRE ATT&CK mapping. ML alerts on FAILED logins map to T1110.
         mitre = self.mitre_mapping.get(alert_type)
+        values = (alert.get("trigger_details") or {}).get("values") or {}
+        if alert_type == "ML Anomaly Detected" and values.get("is_failed_event"):
+            mitre = config.MITRE_ML_FAILED
         if mitre:
             alert["mitre"] = mitre
 
@@ -77,7 +80,7 @@ class AnalysisAgent:
             "Brute Force Attack": (
                 f"HIGH: Repeated failed logins from {ip} indicate an automated "
                 f"brute force attack targeting '{user}'. "
-                f"IP has been flagged for blocking."
+                f"A simulated block is recorded for this IP (nothing is enforced in this prototype)."
             ),
             "Slow Brute Force": (
                 f"HIGH: IP {ip} is making deliberate slow-paced login attempts "

@@ -265,11 +265,15 @@ class DetectionAgent:
                         self.ml_last_alerted[ip] = timestamp
                         # Note: NOT adding to rule_blocked_ips here
                     else:
-                        # SUCCESS events: block immediately via ml_blocked_ips
-                        # (Fix B: kept separate from rule_blocked_ips, so this
-                        # never silences the FAILED-event rule checks above).
-                        # No rule-based detector covers suspicious SUCCESS
-                        # logins (account takeover from unknown IP).
+                        # SUCCESS events: alert once per IP. ml_blocked_ips
+                        # records that this IP already produced an ML SUCCESS
+                        # alert, and later ML SUCCESS alerts from it are
+                        # suppressed. This is detection-side de-duplication,
+                        # not a network block: the response layer's
+                        # (simulated) block depends only on severity
+                        # (config.SIMULATED_BLOCK_SEVERITIES). Fix B keeps it
+                        # separate from rule_blocked_ips, so it never silences
+                        # the FAILED-event rule checks above.
                         if ip in self.rule_blocked_ips or ip in self.ml_blocked_ips:
                             return None
                         self.ml_blocked_ips.add(ip)
@@ -299,9 +303,9 @@ class DetectionAgent:
                         ),
                         "trigger_details": {
                             "rule": (
-                                "Isolation Forest — FAILED event, IP not blocked (rules still accumulate)"
+                                "Isolation Forest — FAILED event; rule-based failure counting continues for this IP"
                                 if is_failed_event else
-                                "Isolation Forest — SUCCESS event from suspicious IP, blocked immediately"
+                                "Isolation Forest — SUCCESS event; later ML alerts on successful logins from this IP are suppressed"
                             ),
                             "threshold": (f"Score < {config.CONFIDENCE_HIGH_CUTOFF:.2f} = High, "
                                           f"< {config.CONFIDENCE_MEDIUM_CUTOFF:.2f} = Medium confidence"),
@@ -310,7 +314,7 @@ class DetectionAgent:
                                 "anomaly_score":   result["anomaly_score"],
                                 "confidence":      result["confidence"],
                                 "is_failed_event": is_failed_event,
-                                "blocked":         not is_failed_event,
+                                "suppresses_later_ml_success_alerts": not is_failed_event,
                             },
                         }
                     }

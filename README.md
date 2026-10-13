@@ -109,14 +109,14 @@ flowchart LR
 
 ## Detection Engine
 
-| Detector              | Type             | Trigger                                                            | MITRE ATT&CK                            |
-| --------------------- | ---------------- | ------------------------------------------------------------------ | --------------------------------------- |
-| Brute Force Attack    | Rule-based       | ≥5 failed logins from one IP                                       | T1110.001                               |
-| Slow Brute Force      | Rule-based       | ≥4 failures spread over 5+ minutes, evading rapid-fire thresholds  | T1110.001                               |
-| Credential Stuffing   | Rule-based       | ≥5 unique usernames attempted from one IP with high failure rate   | T1110.004                               |
-| Multiple IP Login     | Rule-based       | Same user authenticated from two IPs within 120 seconds            | T1078 (Defense Evasion / Persistence)   |
-| Suspicious Login Time | Rule-based       | Successful login between 00:00–05:59                               | T1078 (Persistence)                     |
-| ML Anomaly Detection  | Isolation Forest | Statistical deviation from a 561,464-event normal-behaviour baseline | T1078 (Persistence)                   |
+| Detector              | Type             | Trigger                                                              | MITRE ATT&CK                          |
+| --------------------- | ---------------- | -------------------------------------------------------------------- | ------------------------------------- |
+| Brute Force Attack    | Rule-based       | ≥5 failed logins from one IP                                         | T1110.001                             |
+| Slow Brute Force      | Rule-based       | ≥4 failures spread over 5+ minutes, evading rapid-fire thresholds    | T1110.001                             |
+| Credential Stuffing   | Rule-based       | ≥5 usernames seen from one IP and ≥5 failed logins from it           | T1110.004                             |
+| Multiple IP Login     | Rule-based       | Same user authenticated from two IPs within 120 seconds              | T1078 (Initial Access)                |
+| Suspicious Login Time | Rule-based       | Successful login between 00:00–05:59                                 | T1078 (Initial Access)                |
+| ML Anomaly Detection  | Isolation Forest | Statistical deviation from a 561,464-event normal-behaviour baseline | T1078 (Initial Access) on successful logins; T1110 (Credential Access) on failed logins |
 
 Detector evaluation order is deliberate - slow brute force and credential stuffing are checked _before_ the fast brute-force threshold to prevent misclassification (see [`docs/DECISIONS.md`](docs/DECISIONS.md), Decision 9).
 
@@ -124,7 +124,9 @@ Detector evaluation order is deliberate - slow brute force and credential stuffi
 
 Evaluated on a held-out, user-disjoint test split of the RBA Dataset (a privacy-preserving synthesis of real logins, see [Dataset & Attribution](#dataset--attribution)). No user in the test split appears in training, and `contamination` was chosen on the validation split only.
 
-| Metric        | Deployed model (dashboard) | 10-seed mean |
+These figures score an event as anomalous when `predict() == -1` (decision score below 0), which is how the model was evaluated. The running system alerts only below a stricter margin of -0.02 (`ML_ALERT_MARGIN` in `backend/config.py`); at that margin the same model gives precision 58.0% and recall 59.1% (seed 42, Batch 5b).
+
+| Metric (score < 0) | Deployed model (dashboard) | 10-seed mean |
 | ------------- | -------------------------- | ------------ |
 | Precision     | 53.5%                      | 53.8%        |
 | Recall        | 77.9%                      | 77.9%        |
@@ -141,17 +143,19 @@ These figures replace earlier, higher figures that were computed with `contamina
 
 ### Evaluation
 
-The full hybrid pipeline (rules + Isolation Forest) compared with the Isolation Forest alone on the same test split:
+The full hybrid pipeline (rules + Isolation Forest) compared with the Isolation Forest alone on the same test split (seed 42). Each column states the ML threshold it uses: **score < -0.02** is what the system runs; **score < 0** (`predict() == -1`) is the policy the evaluation batches used.
 
-| Measure                                                | Hybrid | Isolation Forest alone |
-| ------------------------------------------------------ | ------ | ---------------------- |
-| Campaign recall (share of distinct attacking IPs caught) | 60.0%  | 58.5%                  |
-| Alerts per 1,000 events                                | 272.2  | 488.6                  |
-| Precision at a 1% attack rate                          | 1.1%   | 2.2%                   |
+| Measure                                                  | Hybrid, as deployed (score < -0.02) | Hybrid (score < 0) | Isolation Forest alone (score < -0.02) | Isolation Forest alone (score < 0) |
+| -------------------------------------------------------- | ----------------------------------- | ------------------ | -------------------------------------- | ---------------------------------- |
+| Campaign recall (share of distinct attacking IPs caught) | 48.3%                               | 60.0%              | 45.3%                                  | 58.5%                              |
+| Alerts per 1,000 events                                  | 189.7                               | 272.2              | 342.2                                  | 488.6                              |
+| Precision at a 1% attack rate                            | 1.2%                                | 1.1%               | 2.7%                                   | 2.2%                               |
 
-The hybrid catches slightly more attacking IPs while raising far fewer alerts. At a realistic attack rate, though, precision is low for both: at 1% prevalence, most alerts would be false positives. The test split's attack share is far higher than real traffic, so the headline precision above overstates what an analyst would see in practice.
+Sources: the "as deployed" hybrid column replays the test stream through the real `DetectionAgent` with the shipped `model.pkl` (`backend/eval/gate.py`, output in `backend/results/phase0_gate.txt`). The other columns are Batch 5b (`backend/ml/batch5b_deployed_policy.py`). Batch 5b computes the per-IP failure rate over every event, while the running agent updates it only for events that reach the ML step; replayed through the real agent at score < 0, the hybrid gives the same 60.0% campaign recall with event recall 27.8% instead of 28.4%.
 
-Processing cost is small: 7.77 ms for 338 events. Run times shown on the dashboard include a demonstration delay of 0.1–1.0 s per event, so they reflect the demo pacing rather than detection cost.
+The hybrid catches slightly more attacking IPs than the Isolation Forest alone while raising far fewer alerts. At a realistic attack rate, though, precision is low for both: at 1% prevalence, most alerts would be false positives. The test split's attack share is far higher than real traffic, so the headline precision above overstates what an analyst would see in practice.
+
+Run times shown on the dashboard include a demonstration delay of 0.1–1.0 s per event, so they reflect the demo pacing rather than detection cost. Detection cost itself is dominated by Isolation Forest scoring, one `decision_function` call over 200 trees per scored event (about 15 ms median on the development machine).
 
 Raw results and the scripts that produced them are in [`backend/results/`](backend/results/README.md).
 

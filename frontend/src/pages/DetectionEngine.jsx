@@ -89,12 +89,20 @@ function detectorPolicy(name, cfg) {
         rule: `${r.cred_stuffing_min_users}+ unique usernames seen from a single IP`,
         threshold: `${r.cred_stuffing_min_users} unique usernames and ${r.cred_stuffing_min_failures}+ failed attempts from the IP`,
       };
-    case "ML Anomaly Detected":
+    case "ML Anomaly Detected": {
+      const failed = cfg?.mitre_ml_failed;
       return {
         ...base,
+        ...(failed
+          ? {
+              mitre: `${base.mitre} / ${failed.technique_id}`,
+              tactic: `${base.tactic} (successful logins) / ${failed.tactic} (failed logins)`,
+            }
+          : {}),
         rule: `Isolation Forest flags the event and its score is below ${fmtScore(ml.alert_margin)}`,
         threshold: `Score < ${fmtScore(ml.confidence_high_cutoff)} = High confidence, Score < ${fmtScore(ml.confidence_medium_cutoff)} = Medium confidence`,
       };
+    }
     default:
       return { ...base, rule: "-", threshold: "-" };
   }

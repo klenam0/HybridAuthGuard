@@ -119,10 +119,10 @@ export const appRoutes = [
   },
   {
     id: "blocked-ips",
-    title: "Blocked IPs",
+    title: "Simulated Blocks",
     Icon: Ban,
     description:
-      "Source IPs of HIGH-severity alerts, flagged for blocking (simulated in this prototype).",
+      "Source IPs whose HIGH-severity alerts triggered a simulated block. Nothing is enforced in this prototype.",
     keywords: ["blocked", "ip", "blacklist", "denylist", "firewall", "ban"],
     sections: [
       {
@@ -138,7 +138,7 @@ export const appRoutes = [
     title: "Email Alerts",
     Icon: Mail,
     description:
-      "Email notifications sent for HIGH-severity detections.",
+      "Email notifications for HIGH-severity detections, with the recorded delivery outcome.",
     keywords: ["email", "notifications", "messages", "recipients"],
   },
   {

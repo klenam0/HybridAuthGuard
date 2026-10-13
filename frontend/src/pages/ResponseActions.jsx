@@ -89,7 +89,6 @@ export default function ResponseActions({ data }) {
   const total = stats?.total_alerts || 0;
   const high = stats?.severity_counts?.HIGH || 0;
   const medium = stats?.severity_counts?.MEDIUM || 0;
-  const low = stats?.severity_counts?.LOW || 0;
 
   // Real model info from API
   const precision = modelInfo?.precision
@@ -105,7 +104,13 @@ export default function ResponseActions({ data }) {
   // Real pipeline stats
   const avgMs = pipelineStats?.avg_event_time_ms || null;
   const avgSec = avgMs ? (avgMs / 1000).toFixed(2) : "-";
-  const successRate = total > 0 ? "100%" : "-";
+  // Email delivery rate from recorded outcomes (stats.email).
+  const emailCounts = stats?.email || {};
+  const emailAttempted = (emailCounts.sent || 0) + (emailCounts.failed || 0);
+  const successRate =
+    emailAttempted > 0
+      ? `${Math.round(((emailCounts.sent || 0) / emailAttempted) * 100)}%`
+      : "-";
 
   // Severity donut data
   const severityData = stats
@@ -161,11 +166,25 @@ export default function ResponseActions({ data }) {
   const mdP = mlAlerts.length ? Math.round((mdC / tot) * 100) : null;
   const loP = mlAlerts.length ? Math.round((loC / tot) * 100) : null;
 
-  // Real response effectiveness from alert data
-  const ipBlockPct = high > 0 ? 100 : 0;
-  const emailPct = high > 0 ? 100 : 0;
-  const notifyPct = medium > 0 ? 100 : 0;
-  const logPct = low > 0 ? 100 : 0;
+  // Response coverage from the outcomes recorded on each alert
+  // (alert.response); alerts saved before outcomes were recorded are
+  // left out rather than assumed successful.
+  const share = (part, whole) =>
+    whole > 0 ? Math.round((part / whole) * 100) : 0;
+  const recorded = alerts.filter((a) => a.response);
+  const recHigh = recorded.filter((a) => a.severity === "HIGH");
+  const recMedium = recorded.filter((a) => a.severity === "MEDIUM");
+  const ipBlockPct = share(
+    recHigh.filter((a) => a.response.simulated_block).length,
+    recHigh.length,
+  );
+  const emailPct = share(emailCounts.sent || 0, emailAttempted);
+  const notifyPct = share(
+    recMedium.filter((a) => a.response.admin_notify_simulated).length,
+    recMedium.length,
+  );
+  // Every alert listed here was read back from the store, so it was written.
+  const logPct = total > 0 ? 100 : 0;
 
   return (
     <div id="response-timeline" className="p-3 sm:p-6 space-y-5 sm:space-y-6">
@@ -268,11 +287,11 @@ export default function ResponseActions({ data }) {
               },
               { label: "HIGH Alerts", value: high, color: "text-orange-400" },
               {
-                label: "Queue",
-                value: 0,
+                label: "Medium",
+                value: medium,
                 color: "text-[color:var(--text-primary)]",
               },
-              { label: "Success", value: successRate, color: "text-green-400" },
+              { label: "Email delivered", value: successRate, color: "text-green-400" },
             ].map(({ label, value, color }) => (
               <div key={label}>
                 <p className="ui-caption">{label}</p>
@@ -559,7 +578,7 @@ export default function ResponseActions({ data }) {
           <CardWrap>
             <CardTitle>Response Effectiveness</CardTitle>
             <div className="space-y-2 mb-4">
-              <BarRow label="IP Blocking" pct={ipBlockPct} color="green" />
+              <BarRow label="Sim. block" pct={ipBlockPct} color="green" />
               <BarRow label="Email Alerts" pct={emailPct} color="cyan" />
               <BarRow label="Admin Notify" pct={notifyPct} color="blue" />
               <BarRow label="Log Written" pct={logPct} color="purple" />
@@ -569,7 +588,7 @@ export default function ResponseActions({ data }) {
                 <p className="text-2xl font-semibold leading-none text-green-400">
                   {successRate}
                 </p>
-                <p className="ui-caption mt-1">Success Rate</p>
+                <p className="ui-caption mt-1">Email delivery</p>
               </div>
               <div className="w-px h-8 bg-[color:var(--border)]" />
               <div className="text-center">

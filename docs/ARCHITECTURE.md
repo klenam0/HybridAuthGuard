@@ -50,12 +50,14 @@ Runs six detectors in a fixed, load-bearing order against every event:
 
 The ordering in step 3 is not cosmetic. Slow brute force and credential stuffing are checked before the fast brute-force threshold specifically because both would otherwise be misclassified as ordinary brute force once the failure count crosses the fast-brute-force threshold. See `docs/DECISIONS.md`, Decision 9.
 
-The ML detector treats `FAILED` and `SUCCESS` events differently: a flagged `FAILED` event triggers an alert but does **not** block the IP, so the rule-based detectors downstream can still accumulate the failure count they need to fire; a flagged `SUCCESS` event blocks immediately, since no rule-based detector covers a suspicious successful login (e.g., account takeover from an unrecognized IP). See Decision 6.
+The ML detector treats `FAILED` and `SUCCESS` events differently: a flagged `FAILED` event triggers an alert and does **not** stop rule-based failure counting for the IP, so the rule-based detectors downstream can still accumulate the failure count they need to fire; a flagged `SUCCESS` event raises one alert per IP, after which further ML alerts on successful logins from that IP are suppressed. No rule-based detector covers a suspicious successful login (e.g., account takeover from an unrecognized IP). See Decision 6.
+
+"Blocked" in the two sets below means *the detector stops alerting*, not that traffic is stopped. The only block in the system is the response layer's **simulated** IP block, which depends solely on severity (`SIMULATED_BLOCK_SEVERITIES` in `backend/config.py`, HIGH by default) and is recorded on each alert as `response.simulated_block`.
 
 Block state is kept in two separate sets so the two paradigms cannot interfere with each other (ADR-16):
 
-- **`rule_blocked_ips`** - IPs blocked by a rule-based detector. Only this set gates the `FAILED`-event rule checks.
-- **`ml_blocked_ips`** - IPs blocked by the ML detector on a `SUCCESS` event. An ML block therefore no longer suppresses rule evidence from later `FAILED` events from the same IP.
+- **`rule_blocked_ips`** - IPs a rule-based detector has already alerted on; their later `FAILED` events are not re-alerted. Only this set gates the `FAILED`-event rule checks.
+- **`ml_blocked_ips`** - IPs that already produced an ML alert on a `SUCCESS` event; later ML `SUCCESS` alerts from them are suppressed. This set never suppresses rule evidence from later `FAILED` events from the same IP.
 
 Two further settings were chosen on the validation split (ADR-17):
 
@@ -76,7 +78,7 @@ Enriches a raw detector output with:
 
 Maps severity to a simulated action:
 
-- **HIGH** → simulated IP block + real Gmail SMTP email
+- **HIGH** → simulated IP block + real Gmail SMTP email (the delivery outcome, `sent`, `failed` or `disabled`, is recorded on the alert as `response.email`)
 - **MEDIUM** → simulated admin notification
 - **LOW** → logged for review only
 

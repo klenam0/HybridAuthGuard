@@ -128,6 +128,9 @@ class AlertManager:
         if "llm_explanation" not in alert:
             alert["llm_explanation"] = None
             alert["enriched"]        = False
+        # Wall-clock time the alert entered the store (detected_at is the
+        # event's own timestamp). Used for the time-windowed threat level.
+        alert.setdefault("saved_at", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
         with self._lock():
             alerts = self._read_for_write()
@@ -135,6 +138,17 @@ class AlertManager:
             atomic_write_json(self.file_path, alerts)
 
         log.info("Alert saved to alerts.json")
+
+    def update_fields(self, alert_id, fields):
+        """Merge fields into a saved alert. Returns True if found."""
+        with self._lock():
+            alerts = self._read_for_write()
+            for alert in alerts:
+                if alert.get("alert_id") == alert_id:
+                    alert.update(fields)
+                    atomic_write_json(self.file_path, alerts)
+                    return True
+        return False
 
     def update_explanation(self, alert_id, llm_explanation):
         """Attach an LLM explanation to a saved alert. Returns True if found."""

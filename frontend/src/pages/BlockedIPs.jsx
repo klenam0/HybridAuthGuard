@@ -54,10 +54,14 @@ export default function BlockedIPs({ data }) {
   const { alerts } = data;
   const [search, setSearch] = useState("");
 
-  // Build blocked IP details from HIGH severity alerts
+  // IPs whose alerts triggered the simulated block: the recorded response
+  // when present, else the HIGH-severity policy (older alerts).
   const ipMap = {};
   alerts.forEach((alert) => {
-    if (alert.severity !== "HIGH") return;
+    const blocked = alert.response
+      ? alert.response.simulated_block
+      : alert.severity === "HIGH";
+    if (!blocked) return;
     const ip = alert.ip;
     if (!ipMap[ip]) {
       ipMap[ip] = {
@@ -97,7 +101,7 @@ export default function BlockedIPs({ data }) {
             <p className="text-2xl font-semibold text-red-700 leading-none">
               {totalBlocked}
             </p>
-            <p className="ui-caption mt-1">Blocked</p>
+            <p className="ui-caption mt-1">Simulated blocks</p>
           </div>
           <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-4 py-2 text-center">
             <p className="text-2xl font-semibold text-orange-700 leading-none">

@@ -1,9 +1,26 @@
 // frontend/src/pages/EmailAlerts.jsx
 
 import { useState, useEffect, useRef } from "react";
-import { Mail, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import {
+  Mail,
+  CheckCircle,
+  XCircle,
+  MinusCircle,
+  HelpCircle,
+  Clock,
+  AlertTriangle,
+} from "lucide-react";
 import PageHeader from "../components/PageHeader";
 import SeverityBadge from "../components/SeverityBadge";
+
+// Delivery outcome recorded by the backend in alert.response.email.
+const EMAIL_STATUS = {
+  sent: { Icon: CheckCircle, color: "text-green-400", label: "Sent" },
+  failed: { Icon: XCircle, color: "text-red-400", label: "Send failed" },
+  disabled: { Icon: MinusCircle, color: "text-slate-400", label: "Email not configured" },
+  pending: { Icon: Clock, color: "text-amber-400", label: "Sending" },
+  unknown: { Icon: HelpCircle, color: "text-slate-500", label: "Outcome not recorded" },
+};
 
 const TYPE_ICONS = {
   "Brute Force Attack": "",
@@ -15,6 +32,11 @@ const TYPE_ICONS = {
 };
 
 export default function EmailAlerts({ data }) {
+  const { stats } = data;
+  const emailCounts = stats?.email || {};
+  const sentCount = emailCounts.sent || 0;
+  const failedCount = emailCounts.failed || 0;
+  const attempted = sentCount + failedCount;
   const { alerts, markAlertPageRead } = data;
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("ALL");
@@ -80,21 +102,21 @@ export default function EmailAlerts({ data }) {
         <div className="flex items-center gap-3 flex-wrap">
           <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-4 py-2 text-center">
             <p className="text-2xl font-semibold text-green-700 leading-none">
-              {totalEmails}
+              {sentCount}
             </p>
             <p className="ui-caption mt-1">Sent</p>
           </div>
           <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-4 py-2 text-center">
             <p className="text-2xl font-semibold text-red-700 leading-none">
-              0
+              {failedCount}
             </p>
             <p className="ui-caption mt-1">Failed</p>
           </div>
           <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-4 py-2 text-center">
             <p className="text-2xl font-semibold text-cyan-700 leading-none">
-              {totalEmails > 0 ? "100%" : "-"}
+              {attempted > 0 ? `${Math.round((sentCount / attempted) * 100)}%` : "-"}
             </p>
-            <p className="ui-caption mt-1">Success</p>
+            <p className="ui-caption mt-1">Delivered</p>
           </div>
         </div>
       </PageHeader>
@@ -172,7 +194,7 @@ export default function EmailAlerts({ data }) {
           <Mail className="w-8 h-8 text-[color:var(--text-muted)] mx-auto mb-3" />
           <p className="ui-body font-medium text-[color:var(--text-secondary)]">
             {totalEmails === 0
-              ? "No emails sent yet"
+              ? "No HIGH-severity alerts yet"
               : "No results match your filter"}
           </p>
           <p className="ui-caption mt-1">
@@ -193,7 +215,7 @@ export default function EmailAlerts({ data }) {
             <div className="col-span-2 ui-table-head">Severity</div>
             <div className="col-span-2 ui-table-head">Source IP</div>
             <div className="col-span-2 ui-table-head">Target User</div>
-            <div className="col-span-2 ui-table-head">Sent At</div>
+            <div className="col-span-2 ui-table-head">Detected</div>
           </div>
 
           {/* Rows */}
@@ -213,7 +235,17 @@ export default function EmailAlerts({ data }) {
               >
                 {/* Status */}
                 <div className="sm:col-span-1">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  {(() => {
+                    const st =
+                      EMAIL_STATUS[alert.response?.email] || EMAIL_STATUS.unknown;
+                    return (
+                      <st.Icon
+                        className={`w-4 h-4 ${st.color}`}
+                        aria-label={st.label}
+                        title={st.label}
+                      />
+                    );
+                  })()}
                 </div>
 
                 {/* Alert type */}
@@ -266,12 +298,13 @@ export default function EmailAlerts({ data }) {
           {/* Table footer */}
           <div className="px-5 py-3 border-t border-[color:var(--border)] bg-[color:var(--bg-elevated)] flex items-center justify-between gap-2 flex-wrap">
             <p className="ui-caption">
-              Showing {emailAlerts.length} of {totalEmails} emails
+              Showing {emailAlerts.length} of {totalEmails} HIGH-severity alerts
             </p>
             <div className="flex items-center gap-1.5">
-              <CheckCircle className="w-3 h-3 text-green-400" />
-              <p className="ui-caption text-green-700">
-                All delivered successfully
+              <p className="ui-caption">
+                {sentCount} sent · {failedCount} failed
+                {emailCounts.disabled ? ` · ${emailCounts.disabled} not configured` : ""}
+                {emailCounts.unknown ? ` · ${emailCounts.unknown} not recorded` : ""}
               </p>
             </div>
           </div>

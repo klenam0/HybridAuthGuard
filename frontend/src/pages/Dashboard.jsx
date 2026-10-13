@@ -200,7 +200,8 @@ export default function Dashboard({ data }) {
 
   const total = stats?.total_alerts ?? alerts.length;
   const severityCounts = stats?.severity_counts || {};
-  const flaggedIps = stats?.blocked_ips?.length ?? 0;
+  const flaggedIps =
+    (stats?.simulated_block_ips || stats?.blocked_ips)?.length ?? 0;
   const mlCount = alerts.filter((a) => a.type === "ML Anomaly Detected").length;
   const eventsProcessed = pipelineStats?.events_processed;
   const avgMs = pipelineStats?.avg_event_time_ms;

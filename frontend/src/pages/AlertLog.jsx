@@ -33,9 +33,9 @@ const SEVERITY_GLOW = {
 };
 
 const ACTION_ICON = {
-  HIGH: { Icon: ShieldX, color: "text-red-400", label: "IP Blocked" },
-  MEDIUM: { Icon: Bell, color: "text-cyan-400", label: "Admin Notified" },
-  LOW: { Icon: FileText, color: "text-slate-400", label: "Log Written" },
+  HIGH: { Icon: ShieldX, color: "text-red-400", label: "Simulated block + email" },
+  MEDIUM: { Icon: Bell, color: "text-cyan-400", label: "Admin notice (simulated)" },
+  LOW: { Icon: FileText, color: "text-slate-400", label: "Logged" },
 };
 
 const SORT_OPTIONS = [

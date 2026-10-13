@@ -8,10 +8,10 @@ import { FILTER_ACTIVE } from "../config/severity";
 import { shortAlertId } from "../utils/alertId";
 
 const ACTIONS = {
-  HIGH: { Icon: ShieldX, color: "text-red-400", label: "IP Blocked" },
-  CRITICAL: { Icon: ShieldX, color: "text-red-400", label: "IP Blocked" },
-  MEDIUM: { Icon: Bell, color: "text-cyan-400", label: "Admin Notified" },
-  LOW: { Icon: FileText, color: "text-slate-400", label: "Log Written" },
+  HIGH: { Icon: ShieldX, color: "text-red-400", label: "Simulated block + email" },
+  CRITICAL: { Icon: ShieldX, color: "text-red-400", label: "Simulated block + email" },
+  MEDIUM: { Icon: Bell, color: "text-cyan-400", label: "Admin notice (simulated)" },
+  LOW: { Icon: FileText, color: "text-slate-400", label: "Logged" },
 };
 
 const FILTERS = ["ALL", "HIGH", "MEDIUM", "LOW"];
@@ -23,7 +23,7 @@ export default function LiveAlerts({ data }) {
   const filtered =
     filter === "ALL" ? alerts : alerts.filter((a) => a.severity === filter);
 
-  const blockedIPs = stats?.blocked_ips || [];
+  const blockedIPs = stats?.simulated_block_ips || stats?.blocked_ips || [];
 
   const recentActions = alerts.slice(0, 6).map((a, i) => {
     const action = ACTIONS[a.severity] || ACTIONS.LOW;
@@ -241,16 +241,16 @@ export default function LiveAlerts({ data }) {
             <div className="flex items-center gap-2">
               <ShieldX className="w-3.5 h-3.5 text-red-400" />
               <p className="ui-label text-[color:var(--text-primary)]">
-                Blocked IP Addresses
+                Simulated IP Blocks
               </p>
             </div>
             <span className="text-sm bg-red-500/20 text-red-400 border border-red-500/30 rounded-full px-2 py-0.5 font-semibold">
-              {blockedIPs.length} active
+              {blockedIPs.length} IPs
             </span>
           </div>
           {blockedIPs.length === 0 ? (
             <p className="ui-body text-[color:var(--text-secondary)]">
-              No IPs blocked yet
+              No simulated blocks yet (nothing is enforced in this prototype)
             </p>
           ) : (
             <div className="space-y-3">

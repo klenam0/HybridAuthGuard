@@ -50,9 +50,15 @@ class MonitoringAgent:
         if alert:
             alert["timestamp"] = event.get("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             analyzed = self.analyzer.evaluate_alert(alert)
+            # Store what the response layer will do, then the real outcome
+            # (e.g. whether the email was actually sent) once it has run.
+            analyzed["response"] = self.responder.decide(analyzed)
             log.info(f"🚨 ALERT: {analyzed.get('type')} | {analyzed.get('severity')} | #{analyzed.get('alert_id','?')}")
             self.alert_manager.save_alert(analyzed)
             self.responder.take_action(analyzed)
+            outcome = self.responder.last_response
+            if outcome is not None and outcome != analyzed["response"]:
+                self.alert_manager.update_fields(analyzed["alert_id"], {"response": outcome})
             self.alerts_generated += 1
 
     # ── Batch mode ────────────────────────────────────────────────────────────
