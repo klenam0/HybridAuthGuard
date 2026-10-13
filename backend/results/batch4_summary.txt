@@ -1,0 +1,33 @@
+Batch 4 summary (full), 54.1 min
+
+feature set | split     model               ROC-AUC  PR-AUC  TPR@1%  TPR@5%       P       R      F1     FPR
+full10|split_A          IF (10-seed, c=0.4)    0.755   0.502   0.004   0.049   0.538   0.778   0.637   0.337
+full10|split_A          lof                   0.505   0.308   0.001   0.001   0.458   0.985   0.625   0.589
+full10|split_A          autoencoder           0.630   0.401   0.015   0.043   0.393   0.916   0.550   0.715
+full10|split_A          rf_supervised         0.993   0.989   0.925   0.966   0.960   0.945   0.953   0.020
+full10|split_A          rf_old_design         0.988   0.983   0.915   0.957   0.862   0.964   0.910   0.078
+full10|split_B          IF (10-seed, c=0.4)    0.773   0.517   0.005   0.049   0.550   0.818   0.658   0.337
+full10|split_B          lof                   0.497   0.304   0.002   0.002   0.456   0.988   0.624   0.595
+full10|split_B          autoencoder           0.633   0.398   0.012   0.038   0.418   0.816   0.553   0.573
+full10|split_B          rf_supervised         0.993   0.990   0.929   0.969   0.970   0.940   0.955   0.015
+no_user_freq|split_A    IF (10-seed, c=0.4)    0.731   0.475   0.001   0.029   0.498   0.762   0.602   0.389
+no_user_freq|split_A    lof                   0.622   0.362   0.004   0.004   0.514   0.987   0.676   0.471
+no_user_freq|split_A    autoencoder           0.641   0.416   0.019   0.044   0.394   0.976   0.561   0.758
+no_user_freq|split_A    rf_supervised         0.988   0.981   0.851   0.951   0.926   0.939   0.932   0.038
+no_user_freq|split_A    rf_old_design         0.983   0.973   0.836   0.932   0.768   0.965   0.855   0.147
+no_user_freq|split_B    IF (10-seed, c=0.4)    0.750   0.489   0.001   0.029   0.513   0.811   0.628   0.389
+no_user_freq|split_B    lof                   0.612   0.356   0.006   0.006   0.512   0.991   0.675   0.476
+no_user_freq|split_B    autoencoder           0.643   0.413   0.016   0.040   0.415   0.874   0.563   0.621
+no_user_freq|split_B    rf_supervised         0.990   0.984   0.867   0.956   0.931   0.941   0.936   0.035
+
+Single-feature ROC-AUC (split A test):
+   is_new_ip       0.790  TPR@1%FPR 0.000  (higher=attack)
+   ip_freq         0.790  TPR@1%FPR 0.000  (lower=attack)
+   user_freq       0.213  TPR@1%FPR 0.000  (lower=attack)
+   failed_rate     0.790  TPR@1%FPR 0.000  (higher=attack)
+   is_failed       0.717  TPR@1%FPR 0.000  (higher=attack)
+   is_new_country  0.500  TPR@1%FPR 0.000  (higher=attack)
+   country_freq    0.716  TPR@1%FPR 0.016  (lower=attack)
+   device_freq     0.379  TPR@1%FPR 0.009  (lower=attack)
+
+Sanity check: full10|split_A IF ROC-AUC should be about 0.755 (Batch 2.5) in full mode.

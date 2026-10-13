@@ -1,0 +1,37 @@
+Batch 5 summary (full), 5.8 min
+
+Table 2 reproduction (seed 42): rules_only MATCH, ml_only MATCH, hybrid MATCH  [if any DIFFERENT, stop and send this file]
+
+Across 10 seeds (mean, min-max):
+   arm           event recall              campaign recall           FPR                       benign IPs flagged
+   rules_only    0.0816 (0.0816-0.0816)    0.2833 (0.2833-0.2833)    0.0547 (0.0547-0.0547)    3326
+   ml_only       0.7785 (0.7706-0.7822)    0.5830 (0.5747-0.5886)    0.3372 (0.3265-0.3419)    11044
+   hybrid        0.2846 (0.2818-0.2874)    0.6000 (0.5919-0.6044)    0.2645 (0.2565-0.2670)    11915
+   hybrid - IF campaign recall: mean +0.0170 (min +0.0153, max +0.0195); hybrid higher in 10/10 seeds
+   hybrid - IF FPR: mean -0.0727 (min -0.0758, max -0.0700)
+
+Bootstrap 95% CI, seed 42 (2000 reps; attacking IPs / benign IPs resampled):
+   rules_only   campaign recall [0.2715, 0.2947]  FPR [0.0529, 0.0565]
+   ml_only      campaign recall [0.5712, 0.5972]  FPR [0.3339, 0.3504]
+   hybrid       campaign recall [0.5867, 0.6125]  FPR [0.2617, 0.2702]
+   hybrid - IF  campaign recall [0.012, 0.0188] (>0 in 100.0% of reps)  FPR [-0.0846, -0.0682]
+
+Hybrid blocking cost on the test stream (seed 42):
+   benign IPs blocked 5841 of 42162 {'ml': 5715, 'rule': 126}
+   benign events after their IP was blocked 9991 (14.42% of benign events), of which successful logins 7206
+   benign users affected 10071 of 46279 (21.76%)
+   attacking IPs blocked 2095
+
+Where the hybrid's lower FPR comes from (seed 42, benign events, % of benign events):
+   IF-only FPR 34.19  -> hybrid FPR 26.61
+   IF flag silenced, IP already rule-blocked: -1.1
+   IF flag silenced, IP already ML-blocked:   -7.81
+   IF flag silenced, other:                   -0.0
+   rule alerts the IF did not raise:          +1.32
+   identity check: True
+   (attack events: IF recall 77.88 -> hybrid 28.44; silenced by blocks -50.16)
+
+Replay construction:
+   test stream: 5425 attacking IPs, median 2.0 events/IP, 21.6% of IPs with >=5 failed attempts
+   val+test:    7251 attacking IPs, median 2.0 events/IP, 24.2% of IPs with >=5 failed attempts
+   val+test replay (seed 42): rules_only recall 0.0677 campaign 0.3117 FPR 0.0540; ml_only recall 0.8147 campaign 0.5885 FPR 0.3618; hybrid recall 0.2096 campaign 0.6090 FPR 0.2497

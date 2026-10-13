@@ -1,0 +1,27 @@
+Batch 5b summary, 5.9 min
+Batch 5 reproduction (evaluated threshold, seed 42): MATCH
+
+10-seed means (min-max). Users affected = share of 46,279 legitimate users; IPs blocked out of 42,162 benign.
+
+[evaluated_score_lt_0]
+   IF-only campaign recall 0.5830 (0.5747-0.5886), event recall 0.7785 (0.7706-0.7822), FPR 0.3372 (0.3265-0.3419)
+   hybrid campaign recall 0.6000 (0.5919-0.6044), benign IPs flagged 11915, event recall 0.2846 (0.2818-0.2874), FPR 0.2645 (0.2565-0.2670)
+   share of ML alerts at HIGH severity: 0.0555 (0.0514-0.0582)
+   detector suppression: users affected 0.2185 (0.2092-0.2249), benign IPs 5861
+   response blocks (HIGH only): users affected 0.0410 (0.0386-0.0423), benign IPs 871, attack IPs 1382, benign successful logins after block 1869
+
+[deployed_score_lt_-0.02]
+   IF-only campaign recall 0.4540 (0.4466-0.4647), event recall 0.6186 (0.5896-0.6708), FPR 0.2104 (0.2047-0.2166)
+   hybrid campaign recall 0.4858 (0.4793-0.4955), benign IPs flagged 7922, event recall 0.2264 (0.2199-0.2335), FPR 0.1777 (0.1743-0.1806)
+   share of ML alerts at HIGH severity: 0.0777 (0.0729-0.0831)
+   detector suppression: users affected 0.1548 (0.1511-0.1576), benign IPs 3197
+   response blocks (HIGH only): users affected 0.0410 (0.0386-0.0424), benign IPs 873, attack IPs 1383, benign successful logins after block 1873
+
+Alert breakdown, deployed threshold, seed 42 (type | severity: attack / benign alerts):
+   Brute Force Attack | HIGH                    758 / 72     
+   Credential Stuffing | HIGH                   368 / 100    
+   ML Anomaly Detected | HIGH                   456 / 827    
+   ML Anomaly Detected | MEDIUM                4504 / 7810   
+   Multiple IP Login | HIGH                      17 / 77     
+   Slow Brute Force | HIGH                       62 / 66     
+   Suspicious Login Time | MEDIUM              1652 / 3471   
