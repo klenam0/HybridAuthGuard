@@ -231,9 +231,7 @@ export default function Settings({ data }) {
           >
             <ValueBadge
               value={
-                rules?.internal_networks?.join(", ") ||
-                rules?.internal_ip_prefixes?.map((p) => `${p}x`).join(", ") ||
-                "-"
+                rules?.internal_networks?.join(", ") || "-"
               }
             />
           </SettingRow>

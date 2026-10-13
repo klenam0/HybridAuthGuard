@@ -85,6 +85,3 @@ class ResponseAgent:
 
         log.info("🛡️ Response Action Taken: %s", action)
         return action
-
-    def get_actions_log(self):
-        return list(self.actions_log)

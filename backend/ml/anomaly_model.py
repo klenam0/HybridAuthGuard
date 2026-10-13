@@ -1,6 +1,7 @@
 # backend/ml/anomaly_model.py
 
 import logging
+import hashlib
 import os
 import json
 import numpy as np
@@ -14,8 +15,13 @@ import config
 
 log = logging.getLogger(__name__)
 
-# (Optional) If you have an explainer module, uncomment the next line
-# from ml.explainer import AlertExplainer
+
+def _sha256(path, chunk=1 << 20):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(chunk), b""):
+            h.update(block)
+    return h.hexdigest()
 
 
 class AnomalyDetector:
@@ -87,8 +93,6 @@ class AnomalyDetector:
         ip_total = defaultdict(int)
 
         for event in log_events:
-            from datetime import datetime
-
             try:
                 ts   = datetime.strptime(event["timestamp"], "%Y-%m-%d %H:%M:%S")
                 hour = ts.hour
@@ -141,12 +145,9 @@ class AnomalyDetector:
         Extract the 10 features used by the RBA-trained model for a single event.
         Uses the stored encoders and cumulative failure rates.
         """
-        from datetime import datetime as dt
-        import numpy as np
-
         # 1. Parse timestamp
         try:
-            ts = dt.strptime(log_event["timestamp"], "%Y-%m-%d %H:%M:%S")
+            ts = datetime.strptime(log_event["timestamp"], "%Y-%m-%d %H:%M:%S")
             hour = ts.hour
         except Exception:
             hour = 12
@@ -225,11 +226,8 @@ class AnomalyDetector:
         correctly gets 0.0, not a special case, since rarity itself is
         the informative signal (see docs/DECISIONS.md, ADR-15 on frequency encoding).
         """
-        from datetime import datetime as dt
-        import numpy as np
-
         try:
-            ts = dt.strptime(log_event["timestamp"], "%Y-%m-%d %H:%M:%S")
+            ts = datetime.strptime(log_event["timestamp"], "%Y-%m-%d %H:%M:%S")
             hour = ts.hour
         except Exception:
             hour = 12
@@ -332,6 +330,15 @@ class AnomalyDetector:
         Handles 5‑feature (synthetic), 7‑feature (old RBA), and 10‑feature (new RBA) payloads.
         """
         try:
+            # joblib.load unpickles, which executes code embedded in the
+            # file: only load trusted artefacts, and verify the optional
+            # MODEL_SHA256 pin first (audit F31).
+            if config.MODEL_SHA256:
+                digest = _sha256(model_path)
+                if digest.lower() != config.MODEL_SHA256.strip().lower():
+                    raise ValueError(
+                        f"SHA-256 mismatch: file is {digest}, MODEL_SHA256 expects "
+                        f"{config.MODEL_SHA256}; refusing to unpickle it")
             payload = joblib.load(model_path)
 
             self.metadata = {
@@ -481,7 +488,7 @@ class AnomalyDetector:
             # synthetic models.
             if self.encoding_scheme == "frequency":
                 features = self._extract_features_v2_frequency(log_event)
-            elif self.feature_count >= 10 and hasattr(self, "known_ips_set"):
+            elif self.feature_count >= 10:
                 features = self._extract_features_v2(log_event)
             else:
                 # For 5 or 7 features, we need a list of one event
@@ -545,25 +552,3 @@ class AnomalyDetector:
         except Exception as e:
             log.warning(f"⚠ Explainer error: {e}")
             return None
-
-    # ── Credential Stuffing (Rule‑based) ──────────────────────────────────
-
-    def check_credential_stuffing(self, ip, users_tried):
-        """
-        Heuristic rule for credential stuffing:
-        - >5 distinct usernames tried from same IP
-        - failure rate > 70%
-        """
-        unique_users = len(users_tried.get(ip, set()))
-        total        = self.ip_total_counts.get(ip, 0)
-        failed       = self.ip_failure_counts.get(ip, 0)
-        failure_rate = failed / total if total > 0 else 0
-
-        if unique_users >= 5 and failure_rate > 0.7:
-            return {
-                "type":               "Credential Stuffing",
-                "confidence":         "High",
-                "unique_users_tried": unique_users,
-                "failure_rate":       round(failure_rate, 2)
-            }
-        return None

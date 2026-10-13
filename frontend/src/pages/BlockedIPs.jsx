@@ -2,6 +2,31 @@ import { useState } from "react";
 import { ShieldX, Clock, AlertTriangle, CheckCircle } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 
+// IPv4 CIDR membership, for the internal/external split shown on this page.
+function ipv4ToInt(ip) {
+  const parts = String(ip).split(".");
+  if (parts.length !== 4) return null;
+  let n = 0;
+  for (const p of parts) {
+    const v = Number(p);
+    if (!/^\d+$/.test(p) || v > 255) return null;
+    n = n * 256 + v;
+  }
+  return n;
+}
+
+function inCidr(ip, cidr) {
+  const [base, bitsText] = cidr.split("/");
+  const a = ipv4ToInt(ip);
+  const b = ipv4ToInt(base);
+  const bits = Number(bitsText);
+  if (a === null || b === null || !(bits >= 0 && bits <= 32)) return false;
+  const size = 2 ** (32 - bits);
+  return Math.floor(a / size) === Math.floor(b / size);
+}
+
+const DEFAULT_INTERNAL_NETWORKS = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"];
+
 const REASON_MAP = {
   "Brute Force Attack": {
     label: "Brute Force",
@@ -51,7 +76,9 @@ function ReasonBadge({ type }) {
 }
 
 export default function BlockedIPs({ data }) {
-  const { alerts } = data;
+  const { alerts, backendConfig } = data;
+  const internalNetworks =
+    backendConfig?.rules?.internal_networks || DEFAULT_INTERNAL_NETWORKS;
   const [search, setSearch] = useState("");
 
   // IPs whose alerts triggered the simulated block: the recorded response
@@ -88,10 +115,7 @@ export default function BlockedIPs({ data }) {
   const totalBlocked = blockedList.length;
 
   // Classify IP as internal or external
-  const isInternal = (ip) =>
-    ip.startsWith("192.168.") ||
-    ip.startsWith("10.") ||
-    ip.startsWith("172.16.");
+  const isInternal = (ip) => internalNetworks.some((net) => inCidr(ip, net));
 
   return (
     <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">

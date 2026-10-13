@@ -1,11 +1,26 @@
 # backend/agents/detection_agent.py
+import ipaddress
 import logging
 from collections import defaultdict
 from datetime import datetime
+from functools import lru_cache
 
 import config
 
 log = logging.getLogger(__name__)
+
+
+_INTERNAL_NETWORKS = tuple(ipaddress.ip_network(n) for n in config.INTERNAL_NETWORKS)
+
+
+@lru_cache(maxsize=65536)
+def is_internal_ip(ip):
+    """True if ip parses and falls inside config.INTERNAL_NETWORKS."""
+    try:
+        addr = ipaddress.ip_address(str(ip).strip())
+    except ValueError:
+        return False
+    return any(addr in net for net in _INTERNAL_NETWORKS if net.version == addr.version)
 
 
 class DetectionAgent:
@@ -49,7 +64,6 @@ class DetectionAgent:
         self.ip_attempt_times = defaultdict(list)
         self.anomaly_detector = anomaly_detector
         self.ip_users_tried = defaultdict(set)
-        self.internal_ip_prefixes = config.INTERNAL_IP_PREFIXES
         self.suspicious_last_fired = {}  # ip → last datetime it triggered suspicious time
         self.ml_last_alerted = {}        # Fix C: ip → timestamp of last FAILED-event ML alert
 
@@ -193,7 +207,6 @@ class DetectionAgent:
                     and self.failed_attempts[ip] >= config.CRED_STUFFING_MIN_FAILURES):
                 self.rule_blocked_ips.add(ip)
                 total_ip  = self.failed_attempts[ip]
-                fail_rate = round(total_ip / max(total_ip, 1), 2)
                 return {
                     "type": "Credential Stuffing",
                     "ip": ip,
@@ -242,7 +255,7 @@ class DetectionAgent:
             # Fix D: guard disabled by default (INTERNAL_IP_GUARD_ENABLED =
             # False). Re-enable only after confirming these address ranges
             # mean "trusted" wherever this is actually deployed.
-            is_internal = self.INTERNAL_IP_GUARD_ENABLED and ip.startswith(self.internal_ip_prefixes)
+            is_internal = self.INTERNAL_IP_GUARD_ENABLED and is_internal_ip(ip)
             if not is_internal:
                 result = self.anomaly_detector.score_event(log_event)
                 if result and result["is_anomaly"]:

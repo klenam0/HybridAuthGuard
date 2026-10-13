@@ -12,12 +12,11 @@ class AnalysisAgent:
     - Severity classification
     - MITRE ATT&CK mapping
     - Alert ID and timestamp
-    - LLM-generated or template explanation
+    - Template explanation (LLM enrichment runs later, in api.py)
     - Feature-level ML explainability (for ML Anomaly alerts)
     """
 
-    def __init__(self, llm_analyzer=None):
-        self.llm_analyzer = llm_analyzer
+    def __init__(self):
 
         self.severity_mapping = config.SEVERITY_MAP
         self.mitre_mapping    = config.MITRE_MAPPING
@@ -50,13 +49,9 @@ class AnalysisAgent:
         # Get feature explanation for ML alerts
         feature_explanation = alert.pop("feature_explanation", None)
 
-        # Generate explanation — LLM if available, template if not
-        if self.llm_analyzer:
-            alert["explanation"] = self.llm_analyzer.generate_explanation(
-                alert, feature_explanation
-            )
-        else:
-            alert["explanation"] = self._template_explanation(alert)
+        # Template explanation now; utils/llm_analyzer.py enriches the
+        # saved alert asynchronously from the API process.
+        alert["explanation"] = self._template_explanation(alert)
 
         # Attach feature explanation to alert for dashboard transparency
         if feature_explanation:

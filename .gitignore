@@ -30,6 +30,16 @@ backend/data/eval_sample.csv
 backend/data/rba-dataset.csv
 backend/data/*.csv
 backend/data/*.lock
+backend/data/*.tmp
+backend/data/.alerts-*.tmp
+backend/data/alerts.json.corrupt-*
+backend/data/live_queue.deadletter.jsonl
+backend/data/model.pkl.replaced-*
+
+# Pickled caches and models are never committed: they are large, and
+# loading a pickle runs code from it (audit F31).
+*.pkl
+backend/results/rba_sample_cache.pkl
 
 # model.pkl is about 390 MB — too large for direct commit or Git LFS's free
 # bandwidth quota. Distributed via GitHub Releases instead — see

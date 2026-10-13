@@ -34,7 +34,9 @@ ML_REALERT_COOLDOWN_SECONDS = 0
 
 # Skip ML scoring for internal addresses (ADR-17). Off by default.
 INTERNAL_IP_GUARD_ENABLED = False
-INTERNAL_IP_PREFIXES = ("192.168.", "10.0.", "172.16.")
+# RFC 1918 private ranges, checked with ipaddress (audit F37: the old string
+# prefixes "10.0." and "172.16." covered only a /16 of 10/8 and 172.16/12).
+INTERNAL_NETWORKS = ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
 
 # ── ML (ml/anomaly_model.py, ml/train_from_dataset.py, main.py) ───────────
 ML_CONTAMINATION = 0.4                     # deployed RBA model (ADR-13)
@@ -49,6 +51,11 @@ CONFIDENCE_MEDIUM_CUTOFF = -0.02           # decision_function < this -> "Medium
 # "confidence is High or Medium"); 0.0 reproduces the evaluated policy
 # (predict() == -1 alone). See audit F09.
 ML_ALERT_MARGIN = -0.02
+
+# Optional integrity pin for data/model.pkl (audit F31). Loading a pickle
+# runs code from it, so when MODEL_SHA256 is set the file's SHA-256 must
+# match before it is unpickled.
+MODEL_SHA256 = os.environ.get("MODEL_SHA256") or None
 
 # ── Explainer (ml/explainer.py) ───────────────────────────────────────────
 EXPLAINER_DEVIATION_FLAG = 1.5             # |z| above this marks a feature anomalous
@@ -197,7 +204,7 @@ def public_config():
             "cred_stuffing_min_failures": CRED_STUFFING_MIN_FAILURES,
             "ml_realert_cooldown_seconds": ML_REALERT_COOLDOWN_SECONDS,
             "internal_ip_guard_enabled": INTERNAL_IP_GUARD_ENABLED,
-            "internal_ip_prefixes": list(INTERNAL_IP_PREFIXES),
+            "internal_networks": list(INTERNAL_NETWORKS),
         },
         "ml": {
             "contamination": ML_CONTAMINATION,
