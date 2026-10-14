@@ -668,3 +668,94 @@ changed, why, and what had already been seen.
    offline running scores, tiers, blocks, challenges and emails with 0
    mismatches, or the policy is void. The legacy gate (legacy set
    explicitly) stays byte-identical.
+
+7. 2026-10-14, Phase 5b, before any Phase 5b metric. Response volume.
+   Seen before this amendment: every result up to and including Phase 5,
+   in particular the amendment 6 tiers **on val_b** (step-up band
+   precision, the val_b response cost per stratum, the email volume) and
+   the val_a region rows of every rate in amendment 6's grid. **The tiers
+   of Phase 5 were evaluated on val_b, so val_b is no longer an unseen
+   check for the tier rate chosen here.** The val_b numbers below are
+   reported as previously seen; they confirm nothing. From here on the
+   locked May test month is the only clean check. The rules (amendment 3
+   settings), the T2 triage score (amendment 6, chosen on val_a), the
+   block criterion, the test lock and `data/model_v4.pkl` are unchanged.
+
+   **Why.** Amendment 6's step-up rule bounded precision but not volume:
+   every rate met the bar, so "the largest qualifying k" landed on the grid
+   edge (5,000/day; 43,622 legitimate users challenged on val_b). Its
+   cutoffs, the previous day's k-th highest final score, also overshoot
+   the nominal rate for T2 (rates 300 to 2,000 all gave about 2,100
+   incidents/day on val_a), because T2 has few distinct detector tiers and
+   ASN ratios drift upward from day to day.
+
+   **Admission (causal, capped).** For a rated tier with daily rate k, an
+   incident of day d enters the tier at the first of its alerted events at
+   which both hold:
+   - its running score is >= the cutoff of amendment 6 (the k-th highest
+     final score of the most recent earlier day with incidents; every
+     incident qualifies if that day had fewer than k; none before the
+     first day closes);
+   - fewer than k incidents have entered that tier so far on day d (in
+     stream order).
+   An incident that qualifies on score after the day's k slots are taken
+   does not enter; it stays in a lower tier (queue or log). Once in, an
+   incident stays. So each tier admits at most k incidents a day by
+   construction. Tiers are admitted from the top (block, step-up, queue);
+   a tier never admits an incident that is already in a higher tier, and
+   such an incident uses none of its slots. A slot, once used, is not
+   returned (a queue incident that later enters step-up keeps its queue
+   slot used). The queue uses this mechanism at B = 500/day. Admission is
+   first-come within the day, not best-first: a live system cannot know
+   the day's later incidents; this is a known cost of the cap.
+
+   **Block.** Unchanged criterion: k_block = the largest k in amendment
+   6's grid K whose capped block region on val_a has >= 30 incidents and
+   an IP-clustered lower bound >= 0.80. None is expected; if none, there
+   is no block tier.
+
+   **Step-up rate.** Grid K_step = (10, 25, 50, 100, 200, 500, 1000)
+   incidents/day. For each k, the deployed causal run over the whole
+   stream (capped step-up at rate k, the block tier above, the queue at
+   500) gives on val_a:
+   - the step-up band: the incidents of val_a days in the step-up tier;
+     its incident precision with amendment 3's IP-clustered bootstrap
+     (1,000 resamples, 95% percentile interval, `default_rng(42)`);
+   - *attacking IPs challenged*: IPs with an attack event in val_a and a
+     step-up challenge placed during val_a (Phase 5's "IPs challenged:
+     attacking");
+   - *legitimate users challenged per day*: for each val_a day, the
+     distinct non-placeholder users with a benign event, that day, from an
+     IP while it is challenged (and not blocked); the mean over the 16
+     days. U is a ceiling on that mean.
+   k_step = the k in K_step that maximises attacking IPs challenged,
+   subject to (i) >= 30 band incidents on val_a (carried over from
+   amendment 6), (ii) band lower bound >= 0.2149, and (iii) mean
+   legitimate users challenged per day <= **U = 200**. Ties: the smaller
+   k. **If no k qualifies there is no step-up tier.**
+   U is an operational assumption stated here a priori (roughly the number
+   of unexpected MFA prompts a day a small help desk could absorb); it is
+   not tuned. A sensitivity table shows what U in {50, 200, 1,000} would
+   have chosen; only U = 200 is deployed.
+   Also reported per k on val_a: benign IPs challenged per day and in
+   total, attacking IPs challenged per day, step-up incidents per day.
+
+   **Reported on val_b, marked as previously seen** (no choice, no
+   re-tuning): the chosen k's step-up band precision with its interval,
+   and its response cost (legitimate users, benign IPs and attacking IPs
+   challenged, in total and per day; benign and attack events challenged),
+   overall and per stratum (all events, excluding the placeholder, cold
+   users, new attackers, returning attackers), with amendment 6's
+   definitions.
+
+   **Label audit (descriptive only).** A description, on dev_train, val_a
+   and val_b only, of the attacking and benign IPs that the rules do and
+   do not alert on, to ask whether the near-zero new-attacker precision of
+   every detector reflects the detectors or the coverage of the per-IP
+   blocklist label. It re-scores no detector and makes no choice.
+
+   **Gates.** The real agents with the new defaults, replayed over
+   dev_train, val_a and val_b, must reproduce the offline running scores,
+   tiers (including the capped admission), blocks, challenges and the
+   email log with 0 mismatches, or the policy is void. The legacy gate
+   stays byte-identical.
