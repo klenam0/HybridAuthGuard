@@ -1,0 +1,185 @@
+{
+  "t0": 1,
+  "day_convention": "day = floor((time - t0) / 86400); day d = [t0 + d*86400, t0 + (d+1)*86400); first day = day 0; [x, y) in days has y - x whole days (same convention as eval/lanl_split.py)",
+  "redteam_rows": 749,
+  "c3": {
+    "time": 1209601,
+    "day": 14,
+    "source": "results/lanl_split.json LA1.1 cuts.c3"
+  },
+  "rule_used": "LA2.2-LA2.4",
+  "a": {
+    "time": 691201,
+    "day": 8
+  },
+  "b": {
+    "time": 1036801,
+    "day": 12
+  },
+  "dev_train_whole_days": 8,
+  "splits": {
+    "dev_train": {
+      "redteam_events": 50,
+      "redteam_distinct_days": 5,
+      "redteam_distinct_users": 7,
+      "la2_6_mode": "exact counts",
+      "start": 1,
+      "end_exclusive": 691201,
+      "start_day": 0,
+      "end_day_exclusive": 8,
+      "whole_days": 8,
+      "distinct_src_computers": 3,
+      "distinct_dst_computers": 24,
+      "strata_la1_5": {
+        "user": {
+          "returning": {
+            "events": 0,
+            "distinct_users": 0,
+            "la2_6_mode": "exact counts"
+          },
+          "new": {
+            "events": 50,
+            "distinct_users": 7,
+            "la2_6_mode": "exact counts"
+          }
+        },
+        "src_computer": {
+          "returning": {
+            "events": 0,
+            "distinct_users": 0,
+            "la2_6_mode": "exact counts"
+          },
+          "new": {
+            "events": 50,
+            "distinct_users": 7,
+            "la2_6_mode": "exact counts"
+          }
+        },
+        "dst_computer": {
+          "returning": {
+            "events": 0,
+            "distinct_users": 0,
+            "la2_6_mode": "exact counts"
+          },
+          "new": {
+            "events": 50,
+            "distinct_users": 7,
+            "la2_6_mode": "exact counts"
+          }
+        }
+      }
+    },
+    "val_a": {
+      "redteam_events": 288,
+      "redteam_distinct_days": 2,
+      "redteam_distinct_users": 45,
+      "la2_6_mode": "bootstrap (user-clustered, 1,000)",
+      "start": 691201,
+      "end_exclusive": 1036801,
+      "start_day": 8,
+      "end_day_exclusive": 12,
+      "whole_days": 4,
+      "distinct_src_computers": 2,
+      "distinct_dst_computers": 173,
+      "strata_la1_5": {
+        "user": {
+          "returning": {
+            "events": 10,
+            "distinct_users": 1,
+            "la2_6_mode": "exact counts"
+          },
+          "new": {
+            "events": 278,
+            "distinct_users": 44,
+            "la2_6_mode": "bootstrap (user-clustered, 1,000)"
+          }
+        },
+        "src_computer": {
+          "returning": {
+            "events": 273,
+            "distinct_users": 45,
+            "la2_6_mode": "bootstrap (user-clustered, 1,000)"
+          },
+          "new": {
+            "events": 15,
+            "distinct_users": 1,
+            "la2_6_mode": "exact counts"
+          }
+        },
+        "dst_computer": {
+          "returning": {
+            "events": 11,
+            "distinct_users": 7,
+            "la2_6_mode": "exact counts"
+          },
+          "new": {
+            "events": 277,
+            "distinct_users": 45,
+            "la2_6_mode": "bootstrap (user-clustered, 1,000)"
+          }
+        }
+      }
+    },
+    "val_b": {
+      "redteam_events": 290,
+      "redteam_distinct_days": 2,
+      "redteam_distinct_users": 50,
+      "la2_6_mode": "bootstrap (user-clustered, 1,000)",
+      "start": 1036801,
+      "end_exclusive": 1209601,
+      "start_day": 12,
+      "end_day_exclusive": 14,
+      "whole_days": 2,
+      "distinct_src_computers": 3,
+      "distinct_dst_computers": 118,
+      "strata_la1_5": {
+        "user": {
+          "returning": {
+            "events": 145,
+            "distinct_users": 15,
+            "la2_6_mode": "exact counts"
+          },
+          "new": {
+            "events": 145,
+            "distinct_users": 35,
+            "la2_6_mode": "bootstrap (user-clustered, 1,000)"
+          }
+        },
+        "src_computer": {
+          "returning": {
+            "events": 290,
+            "distinct_users": 50,
+            "la2_6_mode": "bootstrap (user-clustered, 1,000)"
+          },
+          "new": {
+            "events": 0,
+            "distinct_users": 0,
+            "la2_6_mode": "exact counts"
+          }
+        },
+        "dst_computer": {
+          "returning": {
+            "events": 139,
+            "distinct_users": 34,
+            "la2_6_mode": "bootstrap (user-clustered, 1,000)"
+          },
+          "new": {
+            "events": 151,
+            "distinct_users": 34,
+            "la2_6_mode": "bootstrap (user-clustered, 1,000)"
+          }
+        }
+      }
+    },
+    "test": {
+      "start": 1209601,
+      "start_day": 14,
+      "end": "last auth day, fixed in phase L1",
+      "redteam_events": 121,
+      "redteam_distinct_days": 9,
+      "redteam_distinct_users": 51,
+      "la2_6_mode": "bootstrap (user-clustered, 1,000)"
+    }
+  },
+  "status": "split chosen"
+}
