@@ -100,7 +100,7 @@ metric code, `eval/lanl_la3.py`, is in a6443de, which comes after 9beca16.
 ### Twin-agent equivalence (lanl_a_replay_fresh7_8.json)
 
 The twin carries state from day 0, and the real agents cannot be started in
-that state without replaying days 0-7 (about 2.4 h at the measured speed). So
+that state without replaying days 0-7 (133,093,773 events at the measured 58.4 µs/event, about 2.2 h). So
 both the real agents (frozen defaults) and the twin were started from empty
 state on day 7 and run through day 8. Day 7 closes with incidents, which sets
 the tier cutoffs. Day 8, the required day, then exercises tiers, challenges
