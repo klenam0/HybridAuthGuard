@@ -539,3 +539,132 @@ changed, why, and what had already been seen.
    - excluding the placeholder ID's events.
    This answers whether a model trained on a historical blocklist flags
    new attacking IPs.
+
+6. 2026-10-14, Phase 5, before any Phase 5 metric. Incident triage,
+   graded response policy and operational fixes. Seen before this
+   amendment: every Phase 2, 3, 3b, 4 and 4b result, including the val_b
+   rule workload of amendment 3 (alerts, incidents, incident precision and
+   the amendment 3 budget curves on val_b, which are the T0 budget curves
+   below), the Phase 3b diagnostic of incident precision by top detector on
+   val_b, the Phase 4 and 4b val_b confirmations, and the Phase 4b finding
+   that the ASN prior failure ratio is the best label-free ranking signal
+   (val_a and val_b ROC-AUC 0.726 / 0.736). **The triage scores T1, T2 and
+   T3 below have never been computed on any half, and never on val_b; the
+   response tiers have never been computed at all.** The rules (amendment 3
+   settings), `data/model_v4.pkl` (Phase 4 fallback, `alerting = False`)
+   and the test lock are unchanged. Because v4 raises no ML alert, every
+   incident below is formed by the eight frozen rule detectors only.
+
+   **Unit.** The incident (source IP, calendar day, UTC), as in amendment 3.
+   An incident is *attack* if any event carrying one of its alerts is an
+   attack event.
+
+   **Incident features** (computed causally; the *running* value at an
+   alerted event uses that event and everything before it, the *final*
+   value is the running value at the incident's last alerted event):
+   one indicator per frozen rule detector (it has an alert in the
+   incident); the number of distinct detectors; log1p(alert count); the
+   IP's FAILED and SUCCESS event counts that calendar day (all its events,
+   alerted or not; log1p in T3); whether any of the IP's events that day
+   targeted a `UNKNOWN_ACCOUNT_IDS` account; the maximum, over the IP's
+   events that day, of the event's ASN prior failure ratio (group D
+   `d_asn_fail_ratio`, all prior history, label-free; Phase 4 cache).
+
+   **Triage candidates**, in tie order (simplest first). Scores are
+   compared lexicographically, higher = more urgent:
+   - T0: amendment 3's budget score: (highest val_a alert precision, point
+     estimate at the chosen setting, among the incident's detectors;
+     number of distinct detectors). Baseline.
+   - T1: label-free additive: (number of distinct detectors; maximum ASN
+     failure ratio).
+   - T2: label-free: (T0's first component, the detector tier; maximum ASN
+     failure ratio).
+   - T3: logistic regression on the incident features above (StandardScaler,
+     L2, C = 1.0, lbfgs, `max_iter` 1000, no class weights), fitted on the
+     final features of the **dev_train incidents with their labels**; score
+     = the linear predictor (monotone in the probability). **This is the one
+     use of labels in a deployable component in this project**, declared
+     here as the exception to amendment 4's rule: it uses labels the way an
+     analyst-feedback loop would. It has no IP identity or IP-history
+     feature (the ASN ratio is ASN-level). If chosen, its new-attacker
+     stratum is reported next to every overall result.
+   Remaining ties in an end-of-day ranking are broken uniformly at random,
+   `default_rng(42)`, as in amendment 3.
+
+   **Triage criterion (choose on val_a).** Each calendar day the incidents
+   are ranked by their final score and the top B are taken (end-of-day
+   ranking, as amendment 3's budget curves). Choose the candidate with the
+   highest *mean daily attacking IPs caught* at B = 500 on val_a (per day:
+   distinct attacking IPs with an attack incident among that day's top 500;
+   mean over the 16 days), subject to: the day-clustered bootstrap lower
+   bound of the *mean daily top-500 incident precision* >= T0's val_a point
+   value of that same mean. Bootstrap: the 16 days resampled with
+   replacement, statistic = mean of the drawn days' precision, 1,000
+   resamples, 95% percentile interval, `default_rng(42)` per call. Ties
+   (equal mean daily attacking IPs caught) go to the earlier candidate.
+   T0 is subject to the same bar; its lower bound is below its own point
+   value unless every day is equal, so it is expected to fail it. **If no
+   candidate qualifies, T0 is kept.** Also reported: B = 100 and B = 2,000,
+   attacking IPs caught over the whole half (amendment 3's measure), and
+   every candidate's budget curves. `select` writes the choice to disk and
+   computes no val_b metric; `confirm` reads it and computes val_b once for
+   all four candidates; the chosen one *holds* if its val_b lower bound is
+   >= T0's val_b point value. Nothing is re-chosen after val_b.
+
+   **Response tiers.** A live system cannot rank a day before it ends, so
+   the tiers use a causal, rate-based cutoff. For a daily rate k, the
+   cutoff on day d is the k-th highest *final* score (chosen candidate,
+   lexicographic) among the incidents of the most recent earlier calendar
+   day that had incidents; if that day had fewer than k incidents, every
+   incident qualifies; before the first completed day, none does. An
+   incident enters the rate-k region at its first alerted event whose
+   running score is >= that cutoff, and stays there. Rate grid K = (5, 10,
+   20, 50, 100, 200, 300, 500, 1000, 2000, 5000) incidents/day.
+   - **Block, TTL 3600 s:** k_block = the largest k in K whose region on
+     val_a has >= 30 incidents and an incident-precision lower bound >=
+     0.80 (IP-clustered bootstrap of amendment 3: the IPs with an incident
+     in the region, 1,000 resamples, `default_rng(42)` per call). **If no
+     k qualifies there is no block tier**, and nothing is ever blocked.
+   - **Step-up challenge** (simulated MFA, recorded, not enforced, TTL
+     3600 s): k_step = the largest k in K, k > k_block, whose band (rate-k
+     region minus the rate-k_block region) has >= 30 incidents on val_a and
+     a lower bound >= 0.2149. None qualifies: no step-up tier.
+   - **Alert queue:** the rate-500 region minus the tiers above (empty if
+     k_step >= 500).
+   - **Log only:** every other incident.
+   Each alerted event of an incident in the block (step-up) tier places or
+   extends a block (challenge) on its IP for 3600 s of event time; detection
+   never consults either list. The tier precision on val_a is reported with
+   its interval for every k in K; on val_b the chosen k's are evaluated once
+   (against 0.80, 0.2149 and 0.1915; no re-tuning).
+
+   **Response cost on val_b** (from the one causal run over the whole
+   stream; blocks and challenges placed at the end of val_a carry over):
+   legitimate (non-placeholder) users with a benign event from an IP while
+   it is blocked, and while it is challenged; benign IPs (only non-attack
+   events in val_b) blocked or challenged; attacking IPs blocked or
+   challenged; attack events arriving while blocked or challenged.
+
+   **Strata, every result:** all events; excluding the placeholder ID's
+   events; cold users (no dev_train row); **new attackers** (events whose
+   IP has no attack-labelled dev_train event; benign IPs stay in) and
+   **returning attackers** (the complement: events whose IP has an
+   attack-labelled dev_train event). Budget curves per stratum follow
+   amendment 3 (only the stratum's alerts form incidents, ranked within
+   the stratum; the per-IP daily counts and ASN maximum come from the full
+   stream at the incident's last alerted event). Response costs per
+   stratum restrict the single deployed run's outcomes to the stratum's
+   events, users and IPs.
+
+   **Email (operational, not a metric).** One email per incident, sent when
+   it first enters the block or step-up tier; none for queue or log. Per-IP
+   cooldown (`EMAIL_IP_COOLDOWN_SECONDS`), a global limit per event-time
+   clock hour (`EMAIL_MAX_PER_HOUR`, default 20); incidents over the limit
+   go into that hour's digest, sent once when the hour closes. Severity is
+   derived from the tier (block and step-up HIGH, queue MEDIUM, log LOW).
+
+   **Gates.** The real agents with the new defaults (v3 rules, v4 ML, this
+   policy), replayed over dev_train, val_a and val_b, must reproduce the
+   offline running scores, tiers, blocks, challenges and emails with 0
+   mismatches, or the policy is void. The legacy gate (legacy set
+   explicitly) stays byte-identical.
