@@ -930,3 +930,5 @@ changed, why, and what had already been seen.
    anything; it is logged with before and after values, and only the
    affected metric is rerun. A defect in the frozen system is reported,
    not fixed.
+
+LANL (second dataset): see eval/PROTOCOL_LANL.md (amendment LA1).
