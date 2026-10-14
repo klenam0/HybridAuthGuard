@@ -1,0 +1,50 @@
+{
+  "resources": {
+    "output_drive": "C:\\",
+    "disk_free_bytes": 86820450304,
+    "disk_total_bytes": 1022926573568,
+    "mem_total_bytes": 34135404544,
+    "mem_available_bytes": 17420972032
+  },
+  "smoke": {
+    "t0": 1,
+    "c3_day": 14,
+    "lines_read": 5000000,
+    "decompressed_bytes": 329638542,
+    "compressed_bytes_consumed": 33685514,
+    "rows_written_dev": 5000000,
+    "rows_written_test": 0,
+    "rows_written_total": 5000000,
+    "malformed_lines": 0,
+    "malformed_sidecar": {
+      "path": "C:\\Users\\Dell\\AppData\\Local\\Temp\\claude\\C--Users-Dell-HybridAuthGuard\\932ebd4b-ae9c-4098-a762-38d81494c4ea\\scratchpad\\smoke\\malformed_lines.tsv",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "check_lines_eq_rows_plus_malformed": true,
+    "check_lines_eq_rows_written": true,
+    "time_non_decreasing": true,
+    "first_out_of_order_row": null,
+    "last_row_day": 0,
+    "dev_days_written": [
+      0
+    ],
+    "dev_rows_per_day": {
+      "00": 5000000
+    },
+    "output_bytes_total": 31328547,
+    "elapsed_seconds": 5.4,
+    "rows_per_second": 930745,
+    "peak_working_set_bytes": 654381056,
+    "pyarrow_peak_pool_bytes": 535549952
+  },
+  "output_bytes_per_million_rows": 6265709,
+  "estimate_full": {
+    "method": "scale by compressed bytes: auth.txt.gz size / compressed bytes consumed by the smoke run (gzip read-ahead included)",
+    "scale": 226.4,
+    "est_lines": 1132015554,
+    "est_seconds": 1223,
+    "est_output_bytes": 7092880497,
+    "est_peak_working_set_bytes": "bounded by streaming; smoke peak 654381056 (not scaled)",
+    "est_output_share_of_free_disk": 0.0817
+  }
+}
