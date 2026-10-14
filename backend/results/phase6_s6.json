@@ -1,0 +1,173 @@
+{
+ "protocol": "eval/PROTOCOL.md amendment 9, S6 (functional test, no metrics)",
+ "setup": "copy of the frozen backend (agents, utils, config, api, main, ml, live_simulator) in a scratch directory; empty data/ with model_v4.pkl and model_metrics.json; email variables blank; one seeded previous day (audit_scratch/phase5c_demo/warmup_yesterday.py, 50 events for 2026-10-13); live_simulator.py --rate 4 --attack-interval 15 for 150 s",
+ "checks": {
+  "incidents_formed": 8,
+  "tiers": {
+   "step_up": 5,
+   "queue": 0,
+   "log": 3
+  },
+  "simulated_attack_ips_in_step_up": [
+   "71.140.157.92 (fast brute force)",
+   "47.252.8.222 (slow brute force)",
+   "87.31.89.167 (credential stuffing)",
+   "67.208.48.169 (multiple-IP scenario, external half)"
+  ],
+  "ordinary_user_ips_challenged": [
+   "192.168.1.11 (Akua, Success After Failures after attacks on the account: the known limitation)"
+  ],
+  "off_hours_only_incident_logged": "10.0.0.10 (Suspicious Login Time only) -> log",
+  "pipeline_stats_written_while_running": {
+   "events_processed": 88,
+   "alerts_generated": 14,
+   "written_at": "2026-10-14 09:33:50, live pipeline still running"
+  },
+  "emails": "5 step-up incidents, outcome 'disabled' (no SMTP configured)",
+  "blocks": 0
+ },
+ "incidents": [
+  {
+   "alerts": 2,
+   "day": "2026-10-14",
+   "detectors": [
+    "Success After Failures",
+    "Multiple IP Login"
+   ],
+   "email": "disabled",
+   "first_ts": 1791970410,
+   "incident_id": "67.208.48.169|20740",
+   "ip": "67.208.48.169",
+   "last_ts": 1791970410,
+   "score": [
+    0.24568661971830985,
+    0.38095238095238093
+   ],
+   "tier": "step_up"
+  },
+  {
+   "alerts": 1,
+   "day": "2026-10-14",
+   "detectors": [
+    "Success After Failures"
+   ],
+   "email": "disabled",
+   "first_ts": 1791970407,
+   "incident_id": "192.168.1.11|20740",
+   "ip": "192.168.1.11",
+   "last_ts": 1791970407,
+   "score": [
+    0.24568661971830985,
+    0.3855421686746988
+   ],
+   "tier": "step_up"
+  },
+  {
+   "alerts": 4,
+   "day": "2026-10-14",
+   "detectors": [
+    "Brute Force Attack",
+    "Credential Stuffing",
+    "Distributed Brute Force"
+   ],
+   "email": "disabled",
+   "first_ts": 1791970367,
+   "incident_id": "87.31.89.167|20740",
+   "ip": "87.31.89.167",
+   "last_ts": 1791970375,
+   "score": [
+    0.296875,
+    0.35135135135135137
+   ],
+   "tier": "step_up"
+  },
+  {
+   "alerts": 2,
+   "day": "2026-10-14",
+   "detectors": [
+    "Brute Force Attack",
+    "Distributed Brute Force"
+   ],
+   "email": "disabled",
+   "first_ts": 1791970307,
+   "incident_id": "71.140.157.92|20740",
+   "ip": "71.140.157.92",
+   "last_ts": 1791970316,
+   "score": [
+    0.296875,
+    0.25862068965517243
+   ],
+   "tier": "step_up"
+  },
+  {
+   "alerts": 2,
+   "day": "2026-10-14",
+   "detectors": [
+    "Slow Brute Force",
+    "Distributed Brute Force"
+   ],
+   "email": "disabled",
+   "first_ts": 1791968539,
+   "incident_id": "47.252.8.222|20740",
+   "ip": "47.252.8.222",
+   "last_ts": 1791969739,
+   "score": [
+    0.26303378128817795,
+    0.2923076923076923
+   ],
+   "tier": "step_up"
+  },
+  {
+   "alerts": 1,
+   "day": "2026-10-14",
+   "detectors": [
+    "Suspicious Login Time"
+   ],
+   "email": "not_required",
+   "first_ts": 1791944270,
+   "incident_id": "10.0.0.10|20740",
+   "ip": "10.0.0.10",
+   "last_ts": 1791944270,
+   "score": [
+    0.13086334010043807,
+    0.37209302325581395
+   ],
+   "tier": "log"
+  },
+  {
+   "alerts": 1,
+   "day": "2026-10-13",
+   "detectors": [
+    "Slow Brute Force"
+   ],
+   "email": "not_required",
+   "first_ts": 1791901200,
+   "incident_id": "198.51.100.9|20739",
+   "ip": "198.51.100.9",
+   "last_ts": 1791901200,
+   "score": [
+    0.26303378128817795,
+    0.23529411764705882
+   ],
+   "tier": "log"
+  },
+  {
+   "alerts": 2,
+   "day": "2026-10-13",
+   "detectors": [
+    "Brute Force Attack",
+    "Credential Stuffing"
+   ],
+   "email": "not_required",
+   "first_ts": 1791885601,
+   "incident_id": "203.0.113.7|20739",
+   "ip": "203.0.113.7",
+   "last_ts": 1791885604,
+   "score": [
+    0.296875,
+    0.3076923076923077
+   ],
+   "tier": "log"
+  }
+ ]
+}

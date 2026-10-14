@@ -97,8 +97,9 @@ def stage_s1(args):
             r = {k: P4.event_metrics(S, s, m) for k, m in parts.items()}
             if v == "a" and seed == 42 and not args.smoke:
                 # must reproduce the cached Phase 3 decisions on the dev events
-                dev = np.arange(S.n_dev)
-                d = P2.score_samples(model, prep.scaler.transform(X[dev])) - thr
+                # scored in 1M-row chunks to bound memory
+                d = np.concatenate([P2.score_samples(model, prep.scaler.transform(X[a:min(a + 1_000_000, S.n_dev)]))
+                                    for a in range(0, S.n_dev, 1_000_000)]) - thr
                 cached = np.load(P3B.ML_DECISION)[:S.n_dev]
                 r["check_vs_cached_phase3_decisions"] = {
                     "bit_identical": bool(np.array_equal(d, cached)),
