@@ -1,0 +1,259 @@
+{
+  "scope": "dev days 0-13 only",
+  "splits": {
+    "dev_train": {
+      "days": [
+        0,
+        8
+      ],
+      "filtered_rows_per_day": {
+        "min": 1452770,
+        "mean": 2328251.25,
+        "max": 3091343
+      },
+      "filtered_rows": 18626010,
+      "rows": 133093773,
+      "filtered_share": 0.13994651725742271,
+      "redteam_events": 50,
+      "redteam_users": 7,
+      "events_matched": 50,
+      "events_unmatched": 0,
+      "matched_rows_per_matched_event": {
+        "min": 1,
+        "max": 1
+      },
+      "positive_rows": 50,
+      "positive_rows_passing_filter": 50,
+      "events_passing_filter": 50,
+      "users_passing_filter": 7,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 22241494
+    },
+    "val_a": {
+      "days": [
+        8,
+        12
+      ],
+      "filtered_rows_per_day": {
+        "min": 1565075,
+        "mean": 2142268.0,
+        "max": 3066800
+      },
+      "filtered_rows": 8569072,
+      "rows": 65699676,
+      "filtered_share": 0.13042791870084716,
+      "redteam_events": 288,
+      "redteam_users": 45,
+      "events_matched": 276,
+      "events_unmatched": 12,
+      "matched_rows_per_matched_event": {
+        "min": 1,
+        "max": 1
+      },
+      "positive_rows": 266,
+      "positive_rows_passing_filter": 266,
+      "events_passing_filter": 276,
+      "users_passing_filter": 45,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 10687968
+    },
+    "val_b": {
+      "days": [
+        12,
+        14
+      ],
+      "filtered_rows_per_day": {
+        "min": 3089692,
+        "mean": 3191717.0,
+        "max": 3293742
+      },
+      "filtered_rows": 6383434,
+      "rows": 40678179,
+      "filtered_share": 0.15692526452573013,
+      "redteam_events": 290,
+      "redteam_users": 50,
+      "events_matched": 288,
+      "events_unmatched": 2,
+      "matched_rows_per_matched_event": {
+        "min": 1,
+        "max": 1
+      },
+      "positive_rows": 282,
+      "positive_rows_passing_filter": 282,
+      "events_passing_filter": 288,
+      "users_passing_filter": 50,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 6589392
+    }
+  },
+  "dev": {
+    "redteam_events": 628,
+    "events_matched": 614,
+    "events_unmatched": 14,
+    "matched_rows_per_matched_event": {
+      "min": 1,
+      "max": 1
+    },
+    "events_passing_filter": 614,
+    "users_passing_filter": 86,
+    "redteam_users": 86
+  },
+  "per_day": {
+    "00": {
+      "rows": 15740952,
+      "filtered_rows": 2168941,
+      "positive_rows": 0,
+      "positive_rows_passing_filter": 0,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 2831594,
+      "distinct_src_user_strings": 33593,
+      "distinct_accounts_after_casefold": 33593,
+      "seconds": 10.5
+    },
+    "01": {
+      "rows": 17562370,
+      "filtered_rows": 2498705,
+      "positive_rows": 10,
+      "positive_rows_passing_filter": 10,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 3011966,
+      "distinct_src_user_strings": 29343,
+      "distinct_accounts_after_casefold": 29343,
+      "seconds": 12.1
+    },
+    "02": {
+      "rows": 15585920,
+      "filtered_rows": 1999388,
+      "positive_rows": 15,
+      "positive_rows_passing_filter": 15,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 2614522,
+      "distinct_src_user_strings": 24365,
+      "distinct_accounts_after_casefold": 24365,
+      "seconds": 10.9
+    },
+    "03": {
+      "rows": 13473144,
+      "filtered_rows": 1469407,
+      "positive_rows": 0,
+      "positive_rows_passing_filter": 0,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 2219969,
+      "distinct_src_user_strings": 15843,
+      "distinct_accounts_after_casefold": 15843,
+      "seconds": 9.3
+    },
+    "04": {
+      "rows": 13398091,
+      "filtered_rows": 1452770,
+      "positive_rows": 0,
+      "positive_rows_passing_filter": 0,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 2189034,
+      "distinct_src_user_strings": 15699,
+      "distinct_accounts_after_casefold": 15699,
+      "seconds": 9.2
+    },
+    "05": {
+      "rows": 18557390,
+      "filtered_rows": 2874515,
+      "positive_rows": 21,
+      "positive_rows_passing_filter": 21,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 3069863,
+      "distinct_src_user_strings": 33703,
+      "distinct_accounts_after_casefold": 33703,
+      "seconds": 13.4
+    },
+    "06": {
+      "rows": 19381629,
+      "filtered_rows": 3070941,
+      "positive_rows": 3,
+      "positive_rows_passing_filter": 3,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 3172101,
+      "distinct_src_user_strings": 32428,
+      "distinct_accounts_after_casefold": 32428,
+      "seconds": 13.9
+    },
+    "07": {
+      "rows": 19394277,
+      "filtered_rows": 3091343,
+      "positive_rows": 1,
+      "positive_rows_passing_filter": 1,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 3132445,
+      "distinct_src_user_strings": 32069,
+      "distinct_accounts_after_casefold": 32069,
+      "seconds": 13.8
+    },
+    "08": {
+      "rows": 19374681,
+      "filtered_rows": 3066800,
+      "positive_rows": 261,
+      "positive_rows_passing_filter": 261,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 3147010,
+      "distinct_src_user_strings": 32251,
+      "distinct_accounts_after_casefold": 32251,
+      "seconds": 13.8
+    },
+    "09": {
+      "rows": 18141675,
+      "filtered_rows": 2361596,
+      "positive_rows": 5,
+      "positive_rows_passing_filter": 5,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 3036589,
+      "distinct_src_user_strings": 28693,
+      "distinct_accounts_after_casefold": 28693,
+      "seconds": 12.7
+    },
+    "10": {
+      "rows": 14170706,
+      "filtered_rows": 1575601,
+      "positive_rows": 0,
+      "positive_rows_passing_filter": 0,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 2278369,
+      "distinct_src_user_strings": 17751,
+      "distinct_accounts_after_casefold": 17751,
+      "seconds": 9.8
+    },
+    "11": {
+      "rows": 14012614,
+      "filtered_rows": 1565075,
+      "positive_rows": 0,
+      "positive_rows_passing_filter": 0,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 2226000,
+      "distinct_src_user_strings": 16973,
+      "distinct_accounts_after_casefold": 16973,
+      "seconds": 9.7
+    },
+    "12": {
+      "rows": 19870851,
+      "filtered_rows": 3089692,
+      "positive_rows": 207,
+      "positive_rows_passing_filter": 207,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 3255507,
+      "distinct_src_user_strings": 34684,
+      "distinct_accounts_after_casefold": 34684,
+      "seconds": 14.1
+    },
+    "13": {
+      "rows": 20807328,
+      "filtered_rows": 3293742,
+      "positive_rows": 75,
+      "positive_rows_passing_filter": 75,
+      "unknown_account_rows": 0,
+      "rows_dropped_by_duplicate_check_without_event_id": 3333885,
+      "distinct_src_user_strings": 33375,
+      "distinct_accounts_after_casefold": 33375,
+      "seconds": 16.7
+    }
+  },
+  "seconds": 170.5,
+  "peak_working_set_bytes": 4233113600
+}

@@ -1,0 +1,14 @@
+{
+  "day": 8,
+  "rows": 19374681,
+  "filtered_rows": 3066800,
+  "positive_rows": 261,
+  "positive_rows_passing_filter": 261,
+  "unknown_account_rows": 0,
+  "rows_dropped_by_duplicate_check_without_event_id": 3147010,
+  "distinct_src_user_strings": 32251,
+  "distinct_accounts_after_casefold": 32251,
+  "seconds": 13.8,
+  "peak_working_set_bytes": 3345092608,
+  "estimate_all_dev_days_seconds": 193
+}
