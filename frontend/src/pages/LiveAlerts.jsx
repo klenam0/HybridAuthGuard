@@ -4,9 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { ShieldX, Bell, FileText } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 import SeverityBadge from "../components/SeverityBadge";
+import TierBadge from "../components/TierBadge";
+import { alertTier, enginePolicy, TIERS } from "../utils/policy";
 import { FILTER_ACTIVE } from "../config/severity";
 import { shortAlertId } from "../utils/alertId";
 
+// Legacy mode: the response follows severity. v3: it follows the incident tier.
 const ACTIONS = {
   HIGH: { Icon: ShieldX, color: "text-red-400", label: "Simulated block + email" },
   CRITICAL: { Icon: ShieldX, color: "text-red-400", label: "Simulated block + email" },
@@ -14,26 +17,45 @@ const ACTIONS = {
   LOW: { Icon: FileText, color: "text-slate-400", label: "Logged" },
 };
 
+const TIER_COLORS = {
+  block: "text-red-400",
+  step_up: "text-orange-500",
+  queue: "text-cyan-400",
+  log: "text-slate-400",
+};
+
+function actionFor(alert) {
+  const tier = alertTier(alert);
+  if (tier) {
+    return { Icon: TIERS[tier].Icon, color: TIER_COLORS[tier], label: TIERS[tier].label, tier };
+  }
+  return ACTIONS[alert.severity] || ACTIONS.LOW;
+}
+
 const FILTERS = ["ALL", "HIGH", "MEDIUM", "LOW"];
 
 export default function LiveAlerts({ data }) {
-  const { alerts, stats, markAlertPageRead } = data;
+  const { alerts, stats, status, backendConfig, markAlertPageRead } = data;
+  const policy = enginePolicy(backendConfig, status);
   const [filter, setFilter] = useState("ALL");
 
   const filtered =
     filter === "ALL" ? alerts : alerts.filter((a) => a.severity === filter);
 
   const blockedIPs = stats?.simulated_block_ips || stats?.blocked_ips || [];
+  const challengedIPs = stats?.step_up_ips || [];
 
   const recentActions = alerts.slice(0, 6).map((a, i) => {
-    const action = ACTIONS[a.severity] || ACTIONS.LOW;
+    const action = actionFor(a);
     return {
       time: (a.detected_at || "").split(" ")[1]?.slice(0, 5) || `00:0${i}`,
       Icon: action.Icon,
       color: action.color,
       label: action.label,
       detail:
-        a.severity === "HIGH" || a.severity === "CRITICAL" ? a.ip : a.user,
+        action.tier
+          ? a.ip
+          : a.severity === "HIGH" || a.severity === "CRITICAL" ? a.ip : a.user,
     };
   });
 
@@ -117,7 +139,7 @@ export default function LiveAlerts({ data }) {
             </div>
           ) : (
             filtered.map((alert, i) => {
-              const action = ACTIONS[alert.severity] || ACTIONS.LOW;
+              const action = actionFor(alert);
               const ActionIcon = action.Icon;
 
               return (
@@ -144,6 +166,9 @@ export default function LiveAlerts({ data }) {
                       <p className="ui-body font-medium text-[color:var(--text-primary)] truncate">
                         {alert.type}
                       </p>
+                      {alertTier(alert) && (
+                        <TierBadge tier={alertTier(alert)} className="mt-1" />
+                      )}
                       <p className="text-sm text-[color:var(--text-muted)] font-mono">
                         ALT-{alert.alert_id ? shortAlertId(alert.alert_id) : String(i).padStart(4, "0")}
                       </p>
@@ -235,40 +260,80 @@ export default function LiveAlerts({ data }) {
           )}
         </div>
 
-        {/* Blocked IP Addresses */}
+        {/* Simulated responses on IPs: v3 challenges (and blocks, if the
+            block tier is on); legacy simulated blocks */}
         <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-xl p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <ShieldX className="w-3.5 h-3.5 text-red-400" />
-              <p className="ui-label text-[color:var(--text-primary)]">
-                Simulated IP Blocks
+          {policy.v3 ? (
+            <>
+              <IpPanelHead
+                Icon={TIERS.step_up.Icon}
+                title="Challenged IPs (simulated MFA, not enforced)"
+                count={challengedIPs.length}
+                tone="orange"
+              />
+              <IpList
+                ips={challengedIPs}
+                empty="No IP challenged yet. Step-up is recorded only; no login is stopped."
+              />
+              <p className="ui-caption mt-3">
+                {policy.blockOn
+                  ? `Simulated blocks: ${blockedIPs.length} IPs.`
+                  : "No IP is blocked: the block tier is off (no rate reached a 0.80 precision lower bound on validation data)."}
               </p>
-            </div>
-            <span className="text-sm bg-red-500/20 text-red-400 border border-red-500/30 rounded-full px-2 py-0.5 font-semibold">
-              {blockedIPs.length} IPs
-            </span>
-          </div>
-          {blockedIPs.length === 0 ? (
-            <p className="ui-body text-[color:var(--text-secondary)]">
-              No simulated blocks yet (nothing is enforced in this prototype)
-            </p>
+            </>
           ) : (
-            <div className="space-y-3">
-              {blockedIPs.map((ip, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="text-red-500 text-sm flex-shrink-0">⚠</span>
-                  <span className="text-sm font-mono text-[color:var(--text-primary)] flex-1 truncate">
-                    {ip}
-                  </span>
-                  <button className="text-[color:var(--text-secondary)] hover:text-[color:var(--text-primary)] text-sm transition-colors flex-shrink-0">
-                    ⓘ
-                  </button>
-                </div>
-              ))}
-            </div>
+            <>
+              <IpPanelHead
+                Icon={ShieldX}
+                title="Simulated IP Blocks"
+                count={blockedIPs.length}
+                tone="red"
+              />
+              <IpList
+                ips={blockedIPs}
+                empty="No simulated blocks yet (nothing is enforced in this prototype)"
+              />
+            </>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+const TONES = {
+  red: "bg-red-500/20 text-red-400 border-red-500/30",
+  orange: "bg-orange-500/20 text-orange-500 border-orange-500/30",
+};
+
+function IpPanelHead({ Icon, title, count, tone }) {
+  return (
+    <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+      <div className="flex items-center gap-2">
+        <Icon className={`w-3.5 h-3.5 ${tone === "red" ? "text-red-400" : "text-orange-500"}`} />
+        <p className="ui-label text-[color:var(--text-primary)]">{title}</p>
+      </div>
+      <span className={`text-sm border rounded-full px-2 py-0.5 font-semibold ${TONES[tone]}`}>
+        {count} IPs
+      </span>
+    </div>
+  );
+}
+
+function IpList({ ips, empty, max = 12 }) {
+  if (ips.length === 0) {
+    return <p className="ui-body text-[color:var(--text-secondary)]">{empty}</p>;
+  }
+  return (
+    <div className="space-y-2">
+      {ips.slice(0, max).map((ip) => (
+        <p key={ip} className="text-sm font-mono text-[color:var(--text-primary)] truncate">
+          {ip}
+        </p>
+      ))}
+      {ips.length > max && (
+        <p className="ui-caption">and {ips.length - max} more (see Blocks &amp; Challenges)</p>
+      )}
     </div>
   );
 }

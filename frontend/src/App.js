@@ -14,6 +14,7 @@ import AlertLog from "./pages/AlertLog";
 import DetectionEngine from "./pages/DetectionEngine";
 import ThreatAnalytics from "./pages/ThreatAnalytics";
 import Settings from "./pages/Settings";
+import Incidents from "./pages/Incidents";
 import ConnectionBanner from "./components/ConnectionBanner";
 import { API, POLLED_ENDPOINTS } from "./config/api";
 
@@ -37,6 +38,7 @@ async function fetchJson(path) {
 const PAGES = [
   "dashboard",
   "live-alerts",
+  "incidents",
   "response-actions",
   "mitre-mapping",
   "blocked-ips",
@@ -447,6 +449,7 @@ export default function App() {
         <main className="flex-1 overflow-y-auto">
           {page === "dashboard" && <Dashboard data={d} />}
           {page === "live-alerts" && <LiveAlerts data={d} />}
+          {page === "incidents" && <Incidents data={d} />}
           {page === "response-actions" && <ResponseActions data={d} />}
           {page === "mitre-mapping" && <MITREMapping data={d} />}
           {page === "blocked-ips" && <BlockedIPs data={d} />}

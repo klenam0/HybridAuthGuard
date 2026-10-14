@@ -2,6 +2,7 @@ import { Shield, Cpu, CheckCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import PageHeader from "../components/PageHeader";
 import { shortAlertId } from "../utils/alertId";
+import { enginePolicy } from "../utils/policy";
 
 const DETECTOR_INFO = {
   "Suspicious Login Time": {
@@ -45,6 +46,71 @@ const DETECTOR_INFO = {
     ],
   },
 };
+
+// The v3 windowed rule engine (backend/agents/rules_v3.py), RULES_MODE "v3".
+const V3_DETECTOR_INFO = {
+  "Brute Force Attack": "Real-account failed logins from one IP inside a short window.",
+  "Slow Brute Force":
+    "Failures from one IP spread over a long window while the Brute Force count stays below its threshold.",
+  "Credential Stuffing": "Distinct real accounts with failed logins from one IP.",
+  "Invalid Account Spraying": "Attempts on non-existent (placeholder) accounts from one IP.",
+  "Distributed Brute Force": "Distinct IPs failing against one real account.",
+  "Success After Failures": "A successful login preceded by failures on that account or from that IP.",
+  "Multiple IP Login": "The same user from two IPs within two minutes (known IPs exempt).",
+  "Suspicious Login Time": "A successful login in the off-hours window.",
+};
+
+const fmtDur = (s) =>
+  s >= 86400 && s % 86400 === 0
+    ? `${s / 86400} day${s === 86400 ? "" : "s"}`
+    : s >= 3600 && s % 3600 === 0
+      ? `${s / 3600} h`
+      : s >= 60 && s % 60 === 0
+        ? `${s / 60} min`
+        : `${s} s`;
+
+function detectorPolicyV3(name, cfg) {
+  const mitre = cfg?.mitre?.[name] || {};
+  const base = {
+    type: "rule",
+    description: V3_DETECTOR_INFO[name] || "",
+    mitre: mitre.technique_id || "-",
+    tactic: mitre.tactic || "-",
+  };
+  const v = cfg?.v3;
+  const r = cfg?.rules;
+  if (!v) return { ...base, rule: "-", threshold: "-" };
+  const rows = {
+    "Brute Force Attack": [v.brute_force, (x) => `${x.min_failures} failures within ${fmtDur(x.window_s)}`],
+    "Slow Brute Force": [
+      v.slow_brute_force,
+      (x) => `${x.min_failures} failures within ${fmtDur(x.window_s)}, spread over ${fmtDur(x.min_spread_s)}+`,
+    ],
+    "Credential Stuffing": [v.credential_stuffing, (x) => `${x.min_accounts} accounts within ${fmtDur(x.window_s)}`],
+    "Invalid Account Spraying": [
+      v.invalid_account_spraying,
+      (x) => `${x.min_attempts} attempts within ${fmtDur(x.window_s)}`,
+    ],
+    "Distributed Brute Force": [v.distributed_brute_force, (x) => `${x.min_ips} IPs within ${fmtDur(x.window_s)}`],
+    "Success After Failures": [
+      v.success_after_failures,
+      (x) => `${x.min_failures} failures within ${fmtDur(x.window_s)} before the success`,
+    ],
+    "Multiple IP Login": [
+      v.multiple_ip_login,
+      (x) => `2 IPs within ${fmtDur(x.window_s)}; exempt: ${(x.exempt || []).join(", ") || "none"}`,
+    ],
+  };
+  if (name === "Suspicious Login Time" && r) {
+    return {
+      ...base,
+      rule: base.description,
+      threshold: `Success between ${pad2(r.suspicious_hour_start)}:00 and ${pad2(r.suspicious_hour_end)}:59`,
+    };
+  }
+  const row = rows[name];
+  return { ...base, rule: base.description, threshold: row && row[0] ? row[1](row[0]) : "-" };
+}
 
 // Thresholds, MITRE technique and tactic come from /api/config
 // (backend/config.py) so this page always shows what the backend enforces.
@@ -304,14 +370,23 @@ function DetectorCard({ name, info, alerts, detectorData }) {
 }
 
 export default function DetectionEngine({ data }) {
-  const { alerts, detectors, modelInfo, backendConfig } = data;
+  const { alerts, detectors, modelInfo, backendConfig, status } = data;
+  const policy = enginePolicy(backendConfig, status);
   const pct = (v) => (typeof v === "number" ? `${(v * 100).toFixed(1)}%` : "-");
 
   const ruleAlerts = alerts.filter((a) => a.type !== "ML Anomaly Detected");
   const mlAlerts = alerts.filter((a) => a.type === "ML Anomaly Detected");
   const totalAlerts = alerts.length;
 
-  const detectorNames = Object.keys(DETECTOR_INFO);
+  // v3: the detectors the backend runs (/api/config); legacy: the five
+  // rules and the Isolation Forest.
+  const detectorNames = policy.v3
+    ? (backendConfig?.detectors || []).filter((n) => n !== "ML Anomaly Detected")
+    : Object.keys(DETECTOR_INFO);
+  const infoFor = (name) =>
+    policy.v3
+      ? detectorPolicyV3(name, backendConfig)
+      : { ...DETECTOR_INFO[name], ...detectorPolicy(name, backendConfig) };
 
   return (
     <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
@@ -327,16 +402,37 @@ export default function DetectionEngine({ data }) {
             </p>
             <p className="text-[9px] text-slate-600">Rule Detections</p>
           </div>
-          <div className="bg-[#0f1629] border border-purple-500/20 rounded-lg px-3 py-1.5 text-center">
-            <p className="text-lg font-bold text-purple-400">
-              {mlAlerts.length}
-            </p>
-            <p className="text-[9px] text-slate-600">ML Detections</p>
-          </div>
+          {policy.mlAlerts !== false && (
+            <div className="bg-[#0f1629] border border-purple-500/20 rounded-lg px-3 py-1.5 text-center">
+              <p className="text-lg font-bold text-purple-400">
+                {mlAlerts.length}
+              </p>
+              <p className="text-[9px] text-slate-600">ML Detections</p>
+            </div>
+          )}
         </div>
       </PageHeader>
 
-      {/* How hybrid detection works */}
+      {/* v3: what actually runs */}
+      {policy.v3 && (
+        <div className="bg-[#0f1629] border border-[#1e2a3d] rounded-xl p-4">
+          <p className="text-[11px] font-semibold text-slate-300 mb-2">
+            Detection in this mode (rules v3, ML mode {policy.mlMode || "?"})
+          </p>
+          <p className="text-[11px] text-slate-500 leading-5">
+            {detectorNames.length} windowed rule detectors raise alerts. Alerts are grouped
+            into incidents (source IP, day) and ranked by the triage score: the
+            best detector's validation precision, then the highest prior failure
+            ratio of the IP's network (ASN). The rank sets the response tier.{" "}
+            {policy.mlAlerts === false
+              ? "No machine-learning model raises alerts in this mode: no label-free model cleared the evaluation bar."
+              : ""}
+          </p>
+        </div>
+      )}
+
+      {/* How hybrid detection works (legacy mode) */}
+      {!policy.v3 && (
       <div className="bg-[#0f1629] border border-[#1e2a3d] rounded-xl p-4">
         <p className="text-[11px] font-semibold text-slate-300 mb-2">
           Hybrid Detection Architecture
@@ -377,6 +473,7 @@ export default function DetectionEngine({ data }) {
           </div>
         </div>
       </div>
+      )}
 
       {/* Detector cards */}
       <div>
@@ -388,7 +485,7 @@ export default function DetectionEngine({ data }) {
             <DetectorCard
               key={name}
               name={name}
-              info={{ ...DETECTOR_INFO[name], ...detectorPolicy(name, backendConfig) }}
+              info={infoFor(name)}
               alerts={alerts}
               detectorData={detectors.find((d) => d.name === name)}
             />

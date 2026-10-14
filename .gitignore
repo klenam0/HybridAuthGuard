@@ -18,6 +18,9 @@ backend/env/
 # ── Backend runtime data (regenerated automatically by the pipeline) ──────
 backend/data/alerts.json
 backend/data/alerts.json.bak
+backend/data/alerts.db
+backend/data/alerts.db-*
+backend/data/alerts.db.bak
 backend/data/pipeline_stats.json
 backend/data/raw_logs.txt
 backend/data/parsed_logs.json

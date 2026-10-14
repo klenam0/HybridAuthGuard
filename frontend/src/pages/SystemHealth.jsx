@@ -14,6 +14,7 @@ import {
 import PageHeader from "../components/PageHeader";
 import { POLLED_ENDPOINTS } from "../config/api";
 import { formatUtcTime } from "../utils/time";
+import { enginePolicy } from "../utils/policy";
 
 const TONES = {
   ok: {
@@ -78,6 +79,7 @@ function MetricRow({ label, value, color = "text-[color:var(--text-primary)]" })
 const pct = (v) => (typeof v === "number" ? `${(v * 100).toFixed(1)}%` : "-");
 
 export default function SystemHealth({ data }) {
+  const policy = enginePolicy(data.backendConfig, data.status);
   const {
     modelInfo,
     pipelineStats,
@@ -125,7 +127,9 @@ export default function SystemHealth({ data }) {
 
   const modelState = !status
     ? { tone: "neutral", label: "Model unknown" }
-    : status.model_loaded
+    : policy.mlStep === false
+      ? { tone: "neutral", label: "No ML step (v4)" }
+      : status.model_loaded
       ? { tone: "ok", label: "Model loaded" }
       : { tone: "error", label: "Model not loaded" };
 
@@ -180,6 +184,12 @@ export default function SystemHealth({ data }) {
               title: "Partial connectivity",
               body: `${failingEndpoints.length} of ${POLLED_ENDPOINTS.length} polled endpoints are failing. Affected panels show the last data received.`,
             }
+          : policy.mlStep === false
+            ? {
+                tone: "ok",
+                title: "All polled endpoints responding",
+                body: `No ML model runs in this mode (ML mode v4, forest retired): rule detectors raise the alerts and the incident triage sets the response. The pipeline is ${running ? "running" : "idle"}${pipelineStats?.last_run ? `; last run ${pipelineStats.last_run}` : ""}.`,
+              }
           : status && !status.model_loaded
             ? {
                 tone: "warn",
@@ -250,8 +260,8 @@ export default function SystemHealth({ data }) {
         <HealthCard
           icon={Cpu}
           label="ML Detections"
-          value={mlAlerts}
-          sub="Isolation Forest flags"
+          value={policy.mlAlerts === false ? "Off" : mlAlerts}
+          sub={policy.mlAlerts === false ? "ML mode v4 raises no ML alerts" : "Isolation Forest flags"}
           iconClass="bg-purple-500/20 text-purple-400"
         />
       </div>
@@ -270,6 +280,14 @@ export default function SystemHealth({ data }) {
             <StatusBadge {...modelState} />
           </div>
 
+          {policy.mlStep === false && (
+            <p className="ui-caption leading-6 mb-3">
+              Not used in this mode: ML mode v4 with the Isolation Forest
+              retired loads no model and raises no ML alert. The figures below
+              describe the legacy model (data/model.pkl, trained on
+              label-filtered rows), used only in legacy mode.
+            </p>
+          )}
           <MetricRow label="Algorithm" value="Isolation Forest" />
           <MetricRow label="Trained On" value={modelInfo?.training_size || "-"} />
           <MetricRow
@@ -362,8 +380,21 @@ export default function SystemHealth({ data }) {
           <div className="mt-5 pt-4 border-t border-[color:var(--border)]">
             <p className="ui-kicker mb-1">Configuration</p>
             <p className="ui-caption mb-1">Set in the backend source</p>
-            <MetricRow label="Detection Threshold" value="5 failed attempts" />
-            <MetricRow label="ML Confidence Guard" value="High + Medium only" />
+            {policy.v3 ? (
+              <>
+                <MetricRow label="Rule engine" value="v3 (windowed rules)" />
+                <MetricRow
+                  label="Step-up"
+                  value={policy.stepUpRate ? `at most ${policy.stepUpRate}/day, not enforced` : "off"}
+                />
+                <MetricRow label="Block tier" value={policy.blockOn ? "on (simulated)" : "off"} />
+              </>
+            ) : (
+              <>
+                <MetricRow label="Detection Threshold" value="5 failed attempts" />
+                <MetricRow label="ML Confidence Guard" value="High + Medium only" />
+              </>
+            )}
             <MetricRow
               label="Internal IP Guard"
               value="Disabled"

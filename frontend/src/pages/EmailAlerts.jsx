@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 import SeverityBadge from "../components/SeverityBadge";
+import { enginePolicy } from "../utils/policy";
 
 // Delivery outcome recorded by the backend in alert.response.email.
 const EMAIL_STATUS = {
@@ -19,8 +20,13 @@ const EMAIL_STATUS = {
   failed: { Icon: XCircle, color: "text-red-400", label: "Send failed" },
   disabled: { Icon: MinusCircle, color: "text-slate-400", label: "Email not configured" },
   pending: { Icon: Clock, color: "text-amber-400", label: "Sending" },
+  digest: { Icon: Clock, color: "text-amber-400", label: "In the hourly digest (over the limit)" },
+  cooldown: { Icon: MinusCircle, color: "text-slate-400", label: "Suppressed (per-IP cooldown)" },
   unknown: { Icon: HelpCircle, color: "text-slate-500", label: "Outcome not recorded" },
 };
+
+// The recorded email outcome: v3 per incident, legacy per alert.
+const emailOf = (a) => a.incident?.email || a.response?.email;
 
 const TYPE_ICONS = {
   "Brute Force Attack": "",
@@ -38,12 +44,16 @@ export default function EmailAlerts({ data }) {
   const failedCount = emailCounts.failed || 0;
   const attempted = sentCount + failedCount;
   const { alerts, markAlertPageRead } = data;
+  const policy = enginePolicy(data.backendConfig, data.status);
+  // v3: one email per incident, recorded on the alert at which the incident
+  // entered the block or step-up tier. Legacy: every HIGH alert.
+  const triggers = policy.v3
+    ? alerts.filter((a) => emailOf(a) && emailOf(a) !== "not_required")
+    : alerts.filter((a) => a.severity === "HIGH");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("ALL");
 
-  // Only HIGH severity alerts trigger emails
-  const emailAlerts = alerts
-    .filter((a) => a.severity === "HIGH")
+  const emailAlerts = triggers
     .filter((a) => filter === "ALL" || a.type === filter)
     .filter(
       (a) =>
@@ -53,11 +63,9 @@ export default function EmailAlerts({ data }) {
         a.type.toLowerCase().includes(search.toLowerCase()),
     );
 
-  const totalEmails = alerts.filter((a) => a.severity === "HIGH").length;
+  const totalEmails = triggers.length;
 
-  const uniqueTypes = [
-    ...new Set(alerts.filter((a) => a.severity === "HIGH").map((a) => a.type)),
-  ];
+  const uniqueTypes = [...new Set(triggers.map((a) => a.type))];
 
   const FILTERS = ["ALL", ...uniqueTypes];
 
@@ -124,15 +132,27 @@ export default function EmailAlerts({ data }) {
       {/* SMTP status bar */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-xl px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse flex-shrink-0" />
-          <p className="ui-label text-green-700">SMTP Connected</p>
+          <div
+            className={`w-2 h-2 rounded-full flex-shrink-0 ${sentCount > 0 ? "bg-green-400" : "bg-slate-400"}`}
+          />
+          <p className={`ui-label ${sentCount > 0 ? "text-green-700" : "text-[color:var(--text-secondary)]"}`}>
+            {sentCount > 0
+              ? "SMTP delivering"
+              : emailCounts.disabled
+                ? "Email not configured"
+                : "No email sent yet"}
+          </p>
         </div>
         <div className="hidden sm:block w-px h-4 bg-[color:var(--border)]" />
         <p className="ui-caption">Provider: Gmail SMTP</p>
         <div className="hidden sm:block w-px h-4 bg-[color:var(--border)]" />
         <p className="ui-caption">Port: 465 (SSL)</p>
         <div className="hidden sm:block w-px h-4 bg-[color:var(--border)]" />
-        <p className="ui-caption">Trigger: HIGH severity alerts only</p>
+        <p className="ui-caption">
+          {policy.v3
+            ? `Trigger: one email per incident entering step-up${policy.blockOn ? " or block" : ""}; hourly limit, then a digest`
+            : "Trigger: HIGH severity alerts only"}
+        </p>
       </div>
 
       {/* Search + filter */}
@@ -194,12 +214,16 @@ export default function EmailAlerts({ data }) {
           <Mail className="w-8 h-8 text-[color:var(--text-muted)] mx-auto mb-3" />
           <p className="ui-body font-medium text-[color:var(--text-secondary)]">
             {totalEmails === 0
-              ? "No HIGH-severity alerts yet"
+              ? policy.v3
+                ? "No incident has entered an email tier yet"
+                : "No HIGH-severity alerts yet"
               : "No results match your filter"}
           </p>
           <p className="ui-caption mt-1">
             {totalEmails === 0
-              ? "HIGH severity alerts trigger automatic email notifications"
+              ? policy.v3
+                ? "Incidents entering the step-up tier trigger one email each"
+                : "HIGH severity alerts trigger automatic email notifications"
               : "Try clearing your search or changing the filter"}
           </p>
         </div>
@@ -237,7 +261,7 @@ export default function EmailAlerts({ data }) {
                 <div className="sm:col-span-1">
                   {(() => {
                     const st =
-                      EMAIL_STATUS[alert.response?.email] || EMAIL_STATUS.unknown;
+                      EMAIL_STATUS[emailOf(alert)] || EMAIL_STATUS.unknown;
                     return (
                       <st.Icon
                         className={`w-4 h-4 ${st.color}`}
@@ -298,7 +322,8 @@ export default function EmailAlerts({ data }) {
           {/* Table footer */}
           <div className="px-5 py-3 border-t border-[color:var(--border)] bg-[color:var(--bg-elevated)] flex items-center justify-between gap-2 flex-wrap">
             <p className="ui-caption">
-              Showing {emailAlerts.length} of {totalEmails} HIGH-severity alerts
+              Showing {emailAlerts.length} of {totalEmails}{" "}
+              {policy.v3 ? "incident notifications" : "HIGH-severity alerts"}
             </p>
             <div className="flex items-center gap-1.5">
               <p className="ui-caption">
@@ -320,10 +345,12 @@ export default function EmailAlerts({ data }) {
           </p>
           <p className="ui-caption leading-7">
             Emails are sent via Gmail SMTP using an app password stored securely
-            in the backend environment file. Only HIGH severity alerts trigger
-            notifications to avoid alert fatigue. In production this would
-            connect to a dedicated alerting service such as PagerDuty or AWS
-            SNS.
+            in the backend environment file.{" "}
+            {policy.v3
+              ? "One email per incident when it enters the step-up (or block) tier, at most one per IP per cooldown and a limit per hour; the rest go into an hourly digest."
+              : "Only HIGH severity alerts trigger notifications to avoid alert fatigue."}{" "}
+            In production this would connect to a dedicated alerting service
+            such as PagerDuty or AWS SNS.
           </p>
         </div>
       </div>

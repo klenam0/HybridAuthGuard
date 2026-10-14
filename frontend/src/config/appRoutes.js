@@ -4,6 +4,7 @@ import {
   Ban,
   Bell,
   FileText,
+  Layers,
   LayoutDashboard,
   Mail,
   Settings,
@@ -56,8 +57,30 @@ export const appRoutes = [
       {
         id: "live-alerts-actions",
         title: "Recent Automated Actions",
-        description: "Recently blocked IPs and notification actions.",
+        description: "Recent responses: challenged or blocked IPs and notifications.",
         keywords: ["response", "block", "email"],
+      },
+    ],
+  },
+  {
+    id: "incidents",
+    title: "Incidents",
+    Icon: Layers,
+    description:
+      "Incidents (source IP, day) with their response tier: step-up challenge (simulated MFA, not enforced), analyst queue or log.",
+    keywords: ["incident", "tier", "triage", "step-up", "queue", "mfa"],
+    sections: [
+      {
+        id: "incident-tiers",
+        title: "Incident Tiers",
+        description: "Incidents per tier and each tier's daily rate.",
+        keywords: ["tiers", "rates", "policy"],
+      },
+      {
+        id: "incident-list",
+        title: "Incident List",
+        description: "Latest incidents with tier, detectors, alerts and email outcome.",
+        keywords: ["list", "ip", "day"],
       },
     ],
   },
@@ -65,7 +88,7 @@ export const appRoutes = [
     id: "detection-engine",
     title: "Detection Engine",
     Icon: Shield,
-    description: "The five rule-based detectors and the Isolation Forest model, with their rules and activity.",
+    description: "The rule detectors of the running engine and, in legacy ML mode only, the Isolation Forest, with their rules and activity.",
     keywords: [
       "detectors",
       "rules",
@@ -119,16 +142,16 @@ export const appRoutes = [
   },
   {
     id: "blocked-ips",
-    title: "Simulated Blocks",
+    title: "Blocks & Challenges",
     Icon: Ban,
     description:
-      "Source IPs whose HIGH-severity alerts triggered a simulated block. Nothing is enforced in this prototype.",
-    keywords: ["blocked", "ip", "blacklist", "denylist", "firewall", "ban"],
+      "Source IPs with a simulated response: a block, or (v3) a step-up challenge. Nothing is enforced in this prototype.",
+    keywords: ["blocked", "ip", "blacklist", "denylist", "firewall", "ban", "step-up", "mfa", "challenge"],
     sections: [
       {
         id: "blocked-ip-list",
-        title: "Blocked Address List",
-        description: "IP addresses, block reasons, and enforcement status.",
+        title: "Blocked and Challenged IPs",
+        description: "IP addresses, the simulated response, and the alert that caused it.",
         keywords: ["addresses", "blacklist", "rules"],
       },
     ],

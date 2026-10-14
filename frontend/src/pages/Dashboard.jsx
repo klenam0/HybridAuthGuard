@@ -33,6 +33,7 @@ import {
   SEVERITY_SERIES,
 } from "../config/chartTheme";
 import { formatUtcTime, timeAgo } from "../utils/time";
+import { enginePolicy } from "../utils/policy";
 
 const percent = (part, whole) =>
   whole > 0 ? `${((part / whole) * 100).toFixed(1)}%` : "-";
@@ -189,7 +190,9 @@ export default function Dashboard({ data }) {
     connection,
     running,
     navigateToAlert,
+    backendConfig,
   } = data;
+  const policy = enginePolicy(backendConfig, status);
 
   const hasData = connection.lastSuccess !== null;
   const tileState = hasData
@@ -202,6 +205,7 @@ export default function Dashboard({ data }) {
   const severityCounts = stats?.severity_counts || {};
   const flaggedIps =
     (stats?.simulated_block_ips || stats?.blocked_ips)?.length ?? 0;
+  const challengedIps = stats?.step_up_ips?.length ?? 0;
   const mlCount = alerts.filter((a) => a.type === "ML Anomaly Detected").length;
   const eventsProcessed = pipelineStats?.events_processed;
   const avgMs = pipelineStats?.avg_event_time_ms;
@@ -377,6 +381,8 @@ export default function Dashboard({ data }) {
           <StatusFact label="ML model">
             {!status ? (
               "Unknown"
+            ) : policy.mlStep === false ? (
+              <span title="ML_MODE v4 with the forest retired: no ML step">Not used (v4)</span>
             ) : status.model_loaded ? (
               "Loaded"
             ) : (
@@ -422,24 +428,46 @@ export default function Dashboard({ data }) {
           value={total.toLocaleString()}
           detail="In the current alert set"
         />
-        <MetricTile
-          Icon={Ban}
-          label="Flagged source IPs"
-          state={tileState}
-          value={flaggedIps.toLocaleString()}
-          detail="From HIGH alerts · block simulated"
-        />
-        <MetricTile
-          Icon={Cpu}
-          label="ML anomalies"
-          state={tileState}
-          value={mlCount.toLocaleString()}
-          detail={
-            modelInfo?.precision && modelInfo?.recall
-              ? `Model P ${(modelInfo.precision * 100).toFixed(1)}% · R ${(modelInfo.recall * 100).toFixed(1)}% (offline eval)`
-              : "Isolation Forest"
-          }
-        />
+        {policy.v3 ? (
+          <MetricTile
+            Icon={Ban}
+            label="Challenged source IPs"
+            state={tileState}
+            value={challengedIps.toLocaleString()}
+            detail={`Step-up, simulated MFA, not enforced · ${
+              policy.blockOn ? `${flaggedIps} simulated blocks` : "block tier off"
+            }`}
+          />
+        ) : (
+          <MetricTile
+            Icon={Ban}
+            label="Flagged source IPs"
+            state={tileState}
+            value={flaggedIps.toLocaleString()}
+            detail="From HIGH alerts · block simulated"
+          />
+        )}
+        {policy.mlAlerts === false ? (
+          <MetricTile
+            Icon={Cpu}
+            label="ML detection"
+            state={tileState}
+            value="Off"
+            detail="ML mode v4 raises no ML alerts; the triage uses the ASN failure ratio"
+          />
+        ) : (
+          <MetricTile
+            Icon={Cpu}
+            label="ML anomalies"
+            state={tileState}
+            value={mlCount.toLocaleString()}
+            detail={
+              modelInfo?.precision && modelInfo?.recall
+                ? `Model P ${(modelInfo.precision * 100).toFixed(1)}% · R ${(modelInfo.recall * 100).toFixed(1)}% (offline eval)`
+                : "Isolation Forest"
+            }
+          />
+        )}
       </div>
 
       {/* ── Timeline + needs attention ───────────────────────────────── */}

@@ -10,6 +10,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import PageHeader from "../components/PageHeader";
+import { enginePolicy } from "../utils/policy";
 
 const API = "http://localhost:5000/api";
 
@@ -67,7 +68,8 @@ function ValueBadge({ value, unit = "" }) {
 }
 
 export default function Settings({ data }) {
-  const { modelInfo, backendConfig, adminToken, setAdminToken } = data;
+  const { modelInfo, backendConfig, adminToken, setAdminToken, status } = data;
+  const policy = enginePolicy(backendConfig, status);
   const rules = backendConfig?.rules;
   const ml = backendConfig?.ml;
   const show = (v) => (v === undefined || v === null ? "-" : String(v));
@@ -178,6 +180,26 @@ export default function Settings({ data }) {
           iconColor="text-cyan-400"
         >
           <SettingRow
+            label="Rule Engine"
+            description={
+              policy.v3
+                ? "v3 windowed rules; the legacy thresholds below are not used (see Detection Engine for the v3 windows)"
+                : "Legacy rules (the thresholds below)"
+            }
+          >
+            <ValueBadge value={show(policy.rulesMode)} />
+          </SettingRow>
+          {policy.v3 && (
+            <SettingRow
+              label="Response Policy"
+              description="Incident tiers: step-up is a simulated MFA challenge, recorded and not enforced"
+            >
+              <ValueBadge
+                value={`step-up ≤ ${policy.stepUpRate}/day · queue ≤ ${policy.queueRate}/day · block ${policy.blockOn ? "on" : "off"}`}
+              />
+            </SettingRow>
+          )}
+          <SettingRow
             label="Brute Force Threshold"
             description="Number of failed logins before alert triggers"
           >
@@ -245,9 +267,16 @@ export default function Settings({ data }) {
         >
           <SettingRow
             label="ML Detection"
-            description="Enable Isolation Forest anomaly detection"
+            description={
+              policy.mlAlerts === false
+                ? "ML mode v4: no ML alerts; the model below is the legacy one, used only in legacy mode"
+                : "Isolation Forest anomaly detection"
+            }
           >
-            <StateBadge on />
+            <StateBadge
+              on={policy.mlAlerts !== false}
+              label={policy.mlAlerts === false ? "Off (ML mode v4)" : undefined}
+            />
           </SettingRow>
           <SettingRow
             label="Algorithm"

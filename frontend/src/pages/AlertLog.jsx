@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import PageHeader from "../components/PageHeader";
 import SeverityBadge from "../components/SeverityBadge";
+import TierBadge from "../components/TierBadge";
+import { alertTier, TIERS } from "../utils/policy";
 import { FILTER_ACTIVE } from "../config/severity";
 import { shortAlertId } from "../utils/alertId";
 
@@ -30,6 +32,24 @@ const SEVERITY_GLOW = {
   HIGH: "hover:border-orange-500/30",
   MEDIUM: "hover:border-amber-500/30",
   LOW: "hover:border-blue-500/30",
+};
+
+// Legacy alerts: the response follows severity. v3 alerts carry their
+// incident tier, which decides the response.
+const TIER_COLOR = {
+  block: "text-red-400",
+  step_up: "text-orange-400",
+  queue: "text-cyan-400",
+  log: "text-slate-400",
+};
+
+const EMAIL_TEXT = {
+  sent: "Email sent",
+  failed: "Email failed",
+  disabled: "Email not configured",
+  digest: "In the hourly email digest",
+  cooldown: "Email suppressed (per-IP cooldown)",
+  pending: "Email pending",
 };
 
 const ACTION_ICON = {
@@ -81,8 +101,14 @@ function AlertCard({
   }, [isTarget, onTargetClear]);
 
   const severity = alert.severity || "LOW";
-  const action = ACTION_ICON[severity] || ACTION_ICON.LOW;
+  const tier = alertTier(alert);
+  const action = tier
+    ? { Icon: TIERS[tier].Icon, color: TIER_COLOR[tier], label: TIERS[tier].label }
+    : ACTION_ICON[severity] || ACTION_ICON.LOW;
   const ActionIcon = action.Icon;
+  // The recorded email outcome (v3: the incident's); none recorded: nothing shown.
+  const email = alert.incident?.email || alert.response?.email;
+  const emailText = EMAIL_TEXT[email];
   const isML = alert.type === "ML Anomaly Detected";
 
   const time = alert.detected_at || alert.timestamp || "-";
@@ -129,6 +155,7 @@ function AlertCard({
               ML
             </span>
           )}
+          {tier && <TierBadge tier={tier} className="hidden sm:inline-flex" />}
         </div>
 
         {/* Alert ID */}
@@ -436,10 +463,16 @@ function AlertCard({
                 </p>
               </div>
             </div>
-            {severity === "HIGH" && (
+            {emailText && (
               <div className="flex items-center gap-1.5">
-                <Mail className="w-3 h-3 text-green-400" />
-                <span className="text-[10px] text-green-400">Email sent</span>
+                <Mail
+                  className={`w-3 h-3 ${email === "sent" ? "text-green-400" : "text-slate-400"}`}
+                />
+                <span
+                  className={`text-[10px] ${email === "sent" ? "text-green-400" : "text-slate-400"}`}
+                >
+                  {emailText}
+                </span>
               </div>
             )}
           </div>

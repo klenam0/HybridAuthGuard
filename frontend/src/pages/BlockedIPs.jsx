@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ShieldX, Clock, AlertTriangle, CheckCircle } from "lucide-react";
 import PageHeader from "../components/PageHeader";
+import TierBadge from "../components/TierBadge";
+import { alertTier, enginePolicy } from "../utils/policy";
 
 // IPv4 CIDR membership, for the internal/external split shown on this page.
 function ipv4ToInt(ip) {
@@ -76,23 +78,31 @@ function ReasonBadge({ type }) {
 }
 
 export default function BlockedIPs({ data }) {
-  const { alerts, backendConfig } = data;
+  const { alerts, stats, status, backendConfig } = data;
+  const policy = enginePolicy(backendConfig, status);
   const internalNetworks =
     backendConfig?.rules?.internal_networks || DEFAULT_INTERNAL_NETWORKS;
   const [search, setSearch] = useState("");
 
-  // IPs whose alerts triggered the simulated block: the recorded response
-  // when present, else the HIGH-severity policy (older alerts).
+  // IPs with a simulated response in the recent alerts: a block (legacy:
+  // the recorded response, else the HIGH-severity policy for older alerts;
+  // v3: the block tier) or a v3 step-up challenge (simulated MFA, recorded,
+  // never enforced). A block outranks a challenge.
   const ipMap = {};
   alerts.forEach((alert) => {
-    const blocked = alert.response
-      ? alert.response.simulated_block
-      : alert.severity === "HIGH";
-    if (!blocked) return;
+    const tier = alertTier(alert);
+    const blocked = tier
+      ? tier === "block"
+      : alert.response
+        ? alert.response.simulated_block
+        : alert.severity === "HIGH";
+    const action = blocked ? "block" : tier === "step_up" ? "step_up" : null;
+    if (!action) return;
     const ip = alert.ip;
     if (!ipMap[ip]) {
       ipMap[ip] = {
         ip,
+        action,
         reason: alert.type,
         user: alert.user,
         detectedAt: alert.detected_at || "-",
@@ -100,6 +110,7 @@ export default function BlockedIPs({ data }) {
         count: 0,
       };
     }
+    if (action === "block") ipMap[ip].action = "block";
     ipMap[ip].count += 1;
   });
 
@@ -112,20 +123,40 @@ export default function BlockedIPs({ data }) {
         item.user.toLowerCase().includes(search.toLowerCase()),
     );
 
-  const totalBlocked = blockedList.length;
+  const totalBlocked = blockedList.filter((b) => b.action === "block").length;
+  const totalChallenged = blockedList.filter((b) => b.action === "step_up").length;
+  // Whole store (v3 /api/stats), not only the recent alerts listed below.
+  const storeChallenged = stats?.step_up_ips?.length;
 
   // Classify IP as internal or external
   const isInternal = (ip) => internalNetworks.some((net) => inCidr(ip, net));
 
   return (
     <div className="p-3 sm:p-6 space-y-4 sm:space-y-5">
-      <PageHeader routeId="blocked-ips">
+      <PageHeader
+        routeId="blocked-ips"
+        description={
+          policy.v3
+            ? "Source IPs whose incidents reached a response tier: step-up challenges (simulated MFA, recorded, never enforced) and, if the block tier is on, simulated blocks. Nothing is enforced in this prototype."
+            : undefined
+        }
+      >
         <div className="flex items-center gap-3 flex-wrap">
+          {policy.v3 && (
+            <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-4 py-2 text-center">
+              <p className="text-2xl font-semibold text-orange-700 leading-none">
+                {storeChallenged ?? totalChallenged}
+              </p>
+              <p className="ui-caption mt-1">Challenged (simulated MFA, not enforced)</p>
+            </div>
+          )}
           <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-4 py-2 text-center">
             <p className="text-2xl font-semibold text-red-700 leading-none">
               {totalBlocked}
             </p>
-            <p className="ui-caption mt-1">Simulated blocks</p>
+            <p className="ui-caption mt-1">
+              {policy.v3 && !policy.blockOn ? "Blocks (block tier off)" : "Simulated blocks"}
+            </p>
           </div>
           <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-lg px-4 py-2 text-center">
             <p className="text-2xl font-semibold text-orange-700 leading-none">
@@ -179,7 +210,11 @@ export default function BlockedIPs({ data }) {
         <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-xl py-16 text-center">
           <CheckCircle className="w-8 h-8 text-green-700 mx-auto mb-3" />
           <p className="ui-body font-medium text-[color:var(--text-secondary)]">
-            {search ? "No IPs match your search" : "No IPs blocked yet"}
+            {search
+              ? "No IPs match your search"
+              : policy.v3
+                ? "No IP challenged or blocked yet"
+                : "No IPs blocked yet"}
           </p>
           <p className="ui-caption mt-1">
             {search
@@ -198,9 +233,9 @@ export default function BlockedIPs({ data }) {
           {/* Table header - hidden on mobile, rows are stacked instead */}
           <div className="hidden sm:grid sm:grid-cols-12 gap-3 px-5 py-3 border-b border-[color:var(--border)] bg-[color:var(--bg-elevated)]">
             <div className="col-span-3 ui-table-head">IP Address</div>
+            <div className="col-span-2 ui-table-head">Response</div>
             <div className="col-span-2 ui-table-head">Reason</div>
             <div className="col-span-2 ui-table-head">Target User</div>
-            <div className="col-span-2 ui-table-head">MITRE</div>
             <div className="col-span-2 ui-table-head">Detected At</div>
             <div className="col-span-1 ui-table-head">Hits</div>
           </div>
@@ -216,7 +251,9 @@ export default function BlockedIPs({ data }) {
                 >
                   {/* IP */}
                   <div className="sm:col-span-3 flex items-center gap-2">
-                    <ShieldX className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                    <ShieldX
+                      className={`w-3.5 h-3.5 flex-shrink-0 ${item.action === "block" ? "text-red-400" : "text-orange-500"}`}
+                    />
                     <div>
                       <p className="text-sm font-semibold font-mono text-[color:var(--text-primary)]">
                         {item.ip}
@@ -234,6 +271,11 @@ export default function BlockedIPs({ data }) {
                     </div>
                   </div>
 
+                  {/* Response */}
+                  <div className="sm:col-span-2 pl-6 sm:pl-0">
+                    <TierBadge tier={item.action} long className="whitespace-normal" />
+                  </div>
+
                   {/* Reason */}
                   <div className="sm:col-span-2 pl-6 sm:pl-0">
                     <ReasonBadge type={item.reason} />
@@ -244,13 +286,6 @@ export default function BlockedIPs({ data }) {
                     <p className="ui-body text-[color:var(--text-primary)]">
                       {item.user}
                     </p>
-                  </div>
-
-                  {/* MITRE */}
-                  <div className="sm:col-span-2 pl-6 sm:pl-0">
-                    <span className="text-sm text-cyan-600 font-mono">
-                      {item.mitre}
-                    </span>
                   </div>
 
                   {/* Time */}
@@ -279,14 +314,25 @@ export default function BlockedIPs({ data }) {
         <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
         <div>
           <p className="ui-label text-[color:var(--text-primary)] mb-1">
-            Simulated Blocking
+            {policy.v3 ? "Nothing is enforced" : "Simulated Blocking"}
           </p>
-          <p className="ui-caption leading-7">
-            IP blocking in this prototype is simulated. In a production
-            environment, HIGH severity detections would interface directly with
-            firewall rules, iptables, or cloud security group APIs to enforce
-            real network-level blocks.
-          </p>
+          {policy.v3 ? (
+            <p className="ui-caption leading-7">
+              A step-up challenge is recorded for the IP for one hour; no login
+              is stopped or delayed. A production system would ask its identity
+              provider for MFA here. The block tier is{" "}
+              {policy.blockOn
+                ? "on: blocks are simulated and recorded, not sent to a firewall."
+                : "off: no rate reached a 0.80 precision lower bound on validation data, so nothing is blocked."}
+            </p>
+          ) : (
+            <p className="ui-caption leading-7">
+              IP blocking in this prototype is simulated. In a production
+              environment, HIGH severity detections would interface directly with
+              firewall rules, iptables, or cloud security group APIs to enforce
+              real network-level blocks.
+            </p>
+          )}
         </div>
       </div>
     </div>

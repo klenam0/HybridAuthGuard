@@ -24,6 +24,7 @@ import {
   lineCursor,
 } from "../config/chartTheme";
 import { SEVERITY } from "../config/severity";
+import { enginePolicy } from "../utils/policy";
 
 const SEVERITY_COLORS = {
   HIGH: SEVERITY.HIGH.chart,
@@ -79,8 +80,9 @@ function BarRow({ label, pct, color }) {
 }
 
 export default function ResponseActions({ data }) {
-  const { alerts, stats, timeline, modelInfo, pipelineStats, backendConfig } =
+  const { alerts, stats, timeline, modelInfo, pipelineStats, backendConfig, status } =
     data;
+  const policy = enginePolicy(backendConfig, status);
   // Confidence cut-offs from /api/config (backend/config.py).
   const highCut = backendConfig?.ml?.confidence_high_cutoff;
   const medCut = backendConfig?.ml?.confidence_medium_cutoff;
@@ -174,8 +176,9 @@ export default function ResponseActions({ data }) {
   const recorded = alerts.filter((a) => a.response);
   const recHigh = recorded.filter((a) => a.severity === "HIGH");
   const recMedium = recorded.filter((a) => a.severity === "MEDIUM");
+  // v3: HIGH = the step-up tier (simulated MFA, not enforced); legacy: block.
   const ipBlockPct = share(
-    recHigh.filter((a) => a.response.simulated_block).length,
+    recHigh.filter((a) => (policy.v3 ? a.response.step_up : a.response.simulated_block)).length,
     recHigh.length,
   );
   const emailPct = share(emailCounts.sent || 0, emailAttempted);
@@ -312,6 +315,16 @@ export default function ResponseActions({ data }) {
             <p className="ui-kicker">ML Intelligence - Isolation Forest</p>
           </div>
 
+          {policy.mlAlerts === false ? (
+            <p className="ui-body text-[color:var(--text-secondary)] leading-6">
+              Not used in this mode. ML mode v4 raises no ML alerts: no
+              label-free model cleared the evaluation bar, and the legacy model
+              was trained on label-filtered rows. Responses come from the rule
+              alerts and the incident triage.
+            </p>
+          ) : (
+          <>
+
           <div className="grid grid-cols-2 gap-3 mb-4">
             {[
               {
@@ -395,6 +408,8 @@ export default function ResponseActions({ data }) {
                 </div>
               ))}
             </div>
+          )}
+          </>
           )}
         </CardWrap>
       </div>
@@ -578,9 +593,9 @@ export default function ResponseActions({ data }) {
           <CardWrap>
             <CardTitle>Response Effectiveness</CardTitle>
             <div className="space-y-2 mb-4">
-              <BarRow label="Sim. block" pct={ipBlockPct} color="green" />
+              <BarRow label={policy.v3 ? "Sim. step-up" : "Sim. block"} pct={ipBlockPct} color="green" />
               <BarRow label="Email Alerts" pct={emailPct} color="cyan" />
-              <BarRow label="Admin Notify" pct={notifyPct} color="blue" />
+              <BarRow label={policy.v3 ? "Analyst queue" : "Admin Notify"} pct={notifyPct} color="blue" />
               <BarRow label="Log Written" pct={logPct} color="purple" />
             </div>
             <div className="flex items-center justify-around pt-4 border-t border-[color:var(--border)]">
