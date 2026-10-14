@@ -1,0 +1,145 @@
+HybridAuthGuard reproduction gate
+model: data/model.pkl, trained_at 2026-10-06T17:51:38.813374
+stream: RBA sample cache, seed-42 user-disjoint split, test partition, time-sorted
+config: ML_ALERT_MARGIN=-0.02 CONFIDENCE_HIGH_CUTOFF=-0.1 CONFIDENCE_MEDIUM_CUTOFF=-0.02 BRUTE_FORCE_THRESHOLD=5
+
+[hybrid, deployed margin -0.02]
+  events                       104268
+  attack_events                35000
+  benign_events                69268
+  attacking_ips                5425
+  benign_ips                   42162
+  benign_users                 46279
+  ml_scored_events             84671
+  alerts                       19777
+  emails                       2692
+  event_recall                 0.2151  (0.2150857142857143)
+  campaign_recall              0.4829  (0.48294930875576036)
+  fpr                          0.1768  (0.17683490211930472)
+  precision                    0.3806  (0.3806441826363958)
+  alert breakdown (type | severity | confidence [truth]):
+    Brute Force Attack | HIGH [attack]                           758
+    Brute Force Attack | HIGH [benign]                           72
+    Credential Stuffing | HIGH [attack]                          368
+    Credential Stuffing | HIGH [benign]                          100
+    ML Anomaly Detected | HIGH | High [attack]                   414
+    ML Anomaly Detected | HIGH | High [benign]                   758
+    ML Anomaly Detected | MEDIUM | Medium [attack]               4257
+    ML Anomaly Detected | MEDIUM | Medium [benign]               7705
+    Multiple IP Login | HIGH [attack]                            17
+    Multiple IP Login | HIGH [benign]                            77
+    Slow Brute Force | HIGH [attack]                             62
+    Slow Brute Force | HIGH [benign]                             66
+    Suspicious Login Time | MEDIUM [attack]                      1652
+    Suspicious Login Time | MEDIUM [benign]                      3471
+  detector_suppression:
+    benign_ips_blocked               3280
+    attack_ips_blocked               1675
+    benign_events_after_block        7749
+    benign_successes_after_block     5422
+    benign_users_affected            5050
+  response_blocks:
+    benign_ips_blocked               875
+    attack_ips_blocked               1368
+    benign_events_after_block        2686
+    benign_successes_after_block     1876
+    benign_users_affected            1727
+
+[hybrid, margin 0.0 (evaluated policy)]
+  events                       104268
+  attack_events                35000
+  benign_events                69268
+  attacking_ips                5425
+  benign_ips                   42162
+  benign_users                 46279
+  ml_scored_events             84671
+  alerts                       28086
+  emails                       2686
+  event_recall                 0.2777  (0.2777142857142857)
+  campaign_recall              0.5998  (0.599815668202765)
+  fpr                          0.2651  (0.2651440780735693)
+  precision                    0.3461  (0.34607989745780815)
+  alert breakdown (type | severity | confidence [truth]):
+    Brute Force Attack | HIGH [attack]                           758
+    Brute Force Attack | HIGH [benign]                           72
+    Credential Stuffing | HIGH [attack]                          368
+    Credential Stuffing | HIGH [benign]                          100
+    ML Anomaly Detected | HIGH | High [attack]                   411
+    ML Anomaly Detected | HIGH | High [benign]                   755
+    ML Anomaly Detected | MEDIUM | Low [attack]                  2473
+    ML Anomaly Detected | MEDIUM | Low [benign]                  6407
+    ML Anomaly Detected | MEDIUM | Medium [attack]               3979
+    ML Anomaly Detected | MEDIUM | Medium [benign]               7418
+    Multiple IP Login | HIGH [attack]                            17
+    Multiple IP Login | HIGH [benign]                            77
+    Slow Brute Force | HIGH [attack]                             62
+    Slow Brute Force | HIGH [benign]                             66
+    Suspicious Login Time | MEDIUM [attack]                      1652
+    Suspicious Login Time | MEDIUM [benign]                      3471
+  detector_suppression:
+    benign_ips_blocked               5807
+    attack_ips_blocked               2095
+    benign_events_after_block        9920
+    benign_successes_after_block     7159
+    benign_users_affected            6221
+  response_blocks:
+    benign_ips_blocked               872
+    attack_ips_blocked               1367
+    benign_events_after_block        2682
+    benign_successes_after_block     1872
+    benign_users_affected            1725
+
+[rules only]
+  events                       104268
+  attack_events                35000
+  benign_events                69268
+  attacking_ips                5425
+  benign_ips                   42162
+  benign_users                 46279
+  ml_scored_events             0
+  alerts                       6643
+  emails                       1520
+  event_recall                 0.0816  (0.08162857142857143)
+  campaign_recall              0.2833  (0.28331797235023043)
+  fpr                          0.0547  (0.054657273199745914)
+  precision                    0.4301  (0.43007677254252596)
+  alert breakdown (type | severity | confidence [truth]):
+    Brute Force Attack | HIGH [attack]                           758
+    Brute Force Attack | HIGH [benign]                           72
+    Credential Stuffing | HIGH [attack]                          368
+    Credential Stuffing | HIGH [benign]                          100
+    Multiple IP Login | HIGH [attack]                            17
+    Multiple IP Login | HIGH [benign]                            77
+    Slow Brute Force | HIGH [attack]                             62
+    Slow Brute Force | HIGH [benign]                             66
+    Suspicious Login Time | MEDIUM [attack]                      1652
+    Suspicious Login Time | MEDIUM [benign]                      3471
+  detector_suppression:
+    benign_ips_blocked               238
+    attack_ips_blocked               1188
+    benign_events_after_block        896
+    benign_successes_after_block     529
+    benign_users_affected            557
+  response_blocks:
+    benign_ips_blocked               313
+    attack_ips_blocked               1193
+    benign_events_after_block        957
+    benign_successes_after_block     576
+    benign_users_affected            600
+
+COMPARISONS (rounded to 4 dp)
+  deployed vs audit E8               campaign_recall  got 0.4829  ref 0.4829  diff +0.0000  MATCH
+  deployed vs audit E8               fpr              got 0.1768  ref 0.1768  diff +0.0000  MATCH
+  deployed vs audit E8               event_recall     got 0.2151  ref 0.2151  diff -0.0000  MATCH
+  -> deployed-threshold reproduction of E8: PASS
+  Batch 5 reference source: results/batch5_results.json + batch5b_results.json, seed 42
+  margin 0 vs Batch 5 hybrid         campaign_recall  got 0.5998  ref 0.5998  diff +0.0000  MATCH
+  margin 0 vs Batch 5 hybrid         fpr              got 0.2651  ref 0.2661  diff -0.0010  DIFFERENT
+  margin 0 vs Batch 5 hybrid         event_recall     got 0.2777  ref 0.2844  diff -0.0067  DIFFERENT
+  -> differences here are expected: Batch 5 computes failed_rate over
+     every event, the real agent only over events that reach the ML
+     step (audit F20). The diff column is the size of that effect.
+  rules only vs Batch 5 rules_only   fpr              got 0.0547  ref 0.0547  diff -0.0000  MATCH
+  rules only vs Batch 5 rules_only   event_recall     got 0.0816  ref 0.0816  diff +0.0000  MATCH
+  -> rules-only reproduction of Batch 5: PASS
+
