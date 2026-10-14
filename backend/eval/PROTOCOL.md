@@ -759,3 +759,53 @@ changed, why, and what had already been seen.
    tiers (including the capped admission), blocks, challenges and the
    email log with 0 mismatches, or the policy is void. The legacy gate
    stays byte-identical.
+
+8. 2026-10-14, Phase 5c, before any Phase 5c metric. Score floor for the
+   rated tiers. Seen before this amendment: every result up to and
+   including Phase 5b (amendment 7's step-up grid on val_a, its tiers and
+   response cost on val_a and val_b, the label audit), and the Phase 5b
+   live demo, where the previous day had fewer than k incidents, so every
+   incident qualified on score and ordinary simulated logins (e.g. an
+   off-hours success caught only by Suspicious Login Time) were
+   challenged. No metric of the floor below had been computed on any
+   split. The rules (amendment 3 settings), T2, the rates (step-up 200/day,
+   queue 500/day, no block tier), the capped admission of amendment 7,
+   `data/model_v4.pkl` and the test lock are unchanged.
+
+   **Floor.** An incident may enter a rated tier (block, step-up, queue)
+   at an alerted event only if, at that event, it carries an alert of at
+   least one of the five rule detectors that survived Phase 3b: those that
+   met amendment 3's criterion on val_a **and** held on val_b
+   (`results/phase3b_confirm.json`): Slow Brute Force, Credential
+   Stuffing, Invalid Account Spraying, Distributed Brute Force, Success
+   After Failures. An incident whose alerts so far come only from Brute
+   Force (met on val_a, failed on val_b), Multiple IP Login or Suspicious
+   Login Time (failed on val_a) stays at log; it can still enter a tier
+   later that day if one of the five alerts in it. The set is read from
+   numbers already on disk; no parameter is introduced or tuned.
+
+   **On top of amendment 7, unchanged.** The cutoff of a tier on day d is
+   still the k-th highest final T2 score among all incidents of the most
+   recent earlier day with incidents (incidents below the floor included;
+   every incident qualifies on score if that day had fewer than k), and at
+   most k incidents enter a tier per day. An incident below the floor uses
+   no slot. T2's score itself is unchanged.
+
+   **Reported on val_a and val_b, both marked as previously seen** (val_a
+   chose k_step, val_b was reported in Phases 5 and 5b; nothing is
+   chosen or re-tuned): per tier, incidents (total and per day),
+   incident precision with amendment 3's IP-clustered interval and
+   attacking IPs, with and without the floor; step-up attacking IPs
+   challenged, benign IPs challenged and legitimate users challenged
+   (total and per day; amendment 7's definitions). Also: how often the
+   floor binds over the whole stream (dev_train, val_a, val_b): incidents
+   below the floor at their final event, and incidents that would have
+   entered step-up or the queue without the floor but did not with it,
+   in total and on how many days.
+
+   **Gates.** The real agents with the new defaults, replayed over
+   dev_train, val_a and val_b, must reproduce the offline running scores,
+   tiers (capped admission with the floor), blocks, challenges and the
+   email log with 0 mismatches, or the floor is void. The legacy gate
+   stays byte-identical. The locked May test month stays the only clean
+   check.
