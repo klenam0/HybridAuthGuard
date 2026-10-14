@@ -133,3 +133,130 @@ LA1 allows no third attempt. Any new split rule would be a new amendment
 the per-split counts above have been seen. It is not blind the way LA1 was.
 The choice of rule, and whether that loss of blindness is acceptable,
 belongs to Dr. Ansong and the user. No split, lock or loader exists yet.
+
+---
+
+# LA2
+
+**Rule applied: LA2.2-LA2.4 (three-way split). The LA2.5 fallback was not used.**
+Every number below comes from `results/lanl_split_la2.json`,
+`eval/LANL_TEST_LOCK.json` or the printed command output named next to it.
+
+## LA2.1 Order of commits
+
+| commit | content |
+|---|---|
+| 3a17909 | Amendment LA2 appended to `eval/PROTOCOL_LANL.md` (that file alone, no code) |
+| 66fd22a | `eval/lanl_split_la2.py`, `results/lanl_split_la2.json` |
+| 7ab96c8 | `eval/lanl_lock.py`, `eval/LANL_TEST_LOCK.json`, `eval/lanl_data.py`, empty `results/lanl_test_access.log` |
+| (this commit) | this section |
+
+LA2 (3a17909) was committed before `lanl_split_la2.py` existed. No script
+computed an LA2 boundary before that commit. `lanl_split.py` and
+`lanl_split.json` were not changed.
+
+## LA2.2 Conventions (lanl_split_la2.py)
+
+The day index is the same as in `lanl_split.py`: day = floor((time - t0) / 86400),
+with t0 = 1. Day d covers [t0 + d*86400, t0 + (d+1)*86400) and the first day is
+day 0. A block [x, y) of day indices has y - x whole days. c3 is read from
+`results/lanl_split.json` (attempt LA1.1, `cuts.c3`) and the script checks that
+it lies on a day boundary.
+
+## LA2.3 Splits
+
+| | time | day |
+|---|---|---|
+| a | 691201 | 8 |
+| b | 1036801 | 12 |
+| c3 | 1209601 | 14 |
+
+| split | days | whole days | red-team events | distinct days | distinct users | src computers | dst computers | LA2.6 mode |
+|---|---|---|---|---|---|---|---|---|
+| dev_train | [0, 8) | 8 | 50 | 5 | 7 | 3 | 24 | exact counts |
+| val_a | [8, 12) | 4 | 288 | 2 | 45 | 2 | 173 | bootstrap |
+| val_b | [12, 14) | 2 | 290 | 2 | 50 | 3 | 118 | bootstrap |
+| test | [14, end fixed in L1] | n/a | 121 | 9 | 51 | not computed | not computed | bootstrap |
+
+dev_train has 8 whole days, which meets LA2.4's minimum of 5. Per LA2.7, the
+test row has only its event count, distinct days and distinct users.
+
+## LA2.4 Dev-only strata (LA1.5)
+
+"Returning" means the value appears in a red-team event before the split
+starts. Each cell is events / distinct red-team users, followed by the LA2.6
+mode for that stratum.
+
+| split | stratum | returning | new |
+|---|---|---|---|
+| dev_train | user | 0 / 0 (exact) | 50 / 7 (exact) |
+| dev_train | src computer | 0 / 0 (exact) | 50 / 7 (exact) |
+| dev_train | dst computer | 0 / 0 (exact) | 50 / 7 (exact) |
+| val_a | user | 10 / 1 (exact) | 278 / 44 (bootstrap) |
+| val_a | src computer | 273 / 45 (bootstrap) | 15 / 1 (exact) |
+| val_a | dst computer | 11 / 7 (exact) | 277 / 45 (bootstrap) |
+| val_b | user | 145 / 15 (exact) | 145 / 35 (bootstrap) |
+| val_b | src computer | 290 / 50 (bootstrap) | 0 / 0 (exact) |
+| val_b | dst computer | 139 / 34 (bootstrap) | 151 / 34 (bootstrap) |
+
+No strata were computed for the test period.
+
+## LA2.5 Test lock and access
+
+- `eval/LANL_TEST_LOCK.json`: c3 = 1209601 (day 14), redteam.txt.gz SHA-256
+  606635837c684ad11e464075ecf97bc5df325ff7d7f64614d2d8c8af18051669, and
+  test-row SHA-256 2dca05c14f63da24947a94ec7d4eda67d646ead201b57ff1e2a20170ded3ded1.
+  The row hash covers the raw lines with time >= c3, in file order, UTF-8,
+  each followed by "\n". Nothing about the rows was printed.
+- `load_lanl(split, source="redteam")` in `eval/lanl_data.py`. Every call to
+  `"test"` writes ALLOWED or DENIED to `results/lanl_test_access.log`, and the
+  call raises unless FINAL_EVAL=1. An allowed call checks the rows against the
+  lock hash before returning them. `source="auth"` raises NotImplementedError
+  (phase L1).
+- Guard test: the log path was pointed at a scratch file outside the repo.
+  The output showed three refusals: test/redteam and test/auth with FINAL_EVAL
+  unset, and test with FINAL_EVAL=0. All three were logged as DENIED.
+  Development loads returned {'dev_train': 50, 'val_a': 288, 'val_b': 290},
+  the same counts as the JSON. The ALLOWED path was not run, because that
+  would read test rows.
+- `results/lanl_test_access.log` was committed empty and is still 0 bytes
+  (`wc -c`).
+
+## LA2.6 Gates
+
+| check | before | after |
+|---|---|---|
+| `python -m eval.freeze --verify` | freeze MATCHES | freeze MATCHES |
+| `python -m eval.lock_test --verify` | test lock MATCHES | test lock MATCHES |
+| `python -m eval.lanl_lock --verify` | n/a | LANL test lock MATCHES |
+| RBA `results/test_access.log` | 1 line | 1 line |
+| `results/lanl_test_access.log` | n/a | 0 bytes |
+
+auth.txt.gz was not read in this part. No script printed anything per day.
+
+## LA2.7 Unexpected findings and notes
+
+- val_a has 4 whole days, but its red-team events fall on only 2 of them. Each
+  split meets the 2-day minimum exactly: val_a and val_b each have events on
+  2 days.
+- dev_train has red-team events (50 events, 7 users) even though LA2.4 does not
+  require any. LA2.6 puts it in exact-count mode.
+- There are very few source computers: 2 to 3 per split. In val_b the
+  source-computer "new" stratum is empty (0 / 0), so source-computer strata
+  carry almost no information in val_b. In val_a the "new" user stratum is
+  large (278 events / 44 users) and the "returning" user stratum is a single
+  user (10 / 1).
+- No script printed a per-day count. However, LA1.1's val_b in
+  `results/lanl_split.json` is day 13 alone, and LA2's val_b is days 12-13.
+  Together the two files let anyone compute the day-12 event count by
+  subtraction. That count is in the test's past, not the test itself.
+- The test-row hash covers every red-team row with time >= c3. If the test end
+  found in phase L1 falls before the last red-team time (day 29, from
+  `results/lanl_inspect.json`), the lock will include rows after the test
+  end. L1 should record which applies.
+- The access log records calls for the test split only, the same as RBA's
+  `eval.datasets.load`. Development calls are not logged.
+
+All commits on `lanl-l0` since `phase6-final`: 33495e8, caee2e3, a7f61a4,
+dd97217, 3a17909, 66fd22a, 7ab96c8 and this report commit. Not pushed or merged.
+Phase L1 has not been started.
