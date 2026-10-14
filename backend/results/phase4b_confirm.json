@@ -1,0 +1,278 @@
+{
+  "protocol": "eval/PROTOCOL.md amendment 5",
+  "base_rate": {
+    "val_a": 0.1074382539498799,
+    "val_b": 0.09574763155385668
+  },
+  "thresholds_fixed": {
+    "val_a": 0.2149,
+    "val_b": 0.1915
+  },
+  "deployment": {
+    "candidate": {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "meta": {
+        "score": "asn",
+        "features": [
+          "d_asn_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.001,
+      "threshold": 1.0
+    },
+    "meets_criterion": false,
+    "alerting": false,
+    "with_D": true,
+    "status": "no amendment 5 candidate meets the criterion; the Phase 4 fallback stays in model_v4.pkl (alerting = False)"
+  },
+  "rows": {
+    "best_lower_bound": {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "quantile": 0.001,
+      "threshold": 1.0,
+      "with_D": true,
+      "val_a": {
+        "incremental_incidents": 1514,
+        "incremental_attack_incidents": 197,
+        "incremental_precision": 0.13011889035667107,
+        "incremental_ci_low": 0.10844136285401346,
+        "incremental_ci_high": 0.1523362119812591,
+        "attacking_ips_incremental": 142,
+        "ml_alerts": 2508,
+        "ml_attack_alerts": 402,
+        "ml_alert_precision": 0.16028708133971292,
+        "ml_alert_ci_low": 0.10281726991002713,
+        "ml_alert_ci_high": 0.24689704091443884,
+        "attacking_ips_flagged": 157,
+        "benign_ips_flagged": 1257,
+        "legitimate_users_alerted": 196,
+        "ml_incidents": 2062,
+        "ml_incident_precision": 0.13918525703200776,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      },
+      "val_b": {
+        "incremental_incidents": 1397,
+        "incremental_attack_incidents": 169,
+        "incremental_precision": 0.12097351467430208,
+        "incremental_ci_low": 0.10026663766013034,
+        "incremental_ci_high": 0.1433568294728692,
+        "attacking_ips_incremental": 129,
+        "ml_alerts": 2351,
+        "ml_attack_alerts": 357,
+        "ml_alert_precision": 0.15185027647809443,
+        "ml_alert_ci_low": 0.10388091040494077,
+        "ml_alert_ci_high": 0.22310093957139573,
+        "attacking_ips_flagged": 160,
+        "benign_ips_flagged": 1177,
+        "legitimate_users_alerted": 145,
+        "ml_incidents": 1987,
+        "ml_incident_precision": 0.13286361348766984,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false,
+        "holds": false,
+        "meets_val_a_bar": false
+      },
+      "event_val_a": {
+        "roc_auc": 0.7263238780656112,
+        "pr_auc": 0.16850164695887007,
+        "tpr_at_1pct_fpr": 0.00566238055916008
+      },
+      "event_val_b": {
+        "roc_auc": 0.7355587960786687,
+        "pr_auc": 0.15692308162020244,
+        "tpr_at_1pct_fpr": 0.006644638573303762
+      }
+    },
+    "best_C1": {
+      "name": "C1:phase2_forest_labelfree",
+      "family": "C1",
+      "quantile": 0.05,
+      "threshold": 0.5574720162259826,
+      "with_D": false,
+      "val_a": {
+        "incremental_incidents": 9172,
+        "incremental_attack_incidents": 540,
+        "incremental_precision": 0.05887483645878761,
+        "incremental_ci_low": 0.05267190396908071,
+        "incremental_ci_high": 0.06513070357717789,
+        "attacking_ips_incremental": 474,
+        "ml_alerts": 24652,
+        "ml_attack_alerts": 2590,
+        "ml_alert_precision": 0.10506246957650495,
+        "ml_alert_ci_low": 0.09160178597932249,
+        "ml_alert_ci_high": 0.12029358795358586,
+        "attacking_ips_flagged": 1297,
+        "benign_ips_flagged": 12539,
+        "legitimate_users_alerted": 5889,
+        "ml_incidents": 18180,
+        "ml_incident_precision": 0.10874587458745874,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      },
+      "val_b": {
+        "incremental_incidents": 9992,
+        "incremental_attack_incidents": 568,
+        "incremental_precision": 0.05684547638110488,
+        "incremental_ci_low": 0.051204690763858564,
+        "incremental_ci_high": 0.06277550581205217,
+        "attacking_ips_incremental": 498,
+        "ml_alerts": 25897,
+        "ml_attack_alerts": 2330,
+        "ml_alert_precision": 0.08997181140672665,
+        "ml_alert_ci_low": 0.07780432894595961,
+        "ml_alert_ci_high": 0.10255199457588383,
+        "attacking_ips_flagged": 1248,
+        "benign_ips_flagged": 13556,
+        "legitimate_users_alerted": 6401,
+        "ml_incidents": 19325,
+        "ml_incident_precision": 0.09500646830530401,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false,
+        "holds": false,
+        "meets_val_a_bar": false
+      },
+      "event_val_a": {
+        "roc_auc": 0.5039329966694688,
+        "pr_auc": 0.1012616157207294,
+        "tpr_at_1pct_fpr": 0.0023514608155400887
+      },
+      "event_val_b": {
+        "roc_auc": 0.506056815350325,
+        "pr_auc": 0.09033833472026825,
+        "tpr_at_1pct_fpr": 0.002788213461277328
+      }
+    },
+    "best_C2": {
+      "name": "C2:freeman_no_placeholder[beta=8]",
+      "family": "C2",
+      "quantile": 0.05,
+      "threshold": 0.0,
+      "with_D": false,
+      "val_a": {
+        "incremental_incidents": 149981,
+        "incremental_attack_incidents": 3129,
+        "incremental_precision": 0.020862642601396177,
+        "incremental_ci_low": 0.020085340581362923,
+        "incremental_ci_high": 0.021772734627647523,
+        "attacking_ips_incremental": 2681,
+        "ml_alerts": 248378,
+        "ml_attack_alerts": 26068,
+        "ml_alert_precision": 0.10495293463994396,
+        "ml_alert_ci_low": 0.09941131099481841,
+        "ml_alert_ci_high": 0.11063803250260526,
+        "attacking_ips_flagged": 4401,
+        "benign_ips_flagged": 150251,
+        "legitimate_users_alerted": 218416,
+        "ml_incidents": 210236,
+        "ml_incident_precision": 0.07759375178370974,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      },
+      "val_b": {
+        "incremental_incidents": 145234,
+        "incremental_attack_incidents": 3191,
+        "incremental_precision": 0.02197143919467893,
+        "incremental_ci_low": 0.021104662435909645,
+        "incremental_ci_high": 0.022801646176554675,
+        "attacking_ips_incremental": 2702,
+        "ml_alerts": 233478,
+        "ml_attack_alerts": 22121,
+        "ml_alert_precision": 0.09474554347732977,
+        "ml_alert_ci_low": 0.08976084607036797,
+        "ml_alert_ci_high": 0.09977607489029708,
+        "attacking_ips_flagged": 4389,
+        "benign_ips_flagged": 143242,
+        "legitimate_users_alerted": 206851,
+        "ml_incidents": 203821,
+        "ml_incident_precision": 0.07383439390445538,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false,
+        "holds": false,
+        "meets_val_a_bar": false
+      },
+      "event_val_a": {
+        "roc_auc": 0.4683513366080684,
+        "pr_auc": 0.10614912441450212,
+        "tpr_at_1pct_fpr": 0.0021469859620148637
+      },
+      "event_val_b": {
+        "roc_auc": 0.46506336467295983,
+        "pr_auc": 0.09409684652140118,
+        "tpr_at_1pct_fpr": 0.0026433712035486352
+      }
+    },
+    "best_C3": {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "quantile": 0.001,
+      "threshold": 1.0,
+      "with_D": true,
+      "val_a": {
+        "incremental_incidents": 1514,
+        "incremental_attack_incidents": 197,
+        "incremental_precision": 0.13011889035667107,
+        "incremental_ci_low": 0.10844136285401346,
+        "incremental_ci_high": 0.1523362119812591,
+        "attacking_ips_incremental": 142,
+        "ml_alerts": 2508,
+        "ml_attack_alerts": 402,
+        "ml_alert_precision": 0.16028708133971292,
+        "ml_alert_ci_low": 0.10281726991002713,
+        "ml_alert_ci_high": 0.24689704091443884,
+        "attacking_ips_flagged": 157,
+        "benign_ips_flagged": 1257,
+        "legitimate_users_alerted": 196,
+        "ml_incidents": 2062,
+        "ml_incident_precision": 0.13918525703200776,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      },
+      "val_b": {
+        "incremental_incidents": 1397,
+        "incremental_attack_incidents": 169,
+        "incremental_precision": 0.12097351467430208,
+        "incremental_ci_low": 0.10026663766013034,
+        "incremental_ci_high": 0.1433568294728692,
+        "attacking_ips_incremental": 129,
+        "ml_alerts": 2351,
+        "ml_attack_alerts": 357,
+        "ml_alert_precision": 0.15185027647809443,
+        "ml_alert_ci_low": 0.10388091040494077,
+        "ml_alert_ci_high": 0.22310093957139573,
+        "attacking_ips_flagged": 160,
+        "benign_ips_flagged": 1177,
+        "legitimate_users_alerted": 145,
+        "ml_incidents": 1987,
+        "ml_incident_precision": 0.13286361348766984,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false,
+        "holds": false,
+        "meets_val_a_bar": false
+      },
+      "event_val_a": {
+        "roc_auc": 0.7263238780656112,
+        "pr_auc": 0.16850164695887007,
+        "tpr_at_1pct_fpr": 0.00566238055916008
+      },
+      "event_val_b": {
+        "roc_auc": 0.7355587960786687,
+        "pr_auc": 0.15692308162020244,
+        "tpr_at_1pct_fpr": 0.006644638573303762
+      }
+    }
+  },
+  "d1_c_val_b": {
+    "roc_auc": 0.506056815350325,
+    "pr_auc": 0.09033833472026825,
+    "tpr_at_1pct_fpr": 0.002788213461277328
+  },
+  "timings_seconds": {
+    "load stream and selection": 6.9,
+    "val_b rows": 14.3,
+    "total": 21.2
+  }
+}
