@@ -208,6 +208,12 @@ class ReplayResult:
 
 
 def replay(events, scorer=None, threshold=config.BRUTE_FORCE_THRESHOLD):
+    """The legacy engine needs legacy ML mode, whatever the defaults are."""
+    with override_config(ML_MODE="legacy"):
+        return _replay(events, scorer, threshold)
+
+
+def _replay(events, scorer=None, threshold=config.BRUTE_FORCE_THRESHOLD):
     """
     Run events (dicts with timestamp/user/ip/status[/country/device_type],
     already time-sorted) through the real agents. scorer=None runs rules only.

@@ -99,6 +99,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join(RESULTS, "phase0_gate.txt"))
     args = ap.parse_args()
+    # The gate reproduces the legacy engine and model whatever the defaults
+    # are (v3 / v4 since Phase 5): legacy is set explicitly.
+    with harness.override_config(RULES_MODE="legacy", ML_MODE="legacy"):
+        return _run(args)
+
+
+def _run(args):
 
     events, truth = streams.rba_test_stream()
     det = load_detector()

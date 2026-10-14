@@ -12,12 +12,21 @@ evaluation (backend/eval/harness.py) after doing so.
 
 import os
 
+try:   # RULES_MODE / ML_MODE etc. may be set in backend/.env (see .env.example)
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+except ImportError:
+    pass
+
 # ── Rules (agents/detection_agent.py) ──────────────────────────────────────
-# Rule engine: "legacy" = the Phase 0-2 rules (agents/detection_agent.py
-# LegacyDetectionAgent), kept unchanged for the reproduction gate; "v3" =
-# the Phase 3 engine (agents/rules_v3.py, V3_* settings below). The legacy
-# settings directly below apply to "legacy" only.
-RULES_MODE = "legacy"
+# Rule engine: "v3" (default since Phase 5) = the Phase 3 engine
+# (agents/rules_v3.py, V3_* settings below) with the incident response tiers;
+# "legacy" = the Phase 0-2 rules (agents/detection_agent.py
+# LegacyDetectionAgent), kept unchanged and still selectable for the
+# reproduction gate (eval/gate.py sets it explicitly). Override with the
+# RULES_MODE environment variable. The legacy settings directly below apply
+# to "legacy" only.
+RULES_MODE = os.environ.get("RULES_MODE", "v3")
 
 BRUTE_FORCE_THRESHOLD = 5              # lifetime FAILED events from one IP
 
@@ -98,12 +107,14 @@ V3_DUPLICATE_WINDOW_SECONDS = 300
 ML_FAILED_RATE_WINDOW_DAYS = 30
 
 # ── ML mode (Phase 4, eval/PROTOCOL.md amendment 4) ───────────────────────
-# "legacy" = the Phase 2 Isolation Forest (data/model.pkl, unchanged).
-# "v4" = ml/model_v4.V4Scorer: the causal features of ml/features_v4.py and
-# the model chosen on val_a, loaded from ML_V4_MODEL_PATH (never model.pkl)
-# with its threshold. Requires RULES_MODE = "v3". If the bundle says the
-# amendment 4 fallback applied, v4 scores every event but raises no ML alert.
-ML_MODE = "legacy"
+# "v4" (default since Phase 5) = the Phase 4 design: no label-filtered model;
+# with ML_V4_IFOREST "on", ml/model_v4.V4Scorer scores every event with the
+# bundle at ML_V4_MODEL_PATH (never model.pkl) and, as the amendment 4
+# fallback applied, raises no ML alert. Requires RULES_MODE = "v3".
+# "legacy" = the Phase 2 Isolation Forest (data/model.pkl, unchanged,
+# trained on label-filtered rows; results/README.md). Override with the
+# ML_MODE environment variable.
+ML_MODE = os.environ.get("ML_MODE", "v4")
 ML_V4_MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "model_v4.pkl")
 # The v4 Isolation Forest (model_v4.pkl, Phase 4 fallback, alerting off).
 # "retired" (eval/PROTOCOL.md amendment 6): the chosen triage score T2 reads
