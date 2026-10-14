@@ -365,10 +365,16 @@ def DetectionAgent(threshold=None, anomaly_detector=None, mode=None):
         from agents.rules_v3 import V3DetectionAgent
         if config.ML_MODE == "v4":
             # Phase 4 ML step: causal features + the val_a choice. A
-            # V4Scorer passed in (replays, tests) is used as it is.
+            # V4Scorer passed in (replays, tests) is used as it is. With
+            # the forest retired (amendment 6) there is no ML step.
             from ml.model_v4 import V4Scorer
             if not isinstance(anomaly_detector, V4Scorer):
-                anomaly_detector = V4Scorer.load(config.ML_V4_MODEL_PATH)
+                if config.ML_V4_IFOREST == "retired":
+                    anomaly_detector = None
+                elif config.ML_V4_IFOREST == "on":
+                    anomaly_detector = V4Scorer.load(config.ML_V4_MODEL_PATH)
+                else:
+                    raise ValueError(f"unknown ML_V4_IFOREST {config.ML_V4_IFOREST!r}")
         elif config.ML_MODE != "legacy":
             raise ValueError(f"unknown ML_MODE {config.ML_MODE!r} (expected 'legacy' or 'v4')")
         return V3DetectionAgent(anomaly_detector=anomaly_detector)

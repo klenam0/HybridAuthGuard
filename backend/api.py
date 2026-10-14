@@ -21,7 +21,7 @@ from flask_cors import CORS
 from utils.llm_analyzer import LLMAnalyzer
 import config
 from utils.event_schema import normalize_event
-from utils.alert_manager import AlertManager
+from utils.alert_manager import open_alert_store
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +36,8 @@ def body_too_large(_e):
     return jsonify({"error": f"Body larger than {config.INGEST_MAX_BODY_BYTES} bytes"}), 413
 
 BASE         = os.path.dirname(os.path.abspath(__file__))
-ALERTS_PATH  = os.path.join(BASE, "data", "alerts.json")
+ALERTS_PATH  = os.path.join(BASE, "data", "alerts.json")      # legacy mode
+ALERTS_DB_PATH = os.path.join(BASE, "data", "alerts.db")      # v3 mode
 STATS_PATH   = os.path.join(BASE, "data", "pipeline_stats.json")
 METRICS_PATH = os.path.join(BASE, "data", "model_metrics.json")
 QUEUE_PATH = os.path.join(BASE, "data", "live_queue.jsonl")
@@ -48,12 +49,18 @@ _store = None
 
 
 def _alert_store():
-    """The alert store for ALERTS_PATH. All alert reads go through its
-    mtime cache and all writes through its lock + atomic replace (F07)."""
+    """The alert store of config.RULES_MODE: SQLite (ALERTS_DB_PATH) in v3,
+    the JSON file (ALERTS_PATH, mtime cache, lock + atomic replace) in
+    legacy (F07)."""
     global _store
-    if _store is None or _store.file_path != ALERTS_PATH:
-        _store = AlertManager(ALERTS_PATH)
+    path = ALERTS_DB_PATH if config.RULES_MODE == "v3" else ALERTS_PATH
+    if _store is None or _store.file_path != path:
+        _store = open_alert_store(path)
     return _store
+
+
+def _sqlite(store):
+    return hasattr(store, "query")
 
 # ── LLM enrichment service ─────────────────────────────────────────────────────
 # Defined AFTER ALERTS_PATH so the path is available when start_llm_service runs
@@ -62,7 +69,7 @@ _llm_analyzer = None
 def start_llm_service():
     global _llm_analyzer
     try:
-        _llm_analyzer = LLMAnalyzer(alerts_path=ALERTS_PATH)
+        _llm_analyzer = LLMAnalyzer(alerts_path=ALERTS_PATH, store=_alert_store())
     except Exception as e:
         log.warning(f"⚠ LLM service failed to start: {e}")
 
@@ -123,14 +130,47 @@ def run_pipeline_thread(delay=0.3, threshold=5, fresh=False):
 
 @app.route("/api/alerts")
 def get_alerts():
-    """Return all alerts from alerts.json."""
-    return jsonify(_alert_store().load_cached())
+    """
+    Alerts. Legacy: every alert in alerts.json. v3: the most recent alerts
+    from alerts.db, oldest first; optional filters ?limit= (max 5000),
+    ?tier=, ?ip=, ?incident=, ?type=.
+    """
+    store = _alert_store()
+    if not _sqlite(store):
+        return jsonify(store.load_cached())
+    try:
+        limit = min(int(request.args.get("limit", 2000)), 5000)
+    except ValueError:
+        return jsonify({"error": "limit must be an integer"}), 400
+    rows = store.query(limit=limit, tier=request.args.get("tier"), ip=request.args.get("ip"),
+                       incident_id=request.args.get("incident"),
+                       alert_type=request.args.get("type"))
+    return jsonify(list(reversed(rows)))
+
+
+@app.route("/api/incidents")
+def get_incidents():
+    """
+    v3 incidents (source IP, day) with their response tier, newest first:
+    block, step_up (simulated MFA challenge, not enforced), queue or log.
+    Optional ?tier=, ?ip=, ?day=YYYY-MM-DD, ?limit= (max 5000).
+    """
+    store = _alert_store()
+    if not _sqlite(store):
+        return jsonify({"error": "incidents exist only in RULES_MODE 'v3'"}), 404
+    try:
+        limit = min(int(request.args.get("limit", 500)), 5000)
+    except ValueError:
+        return jsonify({"error": "limit must be an integer"}), 400
+    return jsonify(store.incidents(limit=limit, tier=request.args.get("tier"),
+                                   ip=request.args.get("ip"), day=request.args.get("day")))
 
 
 @app.route("/api/status")
 def get_status():
     """Return system status."""
-    alert_count = len(_alert_store().load_cached())
+    store = _alert_store()
+    alert_count = store.count() if _sqlite(store) else len(store.load_cached())
 
     uptime_seconds = int(
         (datetime.now(timezone.utc) - SERVER_START_TIME).total_seconds()
@@ -139,12 +179,19 @@ def get_status():
     return jsonify({
         "running":           pipeline_status["running"],
         "alert_count":       alert_count,
-        "model_loaded":      os.path.exists(os.path.join(BASE, "data", "model.pkl")),
+        "rules_mode":        config.RULES_MODE,
+        "ml_mode":           config.ML_MODE,
+        # The model file this mode needs: model.pkl (legacy ML), model_v4.pkl
+        # (v4 forest) or none (v4 with the forest retired, config.ML_V4_IFOREST).
+        "model_loaded":      (os.path.exists(os.path.join(BASE, "data", "model.pkl"))
+                              if config.ML_MODE == "legacy" else
+                              (config.ML_V4_IFOREST == "retired"
+                               or os.path.exists(config.ML_V4_MODEL_PATH))),
         "server_start_time": SERVER_START_TIME.isoformat(),
         "uptime_seconds":    uptime_seconds,
         "detectors": [
             "ML Anomaly Detection" if d == "ML Anomaly Detected" else d
-            for d in config.DETECTORS
+            for d in config.active_detectors()
         ],
     })
 
@@ -199,7 +246,28 @@ def run_pipeline():
 @app.route("/api/stats")
 def get_stats():
     """Return aggregated stats for charts."""
-    alerts = _alert_store().load_cached()
+    store = _alert_store()
+    if _sqlite(store):
+        st = store.stats()
+        severity_counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
+        severity_counts.update(st["severity_counts"])
+        email = {"sent": 0, "failed": 0, "disabled": 0, "digest": 0, "cooldown": 0}
+        for k, v in st["email"].items():
+            if k in email:
+                email[k] += v
+        return jsonify({
+            "severity_counts": severity_counts,
+            "type_counts": [{"name": k, "count": v} for k, v in st["type_counts"]],
+            # IPs whose incidents reached the (simulated, not enforced) tiers.
+            "simulated_block_ips": st["blocked_ips"],
+            "blocked_ips": st["blocked_ips"],   # deprecated alias
+            "step_up_ips": st["step_up_ips"],
+            "incident_tiers": st["incident_tiers"],
+            # Per incident in v3 (one email per incident; see /api/config).
+            "email": email,
+            "total_alerts": st["total_alerts"],
+        })
+    alerts = store.load_cached()
 
     severity_counts = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
     type_counts     = {}
@@ -247,12 +315,17 @@ def get_timeline():
     Returns alert counts grouped by hour for timeline chart.
     Always returns all 24 hours - empty hours return zero.
     """
-    alerts = _alert_store().load_cached()
-
+    store = _alert_store()
     hours = {
         h: {"hour": h, "total": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
         for h in range(24)
     }
+    if _sqlite(store):
+        for h, severity, n in store.hourly():
+            hours[int(h)]["total"] += n
+            hours[int(h)][severity] = hours[int(h)].get(severity, 0) + n
+        return jsonify(list(hours.values()))
+    alerts = store.load_cached()
 
     for alert in alerts:
         detected_at = alert.get("detected_at", "")
@@ -293,7 +366,7 @@ def get_pipeline_stats():
 @app.route("/api/agents")
 def get_agents():
     """Return agent stats from pipeline stats + alerts."""
-    alerts = _alert_store().load_cached()
+    store = _alert_store()
 
     try:
         with open(STATS_PATH, "r", encoding="utf-8") as f:
@@ -302,7 +375,8 @@ def get_agents():
         stats = {}
 
     processed = stats.get("events_processed", 0)
-    generated = stats.get("alerts_generated", len(alerts))
+    generated = stats.get("alerts_generated",
+                          store.count() if _sqlite(store) else len(store.load_cached()))
     last_run  = stats.get("last_run", "-")
 
     # Measured values only (audit F26): no constant status/queue/success.
@@ -344,19 +418,14 @@ def get_agents():
 @app.route("/api/detectors")
 def get_detectors():
     """Return per-detector stats from real alert data."""
-    alerts = _alert_store().load_cached()
-
-    DETECTOR_CONFIG = [
-        ("Suspicious Login Time", False),
-        ("Multiple IP Login",     False),
-        ("Brute Force Attack",    False),
-        ("Slow Brute Force",      False),
-        ("Credential Stuffing",   False),
-        ("ML Anomaly Detected",   True),
-    ]
+    store = _alert_store()
+    DETECTOR_CONFIG = [(d, d == "ML Anomaly Detected") for d in config.active_detectors()]
 
     type_data = {}
-    for alert in alerts:
+    if _sqlite(store):
+        for t, n, last in store.by_type():
+            type_data[t] = {"count": n, "last": last}
+    for alert in ([] if _sqlite(store) else store.load_cached()):
         t = alert.get("type", "Unknown")
         if t not in type_data:
             type_data[t] = {"count": 0, "last": None}
@@ -410,7 +479,10 @@ def get_threat_level():
     window = config.THREAT_LEVEL_WINDOW_MINUTES
     cutoff = datetime.now() - timedelta(minutes=window)
     recent = []
-    for a in _alert_store().load_cached():
+    store = _alert_store()
+    if _sqlite(store):
+        recent = [{"severity": s} for s in store.saved_since(cutoff.strftime("%Y-%m-%d %H:%M:%S"))]
+    for a in ([] if _sqlite(store) else store.load_cached()):
         stamp = a.get("saved_at") or a.get("detected_at")
         try:
             if stamp and datetime.strptime(stamp, "%Y-%m-%d %H:%M:%S") >= cutoff:
@@ -435,11 +507,16 @@ def get_threat_level():
 def get_enrichment_status():
     """Return how many alerts are pending LLM enrichment."""
     try:
-        alerts   = _alert_store().load_cached()
-        total    = len(alerts)
-        enriched = sum(1 for a in alerts if a.get("enriched"))
-        failed   = sum(1 for a in alerts
-                       if not a.get("enriched") and a.get("enrichment_failed"))
+        store = _alert_store()
+        if _sqlite(store):
+            c = store.enrichment_counts()
+            total, enriched, failed = c["total"], c["enriched"], c["failed"]
+        else:
+            alerts   = store.load_cached()
+            total    = len(alerts)
+            enriched = sum(1 for a in alerts if a.get("enriched"))
+            failed   = sum(1 for a in alerts
+                           if not a.get("enriched") and a.get("enrichment_failed"))
         pending  = total - enriched - failed
         return jsonify({
             "total":         total,
@@ -461,7 +538,8 @@ def clear_alerts():
     """Clear all alerts (backed up first) - requires the admin token."""
     try:
         cleared = _alert_store().clear(backup=True)
-        return jsonify({"message": f"Alerts cleared ({cleared} backed up to alerts.json.bak)"})
+        name = os.path.basename(_alert_store().backup_path)
+        return jsonify({"message": f"Alerts cleared ({cleared} backed up to {name})"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

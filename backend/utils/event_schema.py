@@ -16,11 +16,20 @@ The normalised event holds only the known fields:
                folding, which would change detection results).
   ip           parsed with ipaddress and stored in canonical form.
   status       "SUCCESS" or "FAILED" (case-insensitive on input).
-  country,     optional strings.
-  device_type
+  country,     optional strings (length limits in
+  device_type, config.INGEST_MAX_FIELD_CHARS); null or absent = missing.
+  region,      The v4 features (ml/features_v4.py) and the triage read
+  user_agent,  them; a missing one counts as the empty value, exactly as in
+  browser, os  the offline replay.
+  asn          optional non-negative integer (a JSON integer or a string of
+               digits), stored as int.
+  rtt          optional round-trip time in milliseconds: a finite number
+               >= 0, or null.
+Unknown fields are dropped.
 """
 
 import ipaddress
+import math
 from datetime import datetime
 
 import config
@@ -28,7 +37,7 @@ import config
 LEGACY_TS_FMT = "%Y-%m-%d %H:%M:%S"
 STATUSES = {"SUCCESS", "FAILED"}
 REQUIRED = ("user", "ip", "status")
-OPTIONAL = ("country", "device_type")
+OPTIONAL = ("country", "device_type", "region", "user_agent", "browser", "os")
 
 
 def parse_timestamp(value):
@@ -97,6 +106,8 @@ def normalize_event(raw, now=None):
         if key not in raw:
             continue
         value = raw[key]
+        if value is None and key in OPTIONAL:
+            continue
         if not isinstance(value, str):
             return None, f"{key} must be a string"
         if len(value) > limits[key]:
@@ -105,6 +116,21 @@ def normalize_event(raw, now=None):
 
     if not event["user"].strip():
         return None, "user must not be empty"
+
+    asn = raw.get("asn")
+    if asn is not None:
+        if isinstance(asn, str) and asn.strip().isdigit() and len(asn.strip()) <= 12:
+            asn = int(asn.strip())
+        if isinstance(asn, bool) or not isinstance(asn, int) or not 0 <= asn < 2 ** 32:
+            return None, "asn must be a non-negative integer"
+        event["asn"] = asn
+
+    rtt = raw.get("rtt")
+    if rtt is not None:
+        if isinstance(rtt, bool) or not isinstance(rtt, (int, float)) \
+                or not math.isfinite(rtt) or rtt < 0:
+            return None, "rtt must be a finite number >= 0 (milliseconds) or null"
+        event["rtt"] = rtt
 
     try:
         event["ip"] = str(ipaddress.ip_address(event["ip"].strip()))

@@ -12,7 +12,7 @@ from utils.log_generator import generate_logs, generate_training_data
 from utils.log_parser     import parse_logs
 from agents.monitoring_agent import MonitoringAgent
 from ml.anomaly_model        import AnomalyDetector
-from utils.alert_manager     import AlertManager
+from utils.alert_manager     import open_alert_store
 from utils.logging_setup     import configure_logging
 import config
 
@@ -20,9 +20,11 @@ log = logging.getLogger(__name__)
 
 
 def clear_alerts():
-    """Back up alerts.json to alerts.json.bak, then empty it (audit F25)."""
-    cleared = AlertManager().clear(backup=True)
-    log.info(f"🗑️  Cleared previous alerts ({cleared} backed up to alerts.json.bak).\n")
+    """Back up the alert store (alerts.json or alerts.db), then empty it (audit F25)."""
+    store = open_alert_store()
+    cleared = store.clear(backup=True)
+    log.info(f"🗑️  Cleared previous alerts ({cleared} backed up to "
+             f"{os.path.basename(store.backup_path)}).\n")
 
 
 def ensure_data_dir():
@@ -89,6 +91,20 @@ def get_or_train_model(base):
     return detector
 
 
+def load_ml(base):
+    """
+    The ML step for the configured mode. data/model.pkl is loaded only in
+    legacy ML mode; in v4 the detection factory loads data/model_v4.pkl
+    itself, or runs no ML step when the forest is retired
+    (config.ML_V4_IFOREST, eval/PROTOCOL.md amendment 6).
+    """
+    if config.ML_MODE == "legacy":
+        return get_or_train_model(base)
+    log.info(f"🧠 ML_MODE {config.ML_MODE!r}: data/model.pkl not loaded "
+             f"(v4 forest: {config.ML_V4_IFOREST}).\n")
+    return None
+
+
 def train_synthetic_model(base, force=False):
     """
     Explicit, opt-in: train the small synthetic fallback model and save it
@@ -141,7 +157,7 @@ def run_batch(delay=0.5, threshold=5, fresh=True, retrain=False, force=False):
     if fresh:
         clear_alerts()            # backs up first
     else:
-        AlertManager().backup()   # keep a restore point for this run
+        open_alert_store().backup()   # keep a restore point for this run
 
     if retrain:
         train_synthetic_model(base, force=force)
@@ -157,7 +173,7 @@ def run_batch(delay=0.5, threshold=5, fresh=True, retrain=False, force=False):
     parse_logs(input_file=raw_logs_path, output_file=parsed_logs_path)
 
     log.info(f"\n[3/3] Starting Monitoring Agent (delay={delay}s, threshold={threshold})...")
-    detector = get_or_train_model(base)
+    detector = load_ml(base)
 
     log.info("-" * 55)
     agent = MonitoringAgent(
@@ -183,7 +199,7 @@ def run_live(threshold=5):
     log.info("  HYBRIDAUTHGUARD — LIVE MODE")
     log.info("=" * 55)
 
-    detector = get_or_train_model(base)
+    detector = load_ml(base)
 
     log.info("-" * 55)
     agent = MonitoringAgent(

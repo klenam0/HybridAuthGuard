@@ -51,9 +51,10 @@ class LLMAnalyzer:
     LLM-generated explanations. Runs inside the Flask API process.
     """
 
-    def __init__(self, alerts_path, metrics_path=None):
+    def __init__(self, alerts_path, metrics_path=None, store=None):
         self.alerts_path  = alerts_path
-        self.store        = AlertManager(alerts_path)
+        # The API passes its store (SQLite in v3, the JSON file in legacy).
+        self.store        = store if store is not None else AlertManager(alerts_path)
         self._shutdown    = threading.Event()
         self._processing  = set()  # alert IDs currently being processed
         self._slots       = threading.BoundedSemaphore(MAX_CONCURRENT_ENRICH)
