@@ -1,0 +1,188 @@
+{
+ "frozen_commit": "1b9ac866ee25e6e693e316521115d4ca761ab495",
+ "date": "2026-10-14",
+ "note": "Phase 6 must refuse to run unless `python -m eval.freeze --verify` passes.",
+ "hash_method": "SHA-256 of file content with CRLF normalised to LF",
+ "files_sha256_lf": {
+  "config.py": "774c88c271635fd035c70cdfb45de13557ed00354c8b61c4a3fa380d0dfb8cf9",
+  "eval/harness.py": "cc82e54877c4e0383bc0133a7ede0e8aaaaf9a9d53238c723510ca32492b43af",
+  "agents/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "agents/analysis_agent.py": "2f135a01aeadbcc964f2015b222926c63cc2a4992dc75e73bf1ddd7228b1f88b",
+  "agents/detection_agent.py": "fac02bbb71af0b67a702dc9ffe3c57adccd9459dbef6795cfaf78eb023316e95",
+  "agents/monitoring_agent.py": "35433d0e360b62f787241c7a05c3516aaae1cbb76d2dec847d1d01e040b9bdbe",
+  "agents/response_agent.py": "c6ea79110d6da10baca68cae10e020c7f4c9c1c1253204b0ec08cd71d406d6f9",
+  "agents/rules_v3.py": "2fc5703d86aebbd8a364066c5a32b882d879a2b1ea92a7750258b88420fcea74",
+  "agents/triage.py": "07f04bf170c13f772d98830c8176bbd32b498d6f0734df517facd5384ee13dd7",
+  "utils/alert_manager.py": "34bc2f0f33b54d023138d973c1a81a83519fd3135c8722b761282e44c31f64f3",
+  "utils/alert_store_sqlite.py": "f495980092948c86c1fc43b455b60702e6ecf5193a2a6bc8038d26bfb706bffe",
+  "utils/email_alerter.py": "05657f5d179f1a04d9559a2af9cc7a746e48f316f2218d5e36bb59f85ceee7a2",
+  "utils/event_schema.py": "36d2ed80b9568b4a5c68ac86df232c5b3c5476a5ad4ae87f02e558df790b6289",
+  "utils/llm_analyzer.py": "92b37dac95ece4600c63cd023540edd23f7923c2810c701ffd562e065cb9acce",
+  "utils/log_generator.py": "4e98fe738ce8a343b421b15d7f3339ccbe4b54d1363096a6cdce9b841d8ca30e",
+  "utils/log_parser.py": "a36feb18770f43177ea3657437e4fe19205ca16d20c3b237747f2d8c69315181",
+  "utils/logging_setup.py": "63b8d8844308e1ca0065bdf437a72bd9d9af05cb41009682bd3491fda75eceb5",
+  "eval/phase5.py": "1587263ee54b6a5416bb6af676d5c52662116c9dd133a6482aaa8ed96400ee12",
+  "eval/phase5b.py": "3ee68998762232a06e6a3eb4f0389f6675c54a9907553ff2931423b539fbee6d",
+  "eval/phase5c.py": "76c12c41bf8392f5352179201ce49bc64d75545060966e146bd45ab6abdd6c25"
+ },
+ "response_policy": {
+  "rules_mode": "v3",
+  "ml_mode": "v4",
+  "ml_v4_iforest": "retired",
+  "triage_score": "T2",
+  "tier_rates": {
+   "block": 0,
+   "step_up": 200,
+   "queue": 500
+  },
+  "floor_detectors": [
+   "Slow Brute Force",
+   "Credential Stuffing",
+   "Invalid Account Spraying",
+   "Distributed Brute Force",
+   "Success After Failures"
+  ],
+  "detector_precision_val_a": {
+   "Brute Force Attack": 0.296875,
+   "Slow Brute Force": 0.26303378128817795,
+   "Credential Stuffing": 0.2734399587994621,
+   "Invalid Account Spraying": 0.2312331060221457,
+   "Distributed Brute Force": 0.25163256421419244,
+   "Success After Failures": 0.24568661971830985,
+   "Multiple IP Login": 0.1455357142857143,
+   "Suspicious Login Time": 0.13086334010043807
+  },
+  "block_ttl_seconds": 3600,
+  "step_up_ttl_seconds": 3600,
+  "email": {
+   "tiers": [
+    "block",
+    "step_up"
+   ],
+   "max_per_hour": 20,
+   "ip_cooldown_seconds": 86400
+  },
+  "table": [
+   {
+    "tier": "block",
+    "enabled": false,
+    "rate_per_day": null,
+    "threshold": "off: no rate met the bar on val_a",
+    "action": "block the IP for 3600 s (simulated)",
+    "email": true,
+    "severity": "HIGH",
+    "val_a": {
+     "incidents": 0,
+     "precision": null,
+     "ci_low": null,
+     "ci_high": null,
+     "bar": 0.8
+    }
+   },
+   {
+    "tier": "step_up",
+    "enabled": true,
+    "rate_per_day": 200,
+    "threshold": "running T2 score >= the 200th highest final score of the previous day with incidents, first 200 incidents a day, only incidents with an alert of Slow Brute Force, Credential Stuffing, Invalid Account Spraying, Distributed Brute Force, Success After Failures",
+    "action": "step-up challenge (simulated MFA) for 3600 s, not enforced",
+    "email": true,
+    "severity": "HIGH",
+    "val_a": {
+     "incidents": 3142,
+     "precision": 0.4563971992361553,
+     "ci_low": 0.42947546255261687,
+     "ci_high": 0.48383047733446194,
+     "bar": 0.2149
+    }
+   },
+   {
+    "tier": "queue",
+    "enabled": true,
+    "rate_per_day": 500,
+    "threshold": "running T2 score >= the 500th highest final score of the previous day with incidents, first 500 incidents a day, only incidents with an alert of Slow Brute Force, Credential Stuffing, Invalid Account Spraying, Distributed Brute Force, Success After Failures",
+    "action": "analyst queue",
+    "email": false,
+    "severity": "MEDIUM",
+    "val_a": {
+     "incidents": 7935,
+     "precision": 0.2838059231253938,
+     "ci_low": 0.265716433623392,
+     "ci_high": 0.3032622786276811,
+     "bar": null
+    }
+   },
+   {
+    "tier": "log",
+    "enabled": true,
+    "rate_per_day": null,
+    "threshold": "every incident below the tiers above",
+    "action": "log only",
+    "email": false,
+    "severity": "LOW",
+    "val_a": {
+     "incidents": 103867,
+     "precision": 0.15968498175551427,
+     "ci_low": 0.15293680258547893,
+     "ci_high": 0.1664921317126258,
+     "bar": null
+    }
+   }
+  ]
+ },
+ "detector_settings": {
+  "unknown_account_ids": [
+   "-4324475583306591935"
+  ],
+  "brute_force": {
+   "window_s": 60,
+   "min_failures": 5
+  },
+  "slow_brute_force": {
+   "window_s": 604800,
+   "min_failures": 3,
+   "min_spread_s": 300
+  },
+  "credential_stuffing": {
+   "window_s": 604800,
+   "min_accounts": 2
+  },
+  "invalid_account_spraying": {
+   "window_s": 604800,
+   "min_attempts": 3
+  },
+  "distributed_brute_force": {
+   "window_s": 172800,
+   "min_ips": 3
+  },
+  "success_after_failures": {
+   "window_s": 604800,
+   "min_failures": 3
+  },
+  "multiple_ip_login": {
+   "window_s": 120,
+   "exempt": [
+    "known_ip"
+   ]
+  },
+  "dedup_seconds": {
+   "default": 3600,
+   "Suspicious Login Time": 600
+  },
+  "block_ttl_seconds": 3600,
+  "block_detectors": [],
+  "severity_by_tier": {
+   "block": "HIGH",
+   "step_up": "HIGH",
+   "queue": "MEDIUM",
+   "log": "LOW"
+  },
+  "ml_failed_rate_window_days": 30,
+  "suspicious_hour_start": 0,
+  "suspicious_hour_end": 5
+ },
+ "recorded_not_frozen_sha256": {
+  "data/model_v4.pkl": "7a6aab635a3a49d4116daecf287d6a1981847424e0a187431a06ff91f150d8d0",
+  "data/model.pkl": "b47e9533e0bbcb0cfabffcff7e2c43faf761b0c7a11738651411705dcdb870be",
+  "results/test_lock.txt": "b38fd0c77141f8f91ca37264cd2ed39382b892ca96547a46ee836ec7394d9d27"
+ }
+}
