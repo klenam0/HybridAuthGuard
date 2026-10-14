@@ -1,0 +1,31 @@
+{
+  "rule_alerts_dev_equal_phase3b": {
+    "Brute Force Attack": true,
+    "Slow Brute Force": true,
+    "Credential Stuffing": true,
+    "Invalid Account Spraying": true,
+    "Distributed Brute Force": true,
+    "Success After Failures": true,
+    "Multiple IP Login": true,
+    "Suspicious Login Time": true
+  },
+  "asn_ratio_dev_equal_phase5": true,
+  "deployed_dev_equal_phase5c": {
+    "alerted_positions": true,
+    "tiers": true,
+    "scores": true,
+    "blocked": true,
+    "challenged": true
+  },
+  "email_log_dev_equal_phase5c": true,
+  "ok": true,
+  "events": 8550667,
+  "events_may": 2158083,
+  "timings_seconds": {
+    "stream (dev + May cache)": 15.2,
+    "ASN ratio and per-IP daily counters": 1.9,
+    "frozen rule alerts (8 detectors)": 40.6,
+    "offline twin: running T2 scores, capped tiers with the floor, emails": 10.0,
+    "total": 72.6
+  }
+}
