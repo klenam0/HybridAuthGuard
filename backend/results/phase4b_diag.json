@@ -1,0 +1,69 @@
+{
+  "variants": {
+    "a": {
+      "build": {
+        "map_rows": 3672966,
+        "fit_rows": 3672966,
+        "known_ips": 925137,
+        "offset_30pct": -0.4811768262120696,
+        "check_vs_cached": {
+          "bit_identical": true,
+          "max_abs_diff": 0.0
+        }
+      },
+      "description": "maps and fit from non-attack dev_train rows (original, cached)",
+      "val_a": {
+        "roc_auc": 0.762999627767321,
+        "pr_auc": 0.19311065649982126,
+        "tpr_at_1pct_fpr": 0.0025873933388384255
+      },
+      "val_b": {
+        "roc_auc": 0.750421331271785,
+        "pr_auc": 0.16748617966023807,
+        "tpr_at_1pct_fpr": 0.002833476666817544
+      }
+    },
+    "b": {
+      "build": {
+        "map_rows": 4055357,
+        "fit_rows": 3672966,
+        "known_ips": 947226,
+        "offset_30pct": -0.4824542589350101
+      },
+      "description": "maps from all dev_train rows, fit on non-attack rows",
+      "val_a": {
+        "roc_auc": 0.5531101898878288,
+        "pr_auc": 0.11343796793444853,
+        "tpr_at_1pct_fpr": 0.004301836341473005
+      },
+      "val_b": {
+        "roc_auc": 0.5552088718116418,
+        "pr_auc": 0.10104670520900944,
+        "tpr_at_1pct_fpr": 0.004064635857511429
+      }
+    },
+    "c": {
+      "build": {
+        "map_rows": 4055357,
+        "fit_rows": 4055357,
+        "known_ips": 947226,
+        "offset_30pct": -0.48267685169583335
+      },
+      "description": "maps and fit from all dev_train rows (label-free)",
+      "val_a": {
+        "roc_auc": 0.5039329966694688,
+        "pr_auc": 0.1012616157207294,
+        "tpr_at_1pct_fpr": 0.0023514608155400887
+      }
+    }
+  },
+  "timings_seconds": {
+    "load stream": 5.9,
+    "D1 variant (a): maps, fit, score every event": 189.2,
+    "D1 event metrics": 5.1,
+    "candidate thresholds (dev_train quantiles)": 5.5,
+    "total": 219.7,
+    "D1 variant (b): maps, fit, score every event": 195.9,
+    "D1 variant (c): maps, fit, score every event": 203.2
+  }
+}
