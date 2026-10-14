@@ -25,6 +25,8 @@ import pickle
 
 import numpy as np
 
+import config
+
 from ml.features_v4 import FEATURE_NAMES, FeatureExtractorV4
 
 KINDS = ("iforest", "freeman", "new_ip")
@@ -119,11 +121,16 @@ class V4Scorer:
 
     @classmethod
     def load(cls, path, sha256=None):
-        sha256 = sha256 or os.environ.get("MODEL_V4_SHA256") or None
+        """Unpickle the bundle; with a pin (argument or config.MODEL_V4_SHA256,
+        audit F31) only if the file's SHA-256 matches."""
+        sha256 = sha256 or config.MODEL_V4_SHA256
         with open(path, "rb") as f:
             raw = f.read()
-        if sha256 and hashlib.sha256(raw).hexdigest() != sha256.lower():
-            raise ValueError(f"{path}: SHA-256 does not match MODEL_V4_SHA256")
+        if sha256:
+            digest = hashlib.sha256(raw).hexdigest()
+            if digest != sha256.strip().lower():
+                raise ValueError(f"{path}: SHA-256 is {digest}, MODEL_V4_SHA256 expects "
+                                 f"{sha256}; refusing to unpickle it")
         return cls(pickle.loads(raw))
 
     @staticmethod

@@ -4,6 +4,8 @@ import logging
 import os
 import time
 from datetime import datetime
+
+import config
 from .detection_agent import DetectionAgent
 from .analysis_agent  import AnalysisAgent
 from .response_agent  import ResponseAgent
@@ -163,9 +165,16 @@ class MonitoringAgent:
         log.info("   Press Ctrl+C to stop\n")
         log.info("-" * 55)
 
+        last_stats = 0.0
         try:
             while True:
                 offset, handled = self._poll_queue(offset)
+                # Stats while running, not only at shutdown, so the
+                # dashboard shows live progress (LIVE_STATS_INTERVAL_SECONDS).
+                now = time.monotonic()
+                if handled and now - last_stats >= config.LIVE_STATS_INTERVAL_SECONDS:
+                    self._save_stats()
+                    last_stats = now
                 if not handled:
                     time.sleep(poll_interval)
 
@@ -298,6 +307,8 @@ class MonitoringAgent:
         }
 
         os.makedirs(os.path.dirname(self._stats_path), exist_ok=True)
-        with open(self._stats_path, "w") as f:
+        tmp = self._stats_path + ".tmp"          # atomic: the API reads it concurrently
+        with open(tmp, "w") as f:
             json.dump(stats, f, indent=2)
+        os.replace(tmp, self._stats_path)
         log.info(f"📊 Pipeline stats saved")

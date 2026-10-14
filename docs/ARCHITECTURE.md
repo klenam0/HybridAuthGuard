@@ -138,6 +138,26 @@ live_simulator.py --> POST /api/ingest --> live_queue.jsonl (append-only)
 
 **Invariant to preserve:** `live_queue.jsonl` and `live_queue.jsonl.cursor` must always be reset together. The queue is an append-only log; the cursor is a durable read pointer into it. If the queue file is truncated or cleared without also resetting the cursor, the live agent will silently wait forever for the file to grow back past a cursor position that no longer exists. `MonitoringAgent._read_queue()` includes a guard that detects this condition (cursor beyond current file length) and self-corrects by resetting the cursor to zero, but the cleanest way to reset live-mode state is the paired `/api/queue/clear` endpoint, which clears both files atomically.
 
+## Timestamps and Time Zones
+
+Detection, triage, response and email all run on **event time**, the event's own `timestamp`, never on the server's wall clock. The exceptions are stamping an event that arrives without a timestamp, and store retention (`ALERT_RETENTION_DAYS`, by `saved_at`). This makes a replay deterministic.
+
+**One clock.** Internally a timestamp is a naive `YYYY-MM-DD HH:MM:SS` on a single clock: the API server's local time (`utils/event_schema.parse_timestamp`).
+- A value with an offset or `Z` (ISO-8601) is converted to server local time, and the offset is dropped.
+- A naive value (the legacy format, or ISO-8601 without an offset) is taken as already being server local time. It is not converted. A source on another clock must send an offset.
+- An event without a timestamp gets the server's local time when it is ingested.
+
+**What depends on that clock:**
+- The off-hours window of Suspicious Login Time (`SUSPICIOUS_HOUR_START`–`SUSPICIOUS_HOUR_END`, 00:00–05:59).
+- The incident day (one incident per source IP and calendar day). The daily tier caps and previous-day cutoffs reset at midnight.
+- The clock hour of the email limit and digest.
+
+Window lengths (seconds) do not depend on the zone.
+
+**Policy.** Run the backend with the server clock in UTC (e.g. `TZ=UTC`), and have sources send UTC or offset timestamps. Then every day, hour and off-hours window is UTC, as in the evaluation: the RBA replay's naive timestamps are UTC (`eval/PROTOCOL.md`, "Data").
+
+On a non-UTC server with daylight saving, naive local times repeat or skip an hour at the changeover, and the windows see that hour twice or not at all. An event older than the current incident day counts toward today's incident (`agents/triage.py`).
+
 ## Concurrency & File Safety
 
 Two separate processes (`main.py` and `api.py`) both read and write `alerts.json`. Python's `threading.Lock()` only synchronizes within a single process, so this project uses `filelock.FileLock` for cross-process safety on every read-modify-write cycle against `alerts.json`, `live_queue.jsonl`, and their respective lock files.

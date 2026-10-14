@@ -49,6 +49,7 @@ cp .env.example .env
 | `ADMIN_TOKEN`    | Yes, for admin actions | Required (header `X-Admin-Token`) for `/api/run`, clearing or restoring alerts, and clearing the live queue. `CLEAR_TOKEN` is accepted as the older name. |
 | `INGEST_TOKEN`   | Yes, for live mode | Required (header `X-Ingest-Token`) by `/api/ingest`. `live_simulator.py` reads it from this file. Give log sources this token, not the admin one. |
 | `MODEL_SHA256`   | No          | If set, `model.pkl` is loaded only when its SHA-256 matches. Loading a pickle executes code from the file, so pin it if anyone else can write to `backend/data/`. The `model.pkl` the published results were produced with (trained 2026-10-06) has SHA-256 `b47e9533e0bbcb0cfabffcff7e2c43faf761b0c7a11738651411705dcdb870be`. |
+| `MODEL_V4_SHA256` | No | The same pin for `model_v4.pkl`. It is only unpickled with `ML_V4_IFOREST = "on"`; the default (`"retired"`) never loads it. The Phase 4 file has SHA-256 `7a6aab635a3a49d4116daecf287d6a1981847424e0a187431a06ff91f150d8d0`. |
 | `DASHBOARD_ORIGINS` | No       | Comma-separated browser origins allowed by CORS. Defaults to `http://localhost:3000,http://127.0.0.1:3000`. |
 
 Generate each token with:

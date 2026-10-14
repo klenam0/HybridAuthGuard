@@ -142,6 +142,9 @@ ML_ALERT_MARGIN = -0.02
 # runs code from it, so when MODEL_SHA256 is set the file's SHA-256 must
 # match before it is unpickled.
 MODEL_SHA256 = os.environ.get("MODEL_SHA256") or None
+# The same optional pin for data/model_v4.pkl (ml/model_v4.V4Scorer.load).
+# The default (ML_V4_IFOREST = "retired") never unpickles it.
+MODEL_V4_SHA256 = os.environ.get("MODEL_V4_SHA256") or None
 
 # ── Explainer (ml/explainer.py) ───────────────────────────────────────────
 EXPLAINER_DEVIATION_FLAG = 1.5             # |z| above this marks a feature anomalous
@@ -386,6 +389,9 @@ RUN_MAX_DELAY_SECONDS = 5.0
 RUN_THRESHOLD_RANGE = (1, 100)
 
 # ── Live ingest (api.py /api/ingest, agents/monitoring_agent.py) ─────────
+# Live mode writes data/pipeline_stats.json at most this often while events
+# arrive (and once more on stop).
+LIVE_STATS_INTERVAL_SECONDS = 5.0
 INGEST_MAX_BODY_BYTES = 16 * 1024          # Flask MAX_CONTENT_LENGTH
 INGEST_MAX_FIELD_CHARS = {
     "user": 256,

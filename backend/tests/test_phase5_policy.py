@@ -524,3 +524,41 @@ def test_no_ml_mapping_without_an_ml_step(monkeypatch):
     assert "ML Anomaly Detected" not in c["mitre"]
     assert "mitre_ml" not in c and "mitre_ml_failed" not in c
     assert c["mitre_attack_version"] == config.MITRE_ATTACK_VERSION
+
+
+def test_live_mode_writes_pipeline_stats_while_running(v3, tmp_path):
+    """Live mode saves pipeline_stats.json during the run, not only on stop."""
+    mon, _ = _monitor(v3, {"block": 0, "step_up": 0, "queue": 0})
+    mon._stats_path = str(tmp_path / "pipeline_stats.json")
+    v3.setattr(config, "LIVE_STATS_INTERVAL_SECONDS", 0.0)
+    seen = []
+
+    def poll(offset):
+        if len(seen) == 2:
+            raise KeyboardInterrupt
+        mon.events_processed += 3
+        if seen:                               # stats from the first poll exist already
+            seen.append(json.load(open(mon._stats_path))["events_processed"])
+        else:
+            seen.append(None)
+        return offset, 3
+
+    mon._poll_queue = poll
+    mon._load_cursor = lambda: 0
+    mon.stream_live(poll_interval=0)
+    assert seen == [None, 3]
+    assert json.load(open(mon._stats_path))["events_processed"] == 6
+
+
+def test_model_v4_pin_refuses_a_mismatching_file(monkeypatch):
+    import hashlib
+    from ml.model_v4 import V4Scorer
+    p = os.path.join(BACKEND, "data", "model_v4.pkl")
+    if not os.path.exists(p):
+        pytest.skip("data/model_v4.pkl not present")
+    monkeypatch.setattr(config, "MODEL_V4_SHA256", "0" * 64)
+    with pytest.raises(ValueError, match="refusing to unpickle"):
+        V4Scorer.load(p)
+    digest = hashlib.sha256(open(p, "rb").read()).hexdigest()
+    monkeypatch.setattr(config, "MODEL_V4_SHA256", " " + digest.upper())
+    assert V4Scorer.load(p).kind
