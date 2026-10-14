@@ -1,0 +1,70 @@
+{
+  "day": "2020-04-20",
+  "alerts": 22530,
+  "incidents": 7452,
+  "sqlite_insert": {
+    "per_alert_transaction": true,
+    "total_s": 27.81,
+    "us_mean": 1233.7,
+    "us_p50": 326.2,
+    "us_p99": 56488.4,
+    "us_max": 151113.4
+  },
+  "sqlite_file_mb": 51.55,
+  "sqlite_queries": {
+    "recent_2000 (/api/alerts)": {
+      "ms_median": 53.491,
+      "ms_max": 142.327,
+      "rows": 2000
+    },
+    "tier=step_up, 500": {
+      "ms_median": 567.129,
+      "ms_max": 635.856,
+      "rows": 500
+    },
+    "ip (busiest, 10.0.160.77)": {
+      "ms_median": 2.533,
+      "ms_max": 3.455,
+      "rows": 77
+    },
+    "incidents tier=step_up, 500 (/api/incidents)": {
+      "ms_median": 3.696,
+      "ms_max": 5.24,
+      "rows": 500
+    },
+    "stats (/api/stats)": {
+      "ms_median": 157.097,
+      "ms_max": 174.727,
+      "rows": 7
+    },
+    "hourly (/api/timeline)": {
+      "ms_median": 71.511,
+      "ms_max": 82.139,
+      "rows": 48
+    },
+    "by_type (/api/detectors)": {
+      "ms_median": 76.205,
+      "ms_max": 93.959,
+      "rows": 8
+    },
+    "enrichment_counts": {
+      "ms_median": 241.681,
+      "ms_max": 272.917,
+      "rows": 3
+    },
+    "load_cached, unchanged (LLM scanner)": {
+      "ms_median": 0.012,
+      "ms_max": 47.978,
+      "rows": 2000
+    }
+  },
+  "json_insert_first_2000": {
+    "alerts": 2000,
+    "total_s": 377.87,
+    "us_mean": 188937.0,
+    "us_first_100_mean": 14259.6,
+    "us_last_100_mean": 372400.1,
+    "file_mb": 4.5,
+    "note": "the JSON store rewrites the whole file on every save (quadratic in the day)"
+  }
+}

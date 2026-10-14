@@ -1,0 +1,459 @@
+{
+  "equivalent": true,
+  "events": 6392584,
+  "limit": 0,
+  "defaults": {
+    "RULES_MODE": "v3",
+    "ML_MODE": "v4",
+    "ML_V4_IFOREST": "retired",
+    "TRIAGE_SCORE": "T2",
+    "RESPONSE_TIER_RATES": {
+      "block": 0,
+      "step_up": 5000,
+      "queue": 500
+    }
+  },
+  "alerts_saved": 1966312,
+  "ml_alerts": 0,
+  "detector_alert_mismatches": {
+    "Brute Force Attack": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Slow Brute Force": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Credential Stuffing": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Invalid Account Spraying": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Distributed Brute Force": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Success After Failures": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Multiple IP Login": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Suspicious Login Time": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    }
+  },
+  "alerted_events_compared": 1607794,
+  "alerted_events_missing": 0,
+  "tier_mismatches": 0,
+  "score_mismatches": 0,
+  "tier_or_score_mismatches_by_span": {},
+  "blocked_state_mismatches": {
+    "dev_train": 0,
+    "val_a": 0,
+    "val_b": 0
+  },
+  "challenged_state_mismatches": {
+    "dev_train": 0,
+    "val_a": 0,
+    "val_b": 0
+  },
+  "email_log_mismatches": 0,
+  "incident_email_outcome_mismatches": 0,
+  "email_log_entries": 139954,
+  "emails_per_day": {
+    "2020-02-04": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-05": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-06": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-07": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-08": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-09": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-10": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-11": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-12": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-13": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-14": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-15": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-16": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-17": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-18": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-19": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-20": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-21": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-22": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-23": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-24": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-25": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-26": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-27": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-28": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-02-29": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-01": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-02": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-03": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-04": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-05": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-06": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-07": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-08": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-09": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-10": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-11": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-12": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-13": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-14": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-15": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-16": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-17": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-18": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-19": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-20": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-21": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-22": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-23": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-24": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-25": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-26": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-27": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-28": {
+      "email": 480,
+      "digest": 23
+    },
+    "2020-03-29": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-30": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-03-31": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-01": {
+      "email": 477,
+      "digest": 23
+    },
+    "2020-04-02": {
+      "email": 479,
+      "digest": 23
+    },
+    "2020-04-03": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-04": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-05": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-06": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-07": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-08": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-09": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-10": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-11": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-12": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-13": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-14": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-15": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-16": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-17": {
+      "email": 477,
+      "digest": 23
+    },
+    "2020-04-18": {
+      "email": 480,
+      "digest": 23
+    },
+    "2020-04-19": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-20": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-21": {
+      "email": 476,
+      "digest": 23
+    },
+    "2020-04-22": {
+      "email": 479,
+      "digest": 23
+    },
+    "2020-04-23": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-24": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-25": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-26": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-27": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-28": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-29": {
+      "email": 480,
+      "digest": 24
+    },
+    "2020-04-30": {
+      "email": 480,
+      "digest": 24
+    }
+  },
+  "blocked_source_events": 0,
+  "challenged_source_events": 1177960,
+  "duplicate_events": 0,
+  "state_sizes_end": {
+    "rules": {
+      "ips": 177317,
+      "accounts": 57646,
+      "account_history": 523774,
+      "cooldowns": 1439,
+      "recent_events": 2968
+    },
+    "triage": {
+      "ips_today": 37656,
+      "incidents_today": 7978,
+      "asns": 7457,
+      "days_closed": 87
+    }
+  },
+  "store_day": "2020-04-20",
+  "store_inline_inserts": 22530,
+  "store_inline_insert_us_mean": 1211.4,
+  "store_inline_insert_us_p99": 54381.6,
+  "replay_seconds": 676.2,
+  "replay_us_per_event": 105.8,
+  "peak_rss_mb": 6912,
+  "timings_seconds": {
+    "load stream and the offline deployed run": 8.5,
+    "real agents, new defaults (6,392,584 events)": 676.2,
+    "comparison": 10.2,
+    "total": 695.1
+  }
+}
