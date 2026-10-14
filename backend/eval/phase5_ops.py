@@ -14,6 +14,11 @@ Phase 5 operational stages (called through `python -m eval.phase5`):
   store    SQLite insert and query cost on that day's alerts (one
            transaction per alert, as the pipeline does), and the legacy JSON
            store on the first 2,000 of them for comparison.
+
+phase="5b" (python -m eval.phase5b replay / store): the amendment 7 policy;
+the offline run, selection and outputs are Phase 5b's (results/phase5b_*),
+and `store` re-measures the queries on Phase 5's day and on the new one,
+without the JSON comparison.
 """
 
 import json
@@ -72,23 +77,35 @@ class ReplayStore:
         self.db.close()
 
 
-def stage_replay(args):
+def _phase(phase):
+    """(cache path function, selection file, output prefix)."""
+    if phase == "5b":
+        from eval import phase5b as P5B
+        return P5B.cpath, "phase5b_selection.json", "phase5b"
+    return P5.cpath, "phase5_selection.json", "phase5"
+
+
+def stage_replay(args, phase="5"):
     from agents.monitoring_agent import MonitoringAgent
     from agents.response_agent import ResponseAgent
     assert (config.RULES_MODE, config.ML_MODE, config.ML_V4_IFOREST) == ("v3", "v4", "retired"), \
         "the replay gate runs with the new defaults"
     clk = Clock()
     t = time.time()
+    cpath, sel_file, prefix = _phase(phase)
     S = P5.stream()
-    sel = P5.load_json("phase5_selection.json")
+    sel = P5.load_json(sel_file)
     assert config.TRIAGE_SCORE == sel["chosen"]
-    z = np.load(P5.cpath("deployed.npz"))
-    with open(P5.cpath("email_log.json")) as f:
+    t_ = sel["tiers"]
+    assert config.RESPONSE_TIER_RATES == {"block": t_["block_rate"], "step_up": t_["step_up_rate"],
+                                          "queue": t_["queue_rate"]}, "config rates != selection"
+    z = np.load(cpath("deployed.npz"))
+    with open(cpath("email_log.json")) as f:
         em = json.load(f)
     n = args.limit or S.n
     clk.tick("load stream and the offline deployed run", t)
 
-    store = ReplayStore(args.day, P5.cpath("store_day.db"), P5.cpath("store_day.jsonl"))
+    store = ReplayStore(args.day, cpath("store_day.db"), cpath("store_day.jsonl"))
     responder = ResponseAgent(email_alerter=RecordingAlerter(), email_log_max=None)
     mon = MonitoringAgent(alert_manager=store, responder=responder)
     assert mon.detector.anomaly_detector is None, "v4 with the forest retired runs no ML step"
@@ -190,7 +207,7 @@ def stage_replay(args):
            "store_inline_insert_us_p99": round(1e6 * float(np.percentile(ins, 99)), 1) if len(ins) else None,
            "replay_seconds": round(t_replay, 1), "replay_us_per_event": round(1e6 * t_replay / n, 1),
            "peak_rss_mb": P4.peak_rss_mb(), "timings_seconds": clk.total()}
-    name = "phase5_replay_check.json" if not args.limit else "phase5_replay_smoke.json"
+    name = f"{prefix}_replay_check.json" if not args.limit else f"{prefix}_replay_smoke.json"
     P5.save_json(name, out)
     print(json.dumps({k: v for k, v in out.items() if k != "emails_per_day"}, indent=1))
     return 0 if ok else 1
@@ -206,17 +223,30 @@ def _timed(fn, reps=20):
             "rows": len(r) if hasattr(r, "__len__") else None}
 
 
-def stage_store(args):
-    from utils.alert_manager import AlertManager
+def stage_store(args, phase="5"):
+    if phase == "5b":
+        from eval import phase5b as P5B
+        out = {}
+        for label, cp in (("phase5_day_alerts", P5.cpath), ("phase5b_day_alerts", P5B.cpath)):
+            if os.path.exists(cp("store_day.jsonl")):
+                out[label], _ = _store_sqlite(cp("store_day.jsonl"), P5B.cpath(f"store_bench_{label}.db"))
+        assert out, "run a replay first (it writes the day's alerts)"
+        P5.save_json("phase5b_store.json", out)
+        print(json.dumps(out, indent=1))
+        return
+    out, alerts = _store_sqlite(P5.cpath("store_day.jsonl"), P5.cpath("store_bench.db"))
+    _store_json(out, alerts)
+
+
+def _store_sqlite(src, db):
     from utils.alert_store_sqlite import SqliteAlertStore
-    src = P5.cpath("store_day.jsonl")
     with open(src, encoding="utf-8") as f:
         alerts = [json.loads(line) for line in f]
     assert alerts, "run `replay` first (it writes the day's alerts)"
     out = {"day": alerts[0]["detected_at"][:10], "alerts": len(alerts),
-           "incidents": len({(a.get("incident") or {}).get("incident_id") for a in alerts})}
+           "incidents": len({(a.get("incident") or {}).get("incident_id") for a in alerts}),
+           "alerts_by_tier": dict(Counter((a.get("incident") or {}).get("tier") for a in alerts))}
 
-    db = P5.cpath("store_bench.db")
     for p in (db, db + "-wal", db + "-shm"):
         if os.path.exists(p):
             os.remove(p)
@@ -249,8 +279,15 @@ def stage_store(args):
         "enrichment_counts": _timed(lambda: list(s.enrichment_counts().items())),
         "load_cached, unchanged (LLM scanner)": _timed(s.load_cached),
     }
+    out["tier_query_plan"] = " | ".join(r[3] for r in s._con.execute(
+        "EXPLAIN QUERY PLAN SELECT body FROM alerts WHERE tier = ? ORDER BY id DESC LIMIT ?",
+        ("step_up", 500)))
     s.close()
+    return out, alerts
 
+
+def _store_json(out, alerts):
+    from utils.alert_manager import AlertManager
     n_json = min(2000, len(alerts))
     jpath = P5.cpath("store_bench.json")
     if os.path.exists(jpath):

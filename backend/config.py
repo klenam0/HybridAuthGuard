@@ -230,6 +230,11 @@ MITRE_ML_FAILED = {
 # /api/threat-level considers alerts saved within this many minutes.
 THREAT_LEVEL_WINDOW_MINUTES = 60
 
+# ── Alert store (utils/alert_store_sqlite.py, v3) ─────────────────────────
+# Alerts saved more than this many days ago (wall clock) are pruned, with
+# the incidents left without alerts, on open and daily. 0 keeps everything.
+ALERT_RETENTION_DAYS = int(os.environ.get("ALERT_RETENTION_DAYS", "30"))
+
 # ── Response (agents/response_agent.py) ───────────────────────────────────
 # Severities that trigger the (simulated) IP block and the email.
 # In-memory history of response actions kept by ResponseAgent (audit F23).

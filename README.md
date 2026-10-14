@@ -250,11 +250,12 @@ Every threshold and policy value lives in [`backend/config.py`](backend/config.p
 | `RULES_MODE` | `v3` | `v3`: windowed rule engine (`agents/rules_v3.py`, settings chosen on val_a) with the incident response tiers. `legacy`: the Phase 0-2 rules and severity-based blocking, kept for the reproduction gate. |
 | `ML_MODE` | `v4` | `v4`: no label-filtered model. With `ML_V4_IFOREST = "retired"` (default) there is no ML step; the triage reads the ASN failure ratio itself. `legacy`: the Isolation Forest in `data/model.pkl`, trained on label-filtered rows (see `backend/results/README.md`); requires `RULES_MODE=legacy`. |
 | `TRIAGE_SCORE` | `T2` | Incident score: (best detector's val_a precision, highest ASN prior failure ratio of the IP that day). |
-| `RESPONSE_TIER_RATES` | block 0, step-up 5000, queue 500 per day | Rate-based tiers: a tier's cutoff is the k-th highest incident score of the previous day. Block is off (no rate reached a 0.80 precision lower bound on val_a); step-up is a simulated MFA challenge, recorded and never enforced. |
+| `RESPONSE_TIER_RATES` | block 0, step-up 200, queue 500 per day | Rate-based tiers: a tier's cutoff is the k-th highest incident score of the previous day, and at most k incidents enter it per day, first come (amendment 7). Block is off (no rate reached a 0.80 precision lower bound on val_a); step-up is a simulated MFA challenge, recorded and never enforced; its rate was chosen on val_a with at most 200 legitimate users challenged per day. |
 | `EMAIL_MAX_PER_HOUR` | 20 | One email per incident entering the block or step-up tier; over the limit, incidents go into an hourly digest. |
 | `EMAIL_IP_COOLDOWN_SECONDS` | 86400 | At most one email per IP in this window. |
+| `ALERT_RETENTION_DAYS` | 30 | v3 SQLite store: alerts saved more than this many days ago are pruned (on start and daily); 0 keeps everything. |
 
-`RULES_MODE`, `ML_MODE`, `EMAIL_MAX_PER_HOUR` and `EMAIL_IP_COOLDOWN_SECONDS` can be set in `backend/.env` or the environment, for example `RULES_MODE=legacy ML_MODE=legacy` for the original system. In v3 mode alerts are stored in SQLite (`backend/data/alerts.db`, indexed by time, IP, incident and tier) and `/api/incidents` lists incidents by tier; legacy mode keeps `alerts.json`. The legacy reproduction gate (`python -m eval.gate`) always sets legacy mode itself.
+`RULES_MODE`, `ML_MODE`, `EMAIL_MAX_PER_HOUR`, `EMAIL_IP_COOLDOWN_SECONDS` and `ALERT_RETENTION_DAYS` can be set in `backend/.env` or the environment, for example `RULES_MODE=legacy ML_MODE=legacy` for the original system. In v3 mode alerts are stored in SQLite (`backend/data/alerts.db`, indexed by time, IP, incident and tier) and `/api/incidents` lists incidents by tier; legacy mode keeps `alerts.json`. The legacy reproduction gate (`python -m eval.gate`) always sets legacy mode itself.
 
 ## Dataset & Attribution
 

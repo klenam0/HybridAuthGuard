@@ -12,6 +12,12 @@ with its latest tier and score.
 
 WAL journal: readers (the API process) never block the writer (the
 pipeline). Every write is one transaction; save_alerts() batches.
+
+Retention (config.ALERT_RETENTION_DAYS, default 30; 0 keeps everything):
+alerts saved (wall clock, saved_at) more than that many days ago are
+deleted, with the incidents left without alerts, when the store opens and
+then at most once a day (checked on writes and cached reads). Wall clock,
+not event time, so replaying old data does not prune what it just wrote.
 """
 
 import json
@@ -19,7 +25,8 @@ import logging
 import os
 import sqlite3
 import threading
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 
 from utils.event_schema import epoch_seconds
 
@@ -51,6 +58,7 @@ CREATE INDEX IF NOT EXISTS ix_alerts_ts       ON alerts (ts);
 CREATE INDEX IF NOT EXISTS ix_alerts_ip       ON alerts (ip, ts);
 CREATE INDEX IF NOT EXISTS ix_alerts_incident ON alerts (incident_id);
 CREATE INDEX IF NOT EXISTS ix_alerts_tier     ON alerts (tier, ts);
+CREATE INDEX IF NOT EXISTS ix_alerts_tier_id  ON alerts (tier, id);
 CREATE INDEX IF NOT EXISTS ix_alerts_saved    ON alerts (saved_at);
 CREATE TABLE IF NOT EXISTS incidents (
     incident_id  TEXT PRIMARY KEY,
@@ -81,14 +89,20 @@ def _ts(alert):
 
 class SqliteAlertStore:
 
-    def __init__(self, file_path=None):
+    def __init__(self, file_path=None, retention_days=None):
         self.file_path = file_path or DEFAULT_PATH
         self.backup_path = self.file_path + ".bak"
         os.makedirs(os.path.dirname(self.file_path) or ".", exist_ok=True)
+        if retention_days is None:
+            import config
+            retention_days = config.ALERT_RETENTION_DAYS
+        self.retention_days = int(retention_days)
         self._guard = threading.RLock()
         self._con = self._connect(self.file_path)
         self._cache_key = None
         self._cache = []
+        self._last_prune = None
+        self._maybe_prune()
 
     @staticmethod
     def _connect(path):
@@ -135,6 +149,7 @@ class SqliteAlertStore:
         self.save_alerts([alert])
 
     def save_alerts(self, alerts):
+        self._maybe_prune()
         with self._guard:
             cur = self._con.cursor()
             cur.execute("BEGIN")
@@ -148,6 +163,49 @@ class SqliteAlertStore:
             except BaseException:
                 cur.execute("ROLLBACK")
                 raise
+
+    # ── Retention ───────────────────────────────────────────────────────
+
+    def prune(self, now=None):
+        """Delete alerts saved more than retention_days before now (epoch
+        seconds, default the current time) and incidents left without
+        alerts. Returns (alerts, incidents) deleted."""
+        if self.retention_days <= 0:
+            return 0, 0
+        now = time.time() if now is None else now
+        cutoff = (datetime.fromtimestamp(now) - timedelta(days=self.retention_days)
+                  ).strftime("%Y-%m-%d %H:%M:%S")
+        with self._guard:
+            cur = self._con.cursor()
+            cur.execute("BEGIN IMMEDIATE")
+            try:
+                n_alerts = cur.execute("DELETE FROM alerts WHERE saved_at < ?", (cutoff,)).rowcount
+                n_inc = 0
+                if n_alerts:
+                    n_inc = cur.execute(
+                        "DELETE FROM incidents WHERE NOT EXISTS (SELECT 1 FROM alerts a "
+                        "WHERE a.incident_id = incidents.incident_id)").rowcount
+                cur.execute("COMMIT")
+            except BaseException:
+                cur.execute("ROLLBACK")
+                raise
+        if n_alerts:
+            log.info("Alert retention (%d days): pruned %d alerts, %d incidents",
+                     self.retention_days, n_alerts, n_inc)
+        return n_alerts, n_inc
+
+    def _maybe_prune(self):
+        """prune() on open and then at most once a day (monotonic clock)."""
+        if self.retention_days <= 0:
+            return
+        t = time.monotonic()
+        if self._last_prune is not None and t - self._last_prune < 86400:
+            return
+        self._last_prune = t
+        try:
+            self.prune()
+        except sqlite3.Error as e:          # never break the pipeline over housekeeping
+            log.warning("Alert retention prune failed: %s", e)
 
     def _update(self, alert_id, mutate):
         with self._guard:
@@ -322,6 +380,7 @@ class SqliteAlertStore:
         """The most recent CACHED_LIMIT alerts, oldest first; re-read only
         when the database changed (PRAGMA data_version + own writes).
         Callers must treat the list as read-only."""
+        self._maybe_prune()
         with self._guard:
             key = (self._con.execute("PRAGMA data_version").fetchone()[0], self._con.total_changes)
             if key != self._cache_key:

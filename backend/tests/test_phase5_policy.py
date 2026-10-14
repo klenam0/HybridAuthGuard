@@ -309,7 +309,8 @@ def test_sqlite_store_is_indexed_and_round_trips(tmp_path):
     from utils.alert_store_sqlite import SqliteAlertStore
     s = SqliteAlertStore(str(tmp_path / "alerts.db"))
     idx = {r[1] for r in s._con.execute("PRAGMA index_list('alerts')")}
-    assert {"ix_alerts_ts", "ix_alerts_ip", "ix_alerts_incident", "ix_alerts_tier"} <= idx
+    assert {"ix_alerts_ts", "ix_alerts_ip", "ix_alerts_incident", "ix_alerts_tier",
+            "ix_alerts_tier_id"} <= idx
     s.save_alerts([_alert(0), _alert(1), _alert(2, tier="queue", ip="5.5.5.5")])
     assert s.count() == 3 and [a["alert_id"] for a in s.load_alerts()] == ["A0", "A1", "A2"]
     assert [a["alert_id"] for a in s.query(tier="step_up")] == ["A1", "A0"]
@@ -321,6 +322,57 @@ def test_sqlite_store_is_indexed_and_round_trips(tmp_path):
     assert s.enrichment_counts() == {"total": 3, "enriched": 1, "failed": 1}
     assert s.clear(backup=True) == 3 and s.count() == 0
     assert s.restore() == 3 and len(s.load_cached()) == 3
+
+
+def test_tier_filter_uses_the_tier_id_index(tmp_path):
+    from utils.alert_store_sqlite import SqliteAlertStore
+    s = SqliteAlertStore(str(tmp_path / "alerts.db"))
+    plan = " ".join(r[3] for r in s._con.execute(
+        "EXPLAIN QUERY PLAN SELECT body FROM alerts WHERE tier = ? ORDER BY id DESC LIMIT ?",
+        ("step_up", 500)))
+    assert "ix_alerts_tier_id" in plan and "TEMP B-TREE" not in plan
+
+
+def _saved(alert, stamp):
+    return dict(alert, saved_at=stamp)
+
+
+def test_retention_prunes_old_alerts_and_orphan_incidents(tmp_path):
+    from datetime import datetime
+    from utils.alert_store_sqlite import SqliteAlertStore
+    path = str(tmp_path / "alerts.db")
+    s = SqliteAlertStore(path, retention_days=30)
+    now = datetime(2026, 10, 14, 12, 0, 0).timestamp()
+    s.save_alerts([_saved(_alert(0), "2026-09-01 00:00:00"),                  # old
+                   _saved(_alert(1, ip="5.5.5.5"), "2026-09-01 00:00:00"),    # old, own incident
+                   _saved(_alert(2), "2026-10-13 00:00:00")])                 # recent
+    assert len(s.incidents()) == 2
+    assert s.prune(now=now) == (2, 1)
+    assert [a["alert_id"] for a in s.load_alerts()] == ["A2"]
+    assert [i["ip"] for i in s.incidents()] == ["1.2.3.4"]     # still has A2
+    assert s.prune(now=now) == (0, 0)
+    # 0 keeps everything.
+    k = SqliteAlertStore(str(tmp_path / "keep.db"), retention_days=0)
+    k.save_alerts([_saved(_alert(0), "2000-01-01 00:00:00")])
+    assert k.prune(now=now) == (0, 0) and k.count() == 1
+
+
+def test_retention_runs_on_open_and_at_most_daily(tmp_path, monkeypatch):
+    from utils import alert_store_sqlite as M
+    path = str(tmp_path / "alerts.db")
+    M.SqliteAlertStore(path, retention_days=0).save_alerts([_saved(_alert(0), "2000-01-01 00:00:00")])
+    monkeypatch.setattr(config, "ALERT_RETENTION_DAYS", 30)
+    s = M.SqliteAlertStore(path)                   # default from config; prunes on open
+    assert s.retention_days == 30 and s.count() == 0
+    clock = [1000.0]
+    monkeypatch.setattr(M.time, "monotonic", lambda: clock[0])
+    s._last_prune = None
+    s._maybe_prune()                              # at t=1000
+    s.save_alerts([_saved(_alert(1), "2000-01-01 00:00:00")])   # same day: not pruned yet
+    assert s.count() == 1
+    clock[0] += 86400
+    s.load_cached()                               # a day later: pruned
+    assert s.count() == 0
 
 
 def test_api_reads_the_v3_store(tmp_path, monkeypatch):
