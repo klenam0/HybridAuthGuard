@@ -161,71 +161,68 @@ DEFAULT_SEVERITY = "LOW"
 ML_UPGRADE_CONFIDENCE = "High"
 ML_UPGRADE_SEVERITY = "HIGH"
 
-MITRE_MAPPING = {
-    "Brute Force Attack": {
-        "technique_id":   "T1110.001",
-        "technique_name": "Brute Force: Password Guessing",
-        "tactic":         "Credential Access",
-        "url":            "https://attack.mitre.org/techniques/T1110/001/",
-    },
-    "Slow Brute Force": {
-        "technique_id":   "T1110.001",
-        "technique_name": "Brute Force: Password Guessing",
-        "tactic":         "Credential Access",
-        "url":            "https://attack.mitre.org/techniques/T1110/001/",
-    },
-    "Credential Stuffing": {
-        "technique_id":   "T1110.004",
-        "technique_name": "Brute Force: Credential Stuffing",
-        "tactic":         "Credential Access",
-        "url":            "https://attack.mitre.org/techniques/T1110/004/",
-    },
-    "Multiple IP Login": {
-        "technique_id":   "T1078",
-        "technique_name": "Valid Accounts",
-        "tactic":         "Initial Access",
-        "url":            "https://attack.mitre.org/techniques/T1078/",
-    },
-    "Suspicious Login Time": {
-        "technique_id":   "T1078",
-        "technique_name": "Valid Accounts",
-        "tactic":         "Initial Access",
-        "url":            "https://attack.mitre.org/techniques/T1078/",
-    },
-    "ML Anomaly Detected": {
-        "technique_id":   "T1078",
-        "technique_name": "Valid Accounts",
-        "tactic":         "Initial Access",
-        "url":            "https://attack.mitre.org/techniques/T1078/",
-    },
-    "Invalid Account Spraying": {
-        "technique_id":   "T1110",
-        "technique_name": "Brute Force",
-        "tactic":         "Credential Access",
-        "url":            "https://attack.mitre.org/techniques/T1110/",
-    },
-    "Distributed Brute Force": {
-        "technique_id":   "T1110.001",
-        "technique_name": "Brute Force: Password Guessing",
-        "tactic":         "Credential Access",
-        "url":            "https://attack.mitre.org/techniques/T1110/001/",
-    },
-    "Success After Failures": {
-        "technique_id":   "T1078",
-        "technique_name": "Valid Accounts",
-        "tactic":         "Initial Access",
-        "url":            "https://attack.mitre.org/techniques/T1078/",
-    },
-}
+# MITRE ATT&CK (Enterprise) mapping of the eight rule detectors, checked
+# against ATT&CK v20.0 (attack.mitre.org, the site's current version on
+# 2026-10-14). `tactic` is the tactic in this context (a login to the
+# monitored service); `attack_tactics` lists every tactic ATT&CK gives the
+# technique. Served at /api/config and attached to alerts by AnalysisAgent.
+MITRE_ATTACK_VERSION = "ATT&CK v20.0 (Enterprise)"
+_ATTACK = "https://attack.mitre.org/versions/v20/techniques/"
+_T1078_TACTICS = ("Stealth", "Persistence", "Privilege Escalation", "Initial Access")
 
-# An ML alert on a FAILED login is not use of a valid account; it is
-# evidence of password guessing (audit F28).
-MITRE_ML_FAILED = {
-    "technique_id":   "T1110",
-    "technique_name": "Brute Force",
-    "tactic":         "Credential Access",
-    "url":            "https://attack.mitre.org/techniques/T1110/",
+
+def _mitre(tid, name, tactic, tactics, why):
+    return {"technique_id": tid, "technique_name": name, "tactic": tactic,
+            "attack_tactics": list(tactics), "url": _ATTACK + tid.replace(".", "/") + "/",
+            "rationale": why}
+
+
+MITRE_MAPPING = {
+    "Brute Force Attack": _mitre(
+        "T1110.001", "Brute Force: Password Guessing", "Credential Access", ("Credential Access",),
+        "Many failed logins from one IP within 60 s: repeated password guesses."),
+    "Slow Brute Force": _mitre(
+        "T1110.001", "Brute Force: Password Guessing", "Credential Access", ("Credential Access",),
+        "The same guessing spread over up to 7 days, below the Brute Force count."),
+    "Credential Stuffing": _mitre(
+        "T1110.004", "Brute Force: Credential Stuffing", "Credential Access", ("Credential Access",),
+        "Failed logins to several distinct real accounts from one IP. Without passwords "
+        "this is equally consistent with T1110.003 Password Spraying."),
+    "Invalid Account Spraying": _mitre(
+        "T1110", "Brute Force", "Credential Access", ("Credential Access",),
+        "Attempts on accounts that do not exist: username guessing, which ATT&CK has "
+        "no sub-technique for, so the parent technique."),
+    "Distributed Brute Force": _mitre(
+        "T1110.001", "Brute Force: Password Guessing", "Credential Access", ("Credential Access",),
+        "Failed logins to one real account from several IPs: password guessing "
+        "against one account, distributed over sources."),
+    "Success After Failures": _mitre(
+        "T1078", "Valid Accounts", "Initial Access", _T1078_TACTICS,
+        "A successful login after repeated failures: the attacker may now hold "
+        "working credentials and log in with a valid account."),
+    "Multiple IP Login": _mitre(
+        "T1078", "Valid Accounts", "Initial Access", _T1078_TACTICS,
+        "One account logging in successfully from two IPs within 120 s: possible "
+        "use of the account's credentials by someone else."),
+    "Suspicious Login Time": _mitre(
+        "T1078", "Valid Accounts", "Initial Access", _T1078_TACTICS,
+        "A successful login at an unusual hour: possible use of a valid account by "
+        "someone other than its owner."),
 }
+# ML alerts exist only when an ML step raises them (ML_MODE "legacy"; v4
+# raises none). Legacy mapping kept for those modes only: FAILED events to
+# T1110, others to T1078 (audit F28).
+MITRE_ML_LEGACY = _mitre(
+    "T1078", "Valid Accounts", "Initial Access", _T1078_TACTICS,
+    "Legacy ML anomaly on a successful login.")
+MITRE_ML_FAILED = _mitre(
+    "T1110", "Brute Force", "Credential Access", ("Credential Access",),
+    "Legacy ML anomaly on a failed login.")
+
+
+def mitre_table():
+    """One row per v3 rule detector (detector, technique, tactic, rationale)."""
+    return [{"detector": d, **MITRE_MAPPING[d]} for d in V3_DETECTORS if d in MITRE_MAPPING]
 
 # /api/threat-level considers alerts saved within this many minutes.
 THREAT_LEVEL_WINDOW_MINUTES = 60
@@ -468,7 +465,11 @@ def public_config():
             "ml_upgrade_severity": ML_UPGRADE_SEVERITY,
         },
         "mitre": {k: dict(v) for k, v in MITRE_MAPPING.items()},
-        "mitre_ml_failed": dict(MITRE_ML_FAILED),
+        "mitre_table": mitre_table(),
+        "mitre_attack_version": MITRE_ATTACK_VERSION,
+        # ML mappings only when an ML step can raise alerts (not in v4).
+        **({"mitre_ml": dict(MITRE_ML_LEGACY), "mitre_ml_failed": dict(MITRE_ML_FAILED)}
+           if "ML Anomaly Detected" in active_detectors() and ML_MODE != "v4" else {}),
         "threat_level_window_minutes": THREAT_LEVEL_WINDOW_MINUTES,
         "response": {
             "simulated_block_severities": list(SIMULATED_BLOCK_SEVERITIES),

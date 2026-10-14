@@ -4,6 +4,7 @@ import SeverityBadge from "../components/SeverityBadge";
 
 const TACTIC_COLORS = {
   "Credential Access": "bg-red-500/20 text-red-400 border-red-500/30",
+  Stealth: "bg-orange-500/20 text-orange-400 border-orange-500/30",
   "Defense Evasion / Persistence":
     "bg-orange-500/20 text-orange-400 border-orange-500/30",
   Persistence: "bg-amber-500/20 text-amber-400 border-amber-500/30",
@@ -45,9 +46,8 @@ export default function MITREMapping({ data }) {
         alert_types: new Set(),
       };
     }
-    // Collect every distinct tactic in the group (e.g. T1078 is
-    // "Defense Evasion / Persistence" for Multiple IP Login but
-    // "Persistence" for ML Anomaly / Suspicious Login Time).
+    // Collect every distinct tactic in the group (alerts saved under an
+    // older mapping may carry a different tactic for the same technique).
     (alert.mitre.tactic || "")
       .split(" / ")
       .map((s) => s.trim())

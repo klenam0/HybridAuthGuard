@@ -500,3 +500,27 @@ def test_v4_with_the_forest_retired_runs_no_ml_step(monkeypatch):
     monkeypatch.setattr(config, "ML_V4_IFOREST", "retired")
     assert DetectionAgent().anomaly_detector is None
     assert "ML Anomaly Detected" not in config.active_detectors()
+
+
+# ── MITRE ATT&CK mapping (audit F28) ─────────────────────────────────────────
+
+def test_mitre_table_covers_the_eight_rule_detectors_and_alerts_match_it():
+    from agents.analysis_agent import AnalysisAgent
+    from agents.rules_v3 import RULE_DETECTORS
+    table = config.mitre_table()
+    assert sorted(r["detector"] for r in table) == sorted(RULE_DETECTORS)
+    agent = AnalysisAgent(mode="v3")
+    for r in table:
+        m = agent.evaluate_alert({"type": r["detector"]})["mitre"]
+        assert m == {k: r[k] for k in ("technique_id", "technique_name", "tactic", "url")}
+        assert r["tactic"] in r["attack_tactics"] and r["rationale"]
+        assert r["url"].startswith("https://attack.mitre.org/versions/v20/techniques/")
+
+
+def test_no_ml_mapping_without_an_ml_step(monkeypatch):
+    monkeypatch.setattr(config, "RULES_MODE", "v3")
+    monkeypatch.setattr(config, "ML_MODE", "v4")
+    c = config.public_config()
+    assert "ML Anomaly Detected" not in c["mitre"]
+    assert "mitre_ml" not in c and "mitre_ml_failed" not in c
+    assert c["mitre_attack_version"] == config.MITRE_ATTACK_VERSION

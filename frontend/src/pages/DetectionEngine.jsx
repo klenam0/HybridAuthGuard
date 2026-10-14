@@ -118,7 +118,9 @@ const pad2 = (h) => String(h).padStart(2, "0");
 const fmtScore = (v) => (typeof v === "number" ? v.toFixed(2) : "?");
 
 function detectorPolicy(name, cfg) {
-  const mitre = cfg?.mitre?.[name] || {};
+  // ML alerts have a mapping only in the modes that run an ML step (mitre_ml).
+  const mitre =
+    (name === "ML Anomaly Detected" ? cfg?.mitre_ml : cfg?.mitre?.[name]) || {};
   const base = { mitre: mitre.technique_id || "-", tactic: mitre.tactic || "-" };
   const r = cfg?.rules;
   const ml = cfg?.ml;

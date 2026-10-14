@@ -47,13 +47,14 @@ class AnalysisAgent:
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
 
-        # MITRE ATT&CK mapping. ML alerts on FAILED logins map to T1110.
+        # MITRE ATT&CK mapping (config.MITRE_MAPPING). ML alerts (legacy ML
+        # only): FAILED logins map to T1110, others to T1078.
         mitre = self.mitre_mapping.get(alert_type)
-        values = (alert.get("trigger_details") or {}).get("values") or {}
-        if alert_type == "ML Anomaly Detected" and values.get("is_failed_event"):
-            mitre = config.MITRE_ML_FAILED
+        if alert_type == "ML Anomaly Detected":
+            values = (alert.get("trigger_details") or {}).get("values") or {}
+            mitre = config.MITRE_ML_FAILED if values.get("is_failed_event") else config.MITRE_ML_LEGACY
         if mitre:
-            alert["mitre"] = mitre
+            alert["mitre"] = {k: mitre[k] for k in ("technique_id", "technique_name", "tactic", "url")}
 
         # Get feature explanation for ML alerts
         feature_explanation = alert.pop("feature_explanation", None)
