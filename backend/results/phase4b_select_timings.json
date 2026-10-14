@@ -1,0 +1,7 @@
+{
+  "timings_seconds": {
+    "load stream, frozen rule incidents, thresholds": 7.1,
+    "56 candidate rows on val_a": 118.2,
+    "total": 125.3
+  }
+}

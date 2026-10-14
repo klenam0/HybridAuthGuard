@@ -1,0 +1,2113 @@
+{
+  "protocol": "eval/PROTOCOL.md amendment 5",
+  "thresholds_fixed": {
+    "val_a": 0.2149,
+    "val_b": 0.1915
+  },
+  "min_incremental_incidents": 30,
+  "quantiles": [
+    0.001,
+    0.005,
+    0.01,
+    0.02,
+    0.05,
+    0.1,
+    0.2,
+    0.3
+  ],
+  "base_rate_val_a": 0.1074382539498799,
+  "events_val_a": 1183517,
+  "attacking_ips_val_a": 9423,
+  "deployment": {
+    "candidate": {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "meta": {
+        "score": "asn",
+        "features": [
+          "d_asn_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.001,
+      "threshold": 1.0
+    },
+    "meets_criterion": false,
+    "alerting": false,
+    "with_D": true,
+    "status": "no amendment 5 candidate meets the criterion; the Phase 4 fallback stays in model_v4.pkl (alerting = False)"
+  },
+  "chosen_row": {
+    "name": "C3:reputation[asn]",
+    "family": "C3",
+    "kind": "candidate",
+    "meta": {
+      "score": "asn",
+      "features": [
+        "d_asn_fail_ratio"
+      ],
+      "with_D": true
+    },
+    "quantile": 0.001,
+    "threshold": 1.0,
+    "order": 32,
+    "val_a": {
+      "incremental_incidents": 1514,
+      "incremental_attack_incidents": 197,
+      "incremental_precision": 0.13011889035667107,
+      "incremental_ci_low": 0.10844136285401346,
+      "incremental_ci_high": 0.1523362119812591,
+      "attacking_ips_incremental": 142,
+      "ml_alerts": 2508,
+      "ml_attack_alerts": 402,
+      "ml_alert_precision": 0.16028708133971292,
+      "ml_alert_ci_low": 0.10281726991002713,
+      "ml_alert_ci_high": 0.24689704091443884,
+      "attacking_ips_flagged": 157,
+      "benign_ips_flagged": 1257,
+      "legitimate_users_alerted": 196,
+      "ml_incidents": 2062,
+      "ml_incident_precision": 0.13918525703200776,
+      "meets_primary": false,
+      "meets_phase3b_alert_criterion": false
+    }
+  },
+  "best_per_family": {
+    "C1": {
+      "row": {
+        "name": "C1:phase2_forest_labelfree",
+        "family": "C1",
+        "kind": "candidate",
+        "meta": {
+          "with_D": false
+        },
+        "quantile": 0.05,
+        "threshold": 0.5574720162259826,
+        "order": 4,
+        "val_a": {
+          "incremental_incidents": 9172,
+          "incremental_attack_incidents": 540,
+          "incremental_precision": 0.05887483645878761,
+          "incremental_ci_low": 0.05267190396908071,
+          "incremental_ci_high": 0.06513070357717789,
+          "attacking_ips_incremental": 474,
+          "ml_alerts": 24652,
+          "ml_attack_alerts": 2590,
+          "ml_alert_precision": 0.10506246957650495,
+          "ml_alert_ci_low": 0.09160178597932249,
+          "ml_alert_ci_high": 0.12029358795358586,
+          "attacking_ips_flagged": 1297,
+          "benign_ips_flagged": 12539,
+          "legitimate_users_alerted": 5889,
+          "ml_incidents": 18180,
+          "ml_incident_precision": 0.10874587458745874,
+          "meets_primary": false,
+          "meets_phase3b_alert_criterion": false
+        }
+      },
+      "meets": false
+    },
+    "C2": {
+      "row": {
+        "name": "C2:freeman_no_placeholder[beta=8]",
+        "family": "C2",
+        "kind": "candidate",
+        "meta": {
+          "beta": 8.0,
+          "beta_index": 2,
+          "with_D": false
+        },
+        "quantile": 0.05,
+        "threshold": 0.0,
+        "order": 28,
+        "val_a": {
+          "incremental_incidents": 149981,
+          "incremental_attack_incidents": 3129,
+          "incremental_precision": 0.020862642601396177,
+          "incremental_ci_low": 0.020085340581362923,
+          "incremental_ci_high": 0.021772734627647523,
+          "attacking_ips_incremental": 2681,
+          "ml_alerts": 248378,
+          "ml_attack_alerts": 26068,
+          "ml_alert_precision": 0.10495293463994396,
+          "ml_alert_ci_low": 0.09941131099481841,
+          "ml_alert_ci_high": 0.11063803250260526,
+          "attacking_ips_flagged": 4401,
+          "benign_ips_flagged": 150251,
+          "legitimate_users_alerted": 218416,
+          "ml_incidents": 210236,
+          "ml_incident_precision": 0.07759375178370974,
+          "meets_primary": false,
+          "meets_phase3b_alert_criterion": false
+        }
+      },
+      "meets": false
+    },
+    "C3": {
+      "row": {
+        "name": "C3:reputation[asn]",
+        "family": "C3",
+        "kind": "candidate",
+        "meta": {
+          "score": "asn",
+          "features": [
+            "d_asn_fail_ratio"
+          ],
+          "with_D": true
+        },
+        "quantile": 0.001,
+        "threshold": 1.0,
+        "order": 32,
+        "val_a": {
+          "incremental_incidents": 1514,
+          "incremental_attack_incidents": 197,
+          "incremental_precision": 0.13011889035667107,
+          "incremental_ci_low": 0.10844136285401346,
+          "incremental_ci_high": 0.1523362119812591,
+          "attacking_ips_incremental": 142,
+          "ml_alerts": 2508,
+          "ml_attack_alerts": 402,
+          "ml_alert_precision": 0.16028708133971292,
+          "ml_alert_ci_low": 0.10281726991002713,
+          "ml_alert_ci_high": 0.24689704091443884,
+          "attacking_ips_flagged": 157,
+          "benign_ips_flagged": 1257,
+          "legitimate_users_alerted": 196,
+          "ml_incidents": 2062,
+          "ml_incident_precision": 0.13918525703200776,
+          "meets_primary": false,
+          "meets_phase3b_alert_criterion": false
+        }
+      },
+      "meets": false
+    }
+  },
+  "n_rows_meeting": 0,
+  "event_metrics_val_a": {
+    "C1:phase2_forest_labelfree": {
+      "roc_auc": 0.5039329966694688,
+      "pr_auc": 0.1012616157207294,
+      "tpr_at_1pct_fpr": 0.0023514608155400887
+    },
+    "C2:freeman_no_placeholder[beta=0.5]": {
+      "roc_auc": 0.46089982752453795,
+      "pr_auc": 0.1034225645049606,
+      "tpr_at_1pct_fpr": 0.0031772246470842674
+    },
+    "C2:freeman_no_placeholder[beta=2]": {
+      "roc_auc": 0.4647040134158697,
+      "pr_auc": 0.10490024933810733,
+      "tpr_at_1pct_fpr": 0.0027368172702607056
+    },
+    "C2:freeman_no_placeholder[beta=8]": {
+      "roc_auc": 0.4683513366080684,
+      "pr_auc": 0.10614912441450212,
+      "tpr_at_1pct_fpr": 0.0021469859620148637
+    },
+    "C3:reputation[asn]": {
+      "roc_auc": 0.7263238780656112,
+      "pr_auc": 0.16850164695887007,
+      "tpr_at_1pct_fpr": 0.00566238055916008
+    },
+    "C3:reputation[ip]": {
+      "roc_auc": 0.6503609644037459,
+      "pr_auc": 0.13330118524037154,
+      "tpr_at_1pct_fpr": 0.0
+    },
+    "C3:reputation[max]": {
+      "roc_auc": 0.6311660954775794,
+      "pr_auc": 0.1266543600538083,
+      "tpr_at_1pct_fpr": 0.0
+    }
+  },
+  "rows": [
+    {
+      "name": "C1:phase2_forest_labelfree",
+      "family": "C1",
+      "kind": "candidate",
+      "meta": {
+        "with_D": false
+      },
+      "quantile": 0.001,
+      "threshold": 0.6655915361006585,
+      "order": 0,
+      "val_a": {
+        "incremental_incidents": 24,
+        "incremental_attack_incidents": 1,
+        "incremental_precision": 0.041666666666666664,
+        "incremental_ci_low": 0.0,
+        "incremental_ci_high": 0.15,
+        "attacking_ips_incremental": 1,
+        "ml_alerts": 712,
+        "ml_attack_alerts": 4,
+        "ml_alert_precision": 0.0056179775280898875,
+        "ml_alert_ci_low": 0.0008671718455603074,
+        "ml_alert_ci_high": 0.02631868768838395,
+        "attacking_ips_flagged": 4,
+        "benign_ips_flagged": 63,
+        "legitimate_users_alerted": 97,
+        "ml_incidents": 198,
+        "ml_incident_precision": 0.020202020202020204,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C1:phase2_forest_labelfree",
+      "family": "C1",
+      "kind": "candidate",
+      "meta": {
+        "with_D": false
+      },
+      "quantile": 0.005,
+      "threshold": 0.6340649883967225,
+      "order": 1,
+      "val_a": {
+        "incremental_incidents": 252,
+        "incremental_attack_incidents": 8,
+        "incremental_precision": 0.031746031746031744,
+        "incremental_ci_low": 0.012241194865042791,
+        "incremental_ci_high": 0.05645336605890603,
+        "attacking_ips_incremental": 8,
+        "ml_alerts": 2249,
+        "ml_attack_alerts": 116,
+        "ml_alert_precision": 0.05157847932414406,
+        "ml_alert_ci_low": 0.033512962720946185,
+        "ml_alert_ci_high": 0.07914738632971617,
+        "attacking_ips_flagged": 93,
+        "benign_ips_flagged": 543,
+        "legitimate_users_alerted": 482,
+        "ml_incidents": 1057,
+        "ml_incident_precision": 0.10501419110690634,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C1:phase2_forest_labelfree",
+      "family": "C1",
+      "kind": "candidate",
+      "meta": {
+        "with_D": false
+      },
+      "quantile": 0.01,
+      "threshold": 0.6195613560688403,
+      "order": 2,
+      "val_a": {
+        "incremental_incidents": 623,
+        "incremental_attack_incidents": 24,
+        "incremental_precision": 0.038523274478330656,
+        "incremental_ci_low": 0.0214701222957701,
+        "incremental_ci_high": 0.05931206864102425,
+        "attacking_ips_incremental": 21,
+        "ml_alerts": 4145,
+        "ml_attack_alerts": 265,
+        "ml_alert_precision": 0.06393244873341375,
+        "ml_alert_ci_low": 0.045797372285364894,
+        "ml_alert_ci_high": 0.08998101011397543,
+        "attacking_ips_flagged": 202,
+        "benign_ips_flagged": 1207,
+        "legitimate_users_alerted": 805,
+        "ml_incidents": 2100,
+        "ml_incident_precision": 0.11904761904761904,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C1:phase2_forest_labelfree",
+      "family": "C1",
+      "kind": "candidate",
+      "meta": {
+        "with_D": false
+      },
+      "quantile": 0.02,
+      "threshold": 0.5952921714478256,
+      "order": 3,
+      "val_a": {
+        "incremental_incidents": 2176,
+        "incremental_attack_incidents": 102,
+        "incremental_precision": 0.046875,
+        "incremental_ci_low": 0.03385804421486062,
+        "incremental_ci_high": 0.06318526684758029,
+        "attacking_ips_incremental": 81,
+        "ml_alerts": 8611,
+        "ml_attack_alerts": 859,
+        "ml_alert_precision": 0.0997561258854953,
+        "ml_alert_ci_low": 0.08063046924315438,
+        "ml_alert_ci_high": 0.12290835314864637,
+        "attacking_ips_flagged": 523,
+        "benign_ips_flagged": 3603,
+        "legitimate_users_alerted": 1760,
+        "ml_incidents": 5643,
+        "ml_incident_precision": 0.13237639553429026,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C1:phase2_forest_labelfree",
+      "family": "C1",
+      "kind": "candidate",
+      "meta": {
+        "with_D": false
+      },
+      "quantile": 0.05,
+      "threshold": 0.5574720162259826,
+      "order": 4,
+      "val_a": {
+        "incremental_incidents": 9172,
+        "incremental_attack_incidents": 540,
+        "incremental_precision": 0.05887483645878761,
+        "incremental_ci_low": 0.05267190396908071,
+        "incremental_ci_high": 0.06513070357717789,
+        "attacking_ips_incremental": 474,
+        "ml_alerts": 24652,
+        "ml_attack_alerts": 2590,
+        "ml_alert_precision": 0.10506246957650495,
+        "ml_alert_ci_low": 0.09160178597932249,
+        "ml_alert_ci_high": 0.12029358795358586,
+        "attacking_ips_flagged": 1297,
+        "benign_ips_flagged": 12539,
+        "legitimate_users_alerted": 5889,
+        "ml_incidents": 18180,
+        "ml_incident_precision": 0.10874587458745874,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C1:phase2_forest_labelfree",
+      "family": "C1",
+      "kind": "candidate",
+      "meta": {
+        "with_D": false
+      },
+      "quantile": 0.1,
+      "threshold": 0.5272325917846317,
+      "order": 5,
+      "val_a": {
+        "incremental_incidents": 22863,
+        "incremental_attack_incidents": 1107,
+        "incremental_precision": 0.04841884267156541,
+        "incremental_ci_low": 0.045089666376811895,
+        "incremental_ci_high": 0.05203752935358986,
+        "attacking_ips_incremental": 963,
+        "ml_alerts": 52866,
+        "ml_attack_alerts": 4798,
+        "ml_alert_precision": 0.09075776491506829,
+        "ml_alert_ci_low": 0.08206303437232462,
+        "ml_alert_ci_high": 0.09964078491384439,
+        "attacking_ips_flagged": 2231,
+        "benign_ips_flagged": 28933,
+        "legitimate_users_alerted": 15235,
+        "ml_incidents": 41173,
+        "ml_incident_precision": 0.09054477448813543,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C1:phase2_forest_labelfree",
+      "family": "C1",
+      "kind": "candidate",
+      "meta": {
+        "with_D": false
+      },
+      "quantile": 0.2,
+      "threshold": 0.4997358129168118,
+      "order": 6,
+      "val_a": {
+        "incremental_incidents": 52540,
+        "incremental_attack_incidents": 2564,
+        "incremental_precision": 0.048800913589645986,
+        "incremental_ci_low": 0.0465446597512669,
+        "incremental_ci_high": 0.051204271130577406,
+        "attacking_ips_incremental": 2056,
+        "ml_alerts": 117781,
+        "ml_attack_alerts": 11136,
+        "ml_alert_precision": 0.09454835669590171,
+        "ml_alert_ci_low": 0.08782240219814542,
+        "ml_alert_ci_high": 0.10081425726085026,
+        "attacking_ips_flagged": 3879,
+        "benign_ips_flagged": 61102,
+        "legitimate_users_alerted": 35872,
+        "ml_incidents": 92226,
+        "ml_incident_precision": 0.09301064775659793,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C1:phase2_forest_labelfree",
+      "family": "C1",
+      "kind": "candidate",
+      "meta": {
+        "with_D": false
+      },
+      "quantile": 0.3,
+      "threshold": 0.4822339844294513,
+      "order": 7,
+      "val_a": {
+        "incremental_incidents": 88108,
+        "incremental_attack_incidents": 4270,
+        "incremental_precision": 0.048463249648159075,
+        "incremental_ci_low": 0.04664786304768132,
+        "incremental_ci_high": 0.0502536053896421,
+        "attacking_ips_incremental": 3185,
+        "ml_alerts": 182184,
+        "ml_attack_alerts": 18556,
+        "ml_alert_precision": 0.10185307161990076,
+        "ml_alert_ci_low": 0.09643717883777583,
+        "ml_alert_ci_high": 0.10727568072385081,
+        "attacking_ips_flagged": 5108,
+        "benign_ips_flagged": 93090,
+        "legitimate_users_alerted": 61911,
+        "ml_incidents": 146506,
+        "ml_incident_precision": 0.0943374332791831,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=0.5]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 0.5,
+        "beta_index": 0,
+        "with_D": false
+      },
+      "quantile": 0.001,
+      "threshold": 4.158547631330142,
+      "order": 8,
+      "val_a": {
+        "incremental_incidents": 1405,
+        "incremental_attack_incidents": 26,
+        "incremental_precision": 0.018505338078291814,
+        "incremental_ci_low": 0.012073649408832828,
+        "incremental_ci_high": 0.026223002146257116,
+        "attacking_ips_incremental": 26,
+        "ml_alerts": 1846,
+        "ml_attack_alerts": 75,
+        "ml_alert_precision": 0.040628385698808236,
+        "ml_alert_ci_low": 0.0313670368782612,
+        "ml_alert_ci_high": 0.05103809773394024,
+        "attacking_ips_flagged": 69,
+        "benign_ips_flagged": 1725,
+        "legitimate_users_alerted": 1699,
+        "ml_incidents": 1839,
+        "ml_incident_precision": 0.04023926046764546,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=0.5]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 0.5,
+        "beta_index": 0,
+        "with_D": false
+      },
+      "quantile": 0.005,
+      "threshold": 2.7466151262324736,
+      "order": 9,
+      "val_a": {
+        "incremental_incidents": 6260,
+        "incremental_attack_incidents": 89,
+        "incremental_precision": 0.014217252396166134,
+        "incremental_ci_low": 0.011490669533338846,
+        "incremental_ci_high": 0.017271003227784583,
+        "attacking_ips_incremental": 86,
+        "ml_alerts": 8144,
+        "ml_attack_alerts": 338,
+        "ml_alert_precision": 0.04150294695481336,
+        "ml_alert_ci_low": 0.03622952981893386,
+        "ml_alert_ci_high": 0.047231786786918,
+        "attacking_ips_flagged": 285,
+        "benign_ips_flagged": 7275,
+        "legitimate_users_alerted": 7495,
+        "ml_incidents": 8059,
+        "ml_incident_precision": 0.04094800843777144,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=0.5]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 0.5,
+        "beta_index": 0,
+        "with_D": false
+      },
+      "quantile": 0.01,
+      "threshold": 2.1784524356297617,
+      "order": 10,
+      "val_a": {
+        "incremental_incidents": 11362,
+        "incremental_attack_incidents": 157,
+        "incremental_precision": 0.013817989790529837,
+        "incremental_ci_low": 0.011541773972685129,
+        "incremental_ci_high": 0.01611064404177406,
+        "attacking_ips_incremental": 149,
+        "ml_alerts": 14511,
+        "ml_attack_alerts": 551,
+        "ml_alert_precision": 0.03797119426641858,
+        "ml_alert_ci_low": 0.03361557192531536,
+        "ml_alert_ci_high": 0.042519579067527784,
+        "attacking_ips_flagged": 435,
+        "benign_ips_flagged": 12731,
+        "legitimate_users_alerted": 13376,
+        "ml_incidents": 14305,
+        "ml_incident_precision": 0.03718979377839916,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=0.5]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 0.5,
+        "beta_index": 0,
+        "with_D": false
+      },
+      "quantile": 0.02,
+      "threshold": 1.615664633238558,
+      "order": 11,
+      "val_a": {
+        "incremental_incidents": 21235,
+        "incremental_attack_incidents": 263,
+        "incremental_precision": 0.012385213091594066,
+        "incremental_ci_low": 0.010720822494556104,
+        "incremental_ci_high": 0.014026884005937481,
+        "attacking_ips_incremental": 238,
+        "ml_alerts": 26685,
+        "ml_attack_alerts": 959,
+        "ml_alert_precision": 0.03593779276747236,
+        "ml_alert_ci_low": 0.032225289408917335,
+        "ml_alert_ci_high": 0.039884373320661394,
+        "attacking_ips_flagged": 685,
+        "benign_ips_flagged": 22701,
+        "legitimate_users_alerted": 24652,
+        "ml_incidents": 26125,
+        "ml_incident_precision": 0.035023923444976075,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=0.5]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 0.5,
+        "beta_index": 0,
+        "with_D": false
+      },
+      "quantile": 0.05,
+      "threshold": 0.0,
+      "order": 12,
+      "val_a": {
+        "incremental_incidents": 165393,
+        "incremental_attack_incidents": 3306,
+        "incremental_precision": 0.019988754058515173,
+        "incremental_ci_low": 0.01925900082675924,
+        "incremental_ci_high": 0.020817217121145773,
+        "attacking_ips_incremental": 2809,
+        "ml_alerts": 269783,
+        "ml_attack_alerts": 27343,
+        "ml_alert_precision": 0.1013518272092756,
+        "ml_alert_ci_low": 0.09607380489843945,
+        "ml_alert_ci_high": 0.10611337987878883,
+        "attacking_ips_flagged": 4540,
+        "benign_ips_flagged": 162486,
+        "legitimate_users_alerted": 235133,
+        "ml_incidents": 228055,
+        "ml_incident_precision": 0.07361820613448511,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=0.5]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 0.5,
+        "beta_index": 0,
+        "with_D": false
+      },
+      "quantile": 0.1,
+      "threshold": 0.0,
+      "order": 13,
+      "val_a": {
+        "incremental_incidents": 165393,
+        "incremental_attack_incidents": 3306,
+        "incremental_precision": 0.019988754058515173,
+        "incremental_ci_low": 0.01925900082675924,
+        "incremental_ci_high": 0.020817217121145773,
+        "attacking_ips_incremental": 2809,
+        "ml_alerts": 269783,
+        "ml_attack_alerts": 27343,
+        "ml_alert_precision": 0.1013518272092756,
+        "ml_alert_ci_low": 0.09607380489843945,
+        "ml_alert_ci_high": 0.10611337987878883,
+        "attacking_ips_flagged": 4540,
+        "benign_ips_flagged": 162486,
+        "legitimate_users_alerted": 235133,
+        "ml_incidents": 228055,
+        "ml_incident_precision": 0.07361820613448511,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=0.5]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 0.5,
+        "beta_index": 0,
+        "with_D": false
+      },
+      "quantile": 0.2,
+      "threshold": 0.0,
+      "order": 14,
+      "val_a": {
+        "incremental_incidents": 165393,
+        "incremental_attack_incidents": 3306,
+        "incremental_precision": 0.019988754058515173,
+        "incremental_ci_low": 0.01925900082675924,
+        "incremental_ci_high": 0.020817217121145773,
+        "attacking_ips_incremental": 2809,
+        "ml_alerts": 269783,
+        "ml_attack_alerts": 27343,
+        "ml_alert_precision": 0.1013518272092756,
+        "ml_alert_ci_low": 0.09607380489843945,
+        "ml_alert_ci_high": 0.10611337987878883,
+        "attacking_ips_flagged": 4540,
+        "benign_ips_flagged": 162486,
+        "legitimate_users_alerted": 235133,
+        "ml_incidents": 228055,
+        "ml_incident_precision": 0.07361820613448511,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=0.5]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 0.5,
+        "beta_index": 0,
+        "with_D": false
+      },
+      "quantile": 0.3,
+      "threshold": -0.39762000955170307,
+      "order": 15,
+      "val_a": {
+        "incremental_incidents": 168345,
+        "incremental_attack_incidents": 3339,
+        "incremental_precision": 0.0198342689120556,
+        "incremental_ci_low": 0.01905331277788688,
+        "incremental_ci_high": 0.020620978774803508,
+        "attacking_ips_incremental": 2837,
+        "ml_alerts": 273610,
+        "ml_attack_alerts": 27489,
+        "ml_alert_precision": 0.10046781915865648,
+        "ml_alert_ci_low": 0.09552712358781452,
+        "ml_alert_ci_high": 0.10537823645979862,
+        "attacking_ips_flagged": 4568,
+        "benign_ips_flagged": 164764,
+        "legitimate_users_alerted": 238036,
+        "ml_incidents": 231453,
+        "ml_incident_precision": 0.07282688061939141,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=2]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 2.0,
+        "beta_index": 1,
+        "with_D": false
+      },
+      "quantile": 0.001,
+      "threshold": 1.9269828434559988,
+      "order": 16,
+      "val_a": {
+        "incremental_incidents": 1375,
+        "incremental_attack_incidents": 25,
+        "incremental_precision": 0.01818181818181818,
+        "incremental_ci_low": 0.01162769586732195,
+        "incremental_ci_high": 0.025510669256761785,
+        "attacking_ips_incremental": 25,
+        "ml_alerts": 1798,
+        "ml_attack_alerts": 70,
+        "ml_alert_precision": 0.0389321468298109,
+        "ml_alert_ci_low": 0.02947515326390264,
+        "ml_alert_ci_high": 0.0487434493919345,
+        "attacking_ips_flagged": 64,
+        "benign_ips_flagged": 1683,
+        "legitimate_users_alerted": 1656,
+        "ml_incidents": 1791,
+        "ml_incident_precision": 0.038525963149078725,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=2]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 2.0,
+        "beta_index": 1,
+        "with_D": false
+      },
+      "quantile": 0.005,
+      "threshold": 0.9600173269562399,
+      "order": 17,
+      "val_a": {
+        "incremental_incidents": 6086,
+        "incremental_attack_incidents": 89,
+        "incremental_precision": 0.01462372658560631,
+        "incremental_ci_low": 0.011509324615751965,
+        "incremental_ci_high": 0.017795646846100837,
+        "attacking_ips_incremental": 85,
+        "ml_alerts": 7730,
+        "ml_attack_alerts": 281,
+        "ml_alert_precision": 0.036351875808538166,
+        "ml_alert_ci_low": 0.03126069531979622,
+        "ml_alert_ci_high": 0.04200575511552567,
+        "attacking_ips_flagged": 236,
+        "benign_ips_flagged": 6951,
+        "legitimate_users_alerted": 7163,
+        "ml_incidents": 7644,
+        "ml_incident_precision": 0.0358451072736787,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=2]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 2.0,
+        "beta_index": 1,
+        "with_D": false
+      },
+      "quantile": 0.01,
+      "threshold": 0.6353294456956551,
+      "order": 18,
+      "val_a": {
+        "incremental_incidents": 10809,
+        "incremental_attack_incidents": 151,
+        "incremental_precision": 0.013969839948191322,
+        "incremental_ci_low": 0.011714772239778905,
+        "incremental_ci_high": 0.016399518206244787,
+        "attacking_ips_incremental": 142,
+        "ml_alerts": 13595,
+        "ml_attack_alerts": 474,
+        "ml_alert_precision": 0.034865759470393526,
+        "ml_alert_ci_low": 0.030694583073404034,
+        "ml_alert_ci_high": 0.0392912681690064,
+        "attacking_ips_flagged": 382,
+        "benign_ips_flagged": 11983,
+        "legitimate_users_alerted": 12624,
+        "ml_incidents": 13401,
+        "ml_incident_precision": 0.03410193269159018,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=2]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 2.0,
+        "beta_index": 1,
+        "with_D": false
+      },
+      "quantile": 0.02,
+      "threshold": 0.28298410650696526,
+      "order": 19,
+      "val_a": {
+        "incremental_incidents": 20044,
+        "incremental_attack_incidents": 250,
+        "incremental_precision": 0.012472560367192177,
+        "incremental_ci_low": 0.010822875185509177,
+        "incremental_ci_high": 0.014156026770552547,
+        "attacking_ips_incremental": 226,
+        "ml_alerts": 25067,
+        "ml_attack_alerts": 877,
+        "ml_alert_precision": 0.034986236885147806,
+        "ml_alert_ci_low": 0.03148235498541017,
+        "ml_alert_ci_high": 0.039038358291279496,
+        "attacking_ips_flagged": 630,
+        "benign_ips_flagged": 21383,
+        "legitimate_users_alerted": 23251,
+        "ml_incidents": 24536,
+        "ml_incident_precision": 0.03415389631561787,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=2]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 2.0,
+        "beta_index": 1,
+        "with_D": false
+      },
+      "quantile": 0.05,
+      "threshold": 0.0,
+      "order": 20,
+      "val_a": {
+        "incremental_incidents": 154656,
+        "incremental_attack_incidents": 3196,
+        "incremental_precision": 0.020665218290916616,
+        "incremental_ci_low": 0.019813068981445633,
+        "incremental_ci_high": 0.021492086185656394,
+        "attacking_ips_incremental": 2731,
+        "ml_alerts": 255618,
+        "ml_attack_alerts": 26668,
+        "ml_alert_precision": 0.10432755126790758,
+        "ml_alert_ci_low": 0.09970798924350666,
+        "ml_alert_ci_high": 0.10967052944130688,
+        "attacking_ips_flagged": 4453,
+        "benign_ips_flagged": 154021,
+        "legitimate_users_alerted": 223978,
+        "ml_incidents": 215821,
+        "ml_incident_precision": 0.07658198229087994,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=2]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 2.0,
+        "beta_index": 1,
+        "with_D": false
+      },
+      "quantile": 0.1,
+      "threshold": 0.0,
+      "order": 21,
+      "val_a": {
+        "incremental_incidents": 154656,
+        "incremental_attack_incidents": 3196,
+        "incremental_precision": 0.020665218290916616,
+        "incremental_ci_low": 0.019813068981445633,
+        "incremental_ci_high": 0.021492086185656394,
+        "attacking_ips_incremental": 2731,
+        "ml_alerts": 255618,
+        "ml_attack_alerts": 26668,
+        "ml_alert_precision": 0.10432755126790758,
+        "ml_alert_ci_low": 0.09970798924350666,
+        "ml_alert_ci_high": 0.10967052944130688,
+        "attacking_ips_flagged": 4453,
+        "benign_ips_flagged": 154021,
+        "legitimate_users_alerted": 223978,
+        "ml_incidents": 215821,
+        "ml_incident_precision": 0.07658198229087994,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=2]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 2.0,
+        "beta_index": 1,
+        "with_D": false
+      },
+      "quantile": 0.2,
+      "threshold": 0.0,
+      "order": 22,
+      "val_a": {
+        "incremental_incidents": 154656,
+        "incremental_attack_incidents": 3196,
+        "incremental_precision": 0.020665218290916616,
+        "incremental_ci_low": 0.019813068981445633,
+        "incremental_ci_high": 0.021492086185656394,
+        "attacking_ips_incremental": 2731,
+        "ml_alerts": 255618,
+        "ml_attack_alerts": 26668,
+        "ml_alert_precision": 0.10432755126790758,
+        "ml_alert_ci_low": 0.09970798924350666,
+        "ml_alert_ci_high": 0.10967052944130688,
+        "attacking_ips_flagged": 4453,
+        "benign_ips_flagged": 154021,
+        "legitimate_users_alerted": 223978,
+        "ml_incidents": 215821,
+        "ml_incident_precision": 0.07658198229087994,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=2]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 2.0,
+        "beta_index": 1,
+        "with_D": false
+      },
+      "quantile": 0.3,
+      "threshold": -1.1068696846339248,
+      "order": 23,
+      "val_a": {
+        "incremental_incidents": 168465,
+        "incremental_attack_incidents": 3320,
+        "incremental_precision": 0.019707357611373284,
+        "incremental_ci_low": 0.018963030601288382,
+        "incremental_ci_high": 0.02050669635602233,
+        "attacking_ips_incremental": 2823,
+        "ml_alerts": 273198,
+        "ml_attack_alerts": 27352,
+        "ml_alert_precision": 0.10011786323472353,
+        "ml_alert_ci_low": 0.09531060287548894,
+        "ml_alert_ci_high": 0.10501413938780918,
+        "attacking_ips_flagged": 4548,
+        "benign_ips_flagged": 164605,
+        "legitimate_users_alerted": 237934,
+        "ml_incidents": 231242,
+        "ml_incident_precision": 0.07260791724686692,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=8]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 8.0,
+        "beta_index": 2,
+        "with_D": false
+      },
+      "quantile": 0.001,
+      "threshold": 0.6246055528930986,
+      "order": 24,
+      "val_a": {
+        "incremental_incidents": 1295,
+        "incremental_attack_incidents": 26,
+        "incremental_precision": 0.020077220077220077,
+        "incremental_ci_low": 0.012335922770694015,
+        "incremental_ci_high": 0.02863832546349699,
+        "attacking_ips_incremental": 25,
+        "ml_alerts": 1672,
+        "ml_attack_alerts": 59,
+        "ml_alert_precision": 0.035287081339712915,
+        "ml_alert_ci_low": 0.025825438283421476,
+        "ml_alert_ci_high": 0.046237293740402696,
+        "attacking_ips_flagged": 51,
+        "benign_ips_flagged": 1570,
+        "legitimate_users_alerted": 1555,
+        "ml_incidents": 1666,
+        "ml_incident_precision": 0.03481392557022809,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=8]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 8.0,
+        "beta_index": 2,
+        "with_D": false
+      },
+      "quantile": 0.005,
+      "threshold": 0.2425410894557074,
+      "order": 25,
+      "val_a": {
+        "incremental_incidents": 5948,
+        "incremental_attack_incidents": 75,
+        "incremental_precision": 0.012609280430396773,
+        "incremental_ci_low": 0.009937678962438943,
+        "incremental_ci_high": 0.01577790243104354,
+        "attacking_ips_incremental": 72,
+        "ml_alerts": 7368,
+        "ml_attack_alerts": 195,
+        "ml_alert_precision": 0.026465798045602607,
+        "ml_alert_ci_low": 0.021854564949770523,
+        "ml_alert_ci_high": 0.031586522893949205,
+        "attacking_ips_flagged": 154,
+        "benign_ips_flagged": 6667,
+        "legitimate_users_alerted": 6966,
+        "ml_incidents": 7271,
+        "ml_incident_precision": 0.02544354284142484,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=8]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 8.0,
+        "beta_index": 2,
+        "with_D": false
+      },
+      "quantile": 0.01,
+      "threshold": 0.11993843876627064,
+      "order": 26,
+      "val_a": {
+        "incremental_incidents": 9530,
+        "incremental_attack_incidents": 128,
+        "incremental_precision": 0.013431269674711437,
+        "incremental_ci_low": 0.010922017854538939,
+        "incremental_ci_high": 0.016132580548650504,
+        "attacking_ips_incremental": 120,
+        "ml_alerts": 11608,
+        "ml_attack_alerts": 305,
+        "ml_alert_precision": 0.0262749827705031,
+        "ml_alert_ci_low": 0.02250586035322227,
+        "ml_alert_ci_high": 0.030799283341811545,
+        "attacking_ips_flagged": 241,
+        "benign_ips_flagged": 10383,
+        "legitimate_users_alerted": 10987,
+        "ml_incidents": 11445,
+        "ml_incident_precision": 0.025338575797291395,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=8]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 8.0,
+        "beta_index": 2,
+        "with_D": false
+      },
+      "quantile": 0.02,
+      "threshold": 0.03685803094614426,
+      "order": 27,
+      "val_a": {
+        "incremental_incidents": 21004,
+        "incremental_attack_incidents": 228,
+        "incremental_precision": 0.010855075223766901,
+        "incremental_ci_low": 0.00922315153712557,
+        "incremental_ci_high": 0.012363349337339695,
+        "attacking_ips_incremental": 207,
+        "ml_alerts": 24888,
+        "ml_attack_alerts": 508,
+        "ml_alert_precision": 0.02041144326583092,
+        "ml_alert_ci_low": 0.017651770878629975,
+        "ml_alert_ci_high": 0.023452955579658562,
+        "attacking_ips_flagged": 364,
+        "benign_ips_flagged": 21691,
+        "legitimate_users_alerted": 23745,
+        "ml_incidents": 24390,
+        "ml_incident_precision": 0.01972119721197212,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=8]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 8.0,
+        "beta_index": 2,
+        "with_D": false
+      },
+      "quantile": 0.05,
+      "threshold": 0.0,
+      "order": 28,
+      "val_a": {
+        "incremental_incidents": 149981,
+        "incremental_attack_incidents": 3129,
+        "incremental_precision": 0.020862642601396177,
+        "incremental_ci_low": 0.020085340581362923,
+        "incremental_ci_high": 0.021772734627647523,
+        "attacking_ips_incremental": 2681,
+        "ml_alerts": 248378,
+        "ml_attack_alerts": 26068,
+        "ml_alert_precision": 0.10495293463994396,
+        "ml_alert_ci_low": 0.09941131099481841,
+        "ml_alert_ci_high": 0.11063803250260526,
+        "attacking_ips_flagged": 4401,
+        "benign_ips_flagged": 150251,
+        "legitimate_users_alerted": 218416,
+        "ml_incidents": 210236,
+        "ml_incident_precision": 0.07759375178370974,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=8]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 8.0,
+        "beta_index": 2,
+        "with_D": false
+      },
+      "quantile": 0.1,
+      "threshold": 0.0,
+      "order": 29,
+      "val_a": {
+        "incremental_incidents": 149981,
+        "incremental_attack_incidents": 3129,
+        "incremental_precision": 0.020862642601396177,
+        "incremental_ci_low": 0.020085340581362923,
+        "incremental_ci_high": 0.021772734627647523,
+        "attacking_ips_incremental": 2681,
+        "ml_alerts": 248378,
+        "ml_attack_alerts": 26068,
+        "ml_alert_precision": 0.10495293463994396,
+        "ml_alert_ci_low": 0.09941131099481841,
+        "ml_alert_ci_high": 0.11063803250260526,
+        "attacking_ips_flagged": 4401,
+        "benign_ips_flagged": 150251,
+        "legitimate_users_alerted": 218416,
+        "ml_incidents": 210236,
+        "ml_incident_precision": 0.07759375178370974,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=8]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 8.0,
+        "beta_index": 2,
+        "with_D": false
+      },
+      "quantile": 0.2,
+      "threshold": 0.0,
+      "order": 30,
+      "val_a": {
+        "incremental_incidents": 149981,
+        "incremental_attack_incidents": 3129,
+        "incremental_precision": 0.020862642601396177,
+        "incremental_ci_low": 0.020085340581362923,
+        "incremental_ci_high": 0.021772734627647523,
+        "attacking_ips_incremental": 2681,
+        "ml_alerts": 248378,
+        "ml_attack_alerts": 26068,
+        "ml_alert_precision": 0.10495293463994396,
+        "ml_alert_ci_low": 0.09941131099481841,
+        "ml_alert_ci_high": 0.11063803250260526,
+        "attacking_ips_flagged": 4401,
+        "benign_ips_flagged": 150251,
+        "legitimate_users_alerted": 218416,
+        "ml_incidents": 210236,
+        "ml_incident_precision": 0.07759375178370974,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C2:freeman_no_placeholder[beta=8]",
+      "family": "C2",
+      "kind": "candidate",
+      "meta": {
+        "beta": 8.0,
+        "beta_index": 2,
+        "with_D": false
+      },
+      "quantile": 0.3,
+      "threshold": -0.7338084053029952,
+      "order": 31,
+      "val_a": {
+        "incremental_incidents": 168087,
+        "incremental_attack_incidents": 3296,
+        "incremental_precision": 0.019608893013736934,
+        "incremental_ci_low": 0.01884365484333924,
+        "incremental_ci_high": 0.02049579370235826,
+        "attacking_ips_incremental": 2811,
+        "ml_alerts": 272489,
+        "ml_attack_alerts": 27310,
+        "ml_alert_precision": 0.10022422923494159,
+        "ml_alert_ci_low": 0.09517714580838904,
+        "ml_alert_ci_high": 0.10534105003554545,
+        "attacking_ips_flagged": 4536,
+        "benign_ips_flagged": 164184,
+        "legitimate_users_alerted": 237279,
+        "ml_incidents": 230579,
+        "ml_incident_precision": 0.07268224773288114,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "asn",
+        "features": [
+          "d_asn_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.001,
+      "threshold": 1.0,
+      "order": 32,
+      "val_a": {
+        "incremental_incidents": 1514,
+        "incremental_attack_incidents": 197,
+        "incremental_precision": 0.13011889035667107,
+        "incremental_ci_low": 0.10844136285401346,
+        "incremental_ci_high": 0.1523362119812591,
+        "attacking_ips_incremental": 142,
+        "ml_alerts": 2508,
+        "ml_attack_alerts": 402,
+        "ml_alert_precision": 0.16028708133971292,
+        "ml_alert_ci_low": 0.10281726991002713,
+        "ml_alert_ci_high": 0.24689704091443884,
+        "attacking_ips_flagged": 157,
+        "benign_ips_flagged": 1257,
+        "legitimate_users_alerted": 196,
+        "ml_incidents": 2062,
+        "ml_incident_precision": 0.13918525703200776,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "asn",
+        "features": [
+          "d_asn_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.005,
+      "threshold": 1.0,
+      "order": 33,
+      "val_a": {
+        "incremental_incidents": 1514,
+        "incremental_attack_incidents": 197,
+        "incremental_precision": 0.13011889035667107,
+        "incremental_ci_low": 0.10844136285401346,
+        "incremental_ci_high": 0.1523362119812591,
+        "attacking_ips_incremental": 142,
+        "ml_alerts": 2508,
+        "ml_attack_alerts": 402,
+        "ml_alert_precision": 0.16028708133971292,
+        "ml_alert_ci_low": 0.10281726991002713,
+        "ml_alert_ci_high": 0.24689704091443884,
+        "attacking_ips_flagged": 157,
+        "benign_ips_flagged": 1257,
+        "legitimate_users_alerted": 196,
+        "ml_incidents": 2062,
+        "ml_incident_precision": 0.13918525703200776,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "asn",
+        "features": [
+          "d_asn_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.01,
+      "threshold": 0.9985321870413084,
+      "order": 34,
+      "val_a": {
+        "incremental_incidents": 1631,
+        "incremental_attack_incidents": 200,
+        "incremental_precision": 0.12262415695892091,
+        "incremental_ci_low": 0.10087003668216976,
+        "incremental_ci_high": 0.14303107814202934,
+        "attacking_ips_incremental": 145,
+        "ml_alerts": 16882,
+        "ml_attack_alerts": 405,
+        "ml_alert_precision": 0.023990048572444023,
+        "ml_alert_ci_low": 0.014716450932773954,
+        "ml_alert_ci_high": 0.03939547410695537,
+        "attacking_ips_flagged": 160,
+        "benign_ips_flagged": 1426,
+        "legitimate_users_alerted": 226,
+        "ml_incidents": 3050,
+        "ml_incident_precision": 0.09508196721311475,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "asn",
+        "features": [
+          "d_asn_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.02,
+      "threshold": 0.9969425735554768,
+      "order": 35,
+      "val_a": {
+        "incremental_incidents": 1631,
+        "incremental_attack_incidents": 200,
+        "incremental_precision": 0.12262415695892091,
+        "incremental_ci_low": 0.10087003668216976,
+        "incremental_ci_high": 0.14303107814202934,
+        "attacking_ips_incremental": 145,
+        "ml_alerts": 16882,
+        "ml_attack_alerts": 405,
+        "ml_alert_precision": 0.023990048572444023,
+        "ml_alert_ci_low": 0.014716450932773954,
+        "ml_alert_ci_high": 0.03939547410695537,
+        "attacking_ips_flagged": 160,
+        "benign_ips_flagged": 1426,
+        "legitimate_users_alerted": 226,
+        "ml_incidents": 3050,
+        "ml_incident_precision": 0.09508196721311475,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "asn",
+        "features": [
+          "d_asn_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.05,
+      "threshold": 0.7954545454545454,
+      "order": 36,
+      "val_a": {
+        "incremental_incidents": 11246,
+        "incremental_attack_incidents": 1148,
+        "incremental_precision": 0.10208073981860218,
+        "incremental_ci_low": 0.09591704709442779,
+        "incremental_ci_high": 0.1086136571470468,
+        "attacking_ips_incremental": 1045,
+        "ml_alerts": 33289,
+        "ml_attack_alerts": 3547,
+        "ml_alert_precision": 0.1065517137793265,
+        "ml_alert_ci_low": 0.08920872295542945,
+        "ml_alert_ci_high": 0.1282160582357985,
+        "attacking_ips_flagged": 1266,
+        "benign_ips_flagged": 10638,
+        "legitimate_users_alerted": 2246,
+        "ml_incidents": 16565,
+        "ml_incident_precision": 0.12218533051614851,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "asn",
+        "features": [
+          "d_asn_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.1,
+      "threshold": 0.7261663286004056,
+      "order": 37,
+      "val_a": {
+        "incremental_incidents": 35747,
+        "incremental_attack_incidents": 3962,
+        "incremental_precision": 0.11083447562033177,
+        "incremental_ci_low": 0.10661640409012667,
+        "incremental_ci_high": 0.11551223643159661,
+        "attacking_ips_incremental": 2866,
+        "ml_alerts": 76309,
+        "ml_attack_alerts": 13934,
+        "ml_alert_precision": 0.18259969335202925,
+        "ml_alert_ci_low": 0.16922499365424004,
+        "ml_alert_ci_high": 0.19601429904648396,
+        "attacking_ips_flagged": 3452,
+        "benign_ips_flagged": 30789,
+        "legitimate_users_alerted": 12550,
+        "ml_incidents": 54025,
+        "ml_incident_precision": 0.184266543267006,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "asn",
+        "features": [
+          "d_asn_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.2,
+      "threshold": 0.683705454438102,
+      "order": 38,
+      "val_a": {
+        "incremental_incidents": 63067,
+        "incremental_attack_incidents": 5329,
+        "incremental_precision": 0.0844974392312937,
+        "incremental_ci_low": 0.08195125769532237,
+        "incremental_ci_high": 0.08745877859178074,
+        "attacking_ips_incremental": 3969,
+        "ml_alerts": 257818,
+        "ml_attack_alerts": 58447,
+        "ml_alert_precision": 0.22669867891303166,
+        "ml_alert_ci_low": 0.2156980725060154,
+        "ml_alert_ci_high": 0.23715676758314486,
+        "attacking_ips_flagged": 5520,
+        "benign_ips_flagged": 59119,
+        "legitimate_users_alerted": 71627,
+        "ml_incidents": 128311,
+        "ml_incident_precision": 0.18675717592412186,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": true
+      }
+    },
+    {
+      "name": "C3:reputation[asn]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "asn",
+        "features": [
+          "d_asn_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.3,
+      "threshold": 0.6713597158802638,
+      "order": 39,
+      "val_a": {
+        "incremental_incidents": 68087,
+        "incremental_attack_incidents": 5425,
+        "incremental_precision": 0.07967747147032474,
+        "incremental_ci_low": 0.07726282376948902,
+        "incremental_ci_high": 0.08237192867270066,
+        "attacking_ips_incremental": 4055,
+        "ml_alerts": 265851,
+        "ml_attack_alerts": 58620,
+        "ml_alert_precision": 0.22049945270094903,
+        "ml_alert_ci_low": 0.21030964137107827,
+        "ml_alert_ci_high": 0.23093153923732707,
+        "attacking_ips_flagged": 5616,
+        "benign_ips_flagged": 63164,
+        "legitimate_users_alerted": 73917,
+        "ml_incidents": 135412,
+        "ml_incident_precision": 0.17801228842347797,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[ip]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "ip",
+        "features": [
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.001,
+      "threshold": 1.0,
+      "order": 40,
+      "val_a": {
+        "incremental_incidents": 58970,
+        "incremental_attack_incidents": 1856,
+        "incremental_precision": 0.031473630659657456,
+        "incremental_ci_low": 0.029888225404344264,
+        "incremental_ci_high": 0.032948332625318606,
+        "attacking_ips_incremental": 1674,
+        "ml_alerts": 99579,
+        "ml_attack_alerts": 4812,
+        "ml_alert_precision": 0.04832344168951285,
+        "ml_alert_ci_low": 0.04328548133754588,
+        "ml_alert_ci_high": 0.053828425567283324,
+        "attacking_ips_flagged": 2286,
+        "benign_ips_flagged": 67002,
+        "legitimate_users_alerted": 36337,
+        "ml_incidents": 80013,
+        "ml_incident_precision": 0.040480921850199345,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[ip]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "ip",
+        "features": [
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.005,
+      "threshold": 1.0,
+      "order": 41,
+      "val_a": {
+        "incremental_incidents": 58970,
+        "incremental_attack_incidents": 1856,
+        "incremental_precision": 0.031473630659657456,
+        "incremental_ci_low": 0.029888225404344264,
+        "incremental_ci_high": 0.032948332625318606,
+        "attacking_ips_incremental": 1674,
+        "ml_alerts": 99579,
+        "ml_attack_alerts": 4812,
+        "ml_alert_precision": 0.04832344168951285,
+        "ml_alert_ci_low": 0.04328548133754588,
+        "ml_alert_ci_high": 0.053828425567283324,
+        "attacking_ips_flagged": 2286,
+        "benign_ips_flagged": 67002,
+        "legitimate_users_alerted": 36337,
+        "ml_incidents": 80013,
+        "ml_incident_precision": 0.040480921850199345,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[ip]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "ip",
+        "features": [
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.01,
+      "threshold": 1.0,
+      "order": 42,
+      "val_a": {
+        "incremental_incidents": 58970,
+        "incremental_attack_incidents": 1856,
+        "incremental_precision": 0.031473630659657456,
+        "incremental_ci_low": 0.029888225404344264,
+        "incremental_ci_high": 0.032948332625318606,
+        "attacking_ips_incremental": 1674,
+        "ml_alerts": 99579,
+        "ml_attack_alerts": 4812,
+        "ml_alert_precision": 0.04832344168951285,
+        "ml_alert_ci_low": 0.04328548133754588,
+        "ml_alert_ci_high": 0.053828425567283324,
+        "attacking_ips_flagged": 2286,
+        "benign_ips_flagged": 67002,
+        "legitimate_users_alerted": 36337,
+        "ml_incidents": 80013,
+        "ml_incident_precision": 0.040480921850199345,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[ip]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "ip",
+        "features": [
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.02,
+      "threshold": 1.0,
+      "order": 43,
+      "val_a": {
+        "incremental_incidents": 58970,
+        "incremental_attack_incidents": 1856,
+        "incremental_precision": 0.031473630659657456,
+        "incremental_ci_low": 0.029888225404344264,
+        "incremental_ci_high": 0.032948332625318606,
+        "attacking_ips_incremental": 1674,
+        "ml_alerts": 99579,
+        "ml_attack_alerts": 4812,
+        "ml_alert_precision": 0.04832344168951285,
+        "ml_alert_ci_low": 0.04328548133754588,
+        "ml_alert_ci_high": 0.053828425567283324,
+        "attacking_ips_flagged": 2286,
+        "benign_ips_flagged": 67002,
+        "legitimate_users_alerted": 36337,
+        "ml_incidents": 80013,
+        "ml_incident_precision": 0.040480921850199345,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[ip]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "ip",
+        "features": [
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.05,
+      "threshold": 1.0,
+      "order": 44,
+      "val_a": {
+        "incremental_incidents": 58970,
+        "incremental_attack_incidents": 1856,
+        "incremental_precision": 0.031473630659657456,
+        "incremental_ci_low": 0.029888225404344264,
+        "incremental_ci_high": 0.032948332625318606,
+        "attacking_ips_incremental": 1674,
+        "ml_alerts": 99579,
+        "ml_attack_alerts": 4812,
+        "ml_alert_precision": 0.04832344168951285,
+        "ml_alert_ci_low": 0.04328548133754588,
+        "ml_alert_ci_high": 0.053828425567283324,
+        "attacking_ips_flagged": 2286,
+        "benign_ips_flagged": 67002,
+        "legitimate_users_alerted": 36337,
+        "ml_incidents": 80013,
+        "ml_incident_precision": 0.040480921850199345,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[ip]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "ip",
+        "features": [
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.1,
+      "threshold": 1.0,
+      "order": 45,
+      "val_a": {
+        "incremental_incidents": 58970,
+        "incremental_attack_incidents": 1856,
+        "incremental_precision": 0.031473630659657456,
+        "incremental_ci_low": 0.029888225404344264,
+        "incremental_ci_high": 0.032948332625318606,
+        "attacking_ips_incremental": 1674,
+        "ml_alerts": 99579,
+        "ml_attack_alerts": 4812,
+        "ml_alert_precision": 0.04832344168951285,
+        "ml_alert_ci_low": 0.04328548133754588,
+        "ml_alert_ci_high": 0.053828425567283324,
+        "attacking_ips_flagged": 2286,
+        "benign_ips_flagged": 67002,
+        "legitimate_users_alerted": 36337,
+        "ml_incidents": 80013,
+        "ml_incident_precision": 0.040480921850199345,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[ip]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "ip",
+        "features": [
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.2,
+      "threshold": 0.7610619469026548,
+      "order": 46,
+      "val_a": {
+        "incremental_incidents": 69402,
+        "incremental_attack_incidents": 2973,
+        "incremental_precision": 0.04283738220800553,
+        "incremental_ci_low": 0.040993960406205135,
+        "incremental_ci_high": 0.04465857863270787,
+        "attacking_ips_incremental": 2379,
+        "ml_alerts": 128368,
+        "ml_attack_alerts": 10205,
+        "ml_alert_precision": 0.07949800573351615,
+        "ml_alert_ci_low": 0.07410659532535953,
+        "ml_alert_ci_high": 0.08585823869046692,
+        "attacking_ips_flagged": 3350,
+        "benign_ips_flagged": 76379,
+        "legitimate_users_alerted": 45028,
+        "ml_incidents": 102864,
+        "ml_incident_precision": 0.07020920827500389,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[ip]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "ip",
+        "features": [
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.3,
+      "threshold": 0.6829268292682927,
+      "order": 47,
+      "val_a": {
+        "incremental_incidents": 77048,
+        "incremental_attack_incidents": 3688,
+        "incremental_precision": 0.047866265185339006,
+        "incremental_ci_low": 0.04606110851441092,
+        "incremental_ci_high": 0.049945788722503416,
+        "attacking_ips_incremental": 2791,
+        "ml_alerts": 234128,
+        "ml_attack_alerts": 40809,
+        "ml_alert_precision": 0.17430209116380782,
+        "ml_alert_ci_low": 0.1652848570658449,
+        "ml_alert_ci_high": 0.1842049846858174,
+        "attacking_ips_flagged": 4451,
+        "benign_ips_flagged": 83737,
+        "legitimate_users_alerted": 80168,
+        "ml_incidents": 141985,
+        "ml_incident_precision": 0.1251258935803078,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[max]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "max",
+        "features": [
+          "d_asn_fail_ratio",
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.001,
+      "threshold": 1.0,
+      "order": 48,
+      "val_a": {
+        "incremental_incidents": 59545,
+        "incremental_attack_incidents": 1902,
+        "incremental_precision": 0.03194222856663028,
+        "incremental_ci_low": 0.030357435179402755,
+        "incremental_ci_high": 0.033517532617682755,
+        "attacking_ips_incremental": 1718,
+        "ml_alerts": 100177,
+        "ml_attack_alerts": 4859,
+        "ml_alert_precision": 0.0485041476586442,
+        "ml_alert_ci_low": 0.043061398572630034,
+        "ml_alert_ci_high": 0.05418928685907475,
+        "attacking_ips_flagged": 2330,
+        "benign_ips_flagged": 67506,
+        "legitimate_users_alerted": 36426,
+        "ml_incidents": 80596,
+        "ml_incident_precision": 0.04077125415653382,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[max]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "max",
+        "features": [
+          "d_asn_fail_ratio",
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.005,
+      "threshold": 1.0,
+      "order": 49,
+      "val_a": {
+        "incremental_incidents": 59545,
+        "incremental_attack_incidents": 1902,
+        "incremental_precision": 0.03194222856663028,
+        "incremental_ci_low": 0.030357435179402755,
+        "incremental_ci_high": 0.033517532617682755,
+        "attacking_ips_incremental": 1718,
+        "ml_alerts": 100177,
+        "ml_attack_alerts": 4859,
+        "ml_alert_precision": 0.0485041476586442,
+        "ml_alert_ci_low": 0.043061398572630034,
+        "ml_alert_ci_high": 0.05418928685907475,
+        "attacking_ips_flagged": 2330,
+        "benign_ips_flagged": 67506,
+        "legitimate_users_alerted": 36426,
+        "ml_incidents": 80596,
+        "ml_incident_precision": 0.04077125415653382,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[max]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "max",
+        "features": [
+          "d_asn_fail_ratio",
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.01,
+      "threshold": 1.0,
+      "order": 50,
+      "val_a": {
+        "incremental_incidents": 59545,
+        "incremental_attack_incidents": 1902,
+        "incremental_precision": 0.03194222856663028,
+        "incremental_ci_low": 0.030357435179402755,
+        "incremental_ci_high": 0.033517532617682755,
+        "attacking_ips_incremental": 1718,
+        "ml_alerts": 100177,
+        "ml_attack_alerts": 4859,
+        "ml_alert_precision": 0.0485041476586442,
+        "ml_alert_ci_low": 0.043061398572630034,
+        "ml_alert_ci_high": 0.05418928685907475,
+        "attacking_ips_flagged": 2330,
+        "benign_ips_flagged": 67506,
+        "legitimate_users_alerted": 36426,
+        "ml_incidents": 80596,
+        "ml_incident_precision": 0.04077125415653382,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[max]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "max",
+        "features": [
+          "d_asn_fail_ratio",
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.02,
+      "threshold": 1.0,
+      "order": 51,
+      "val_a": {
+        "incremental_incidents": 59545,
+        "incremental_attack_incidents": 1902,
+        "incremental_precision": 0.03194222856663028,
+        "incremental_ci_low": 0.030357435179402755,
+        "incremental_ci_high": 0.033517532617682755,
+        "attacking_ips_incremental": 1718,
+        "ml_alerts": 100177,
+        "ml_attack_alerts": 4859,
+        "ml_alert_precision": 0.0485041476586442,
+        "ml_alert_ci_low": 0.043061398572630034,
+        "ml_alert_ci_high": 0.05418928685907475,
+        "attacking_ips_flagged": 2330,
+        "benign_ips_flagged": 67506,
+        "legitimate_users_alerted": 36426,
+        "ml_incidents": 80596,
+        "ml_incident_precision": 0.04077125415653382,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[max]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "max",
+        "features": [
+          "d_asn_fail_ratio",
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.05,
+      "threshold": 1.0,
+      "order": 52,
+      "val_a": {
+        "incremental_incidents": 59545,
+        "incremental_attack_incidents": 1902,
+        "incremental_precision": 0.03194222856663028,
+        "incremental_ci_low": 0.030357435179402755,
+        "incremental_ci_high": 0.033517532617682755,
+        "attacking_ips_incremental": 1718,
+        "ml_alerts": 100177,
+        "ml_attack_alerts": 4859,
+        "ml_alert_precision": 0.0485041476586442,
+        "ml_alert_ci_low": 0.043061398572630034,
+        "ml_alert_ci_high": 0.05418928685907475,
+        "attacking_ips_flagged": 2330,
+        "benign_ips_flagged": 67506,
+        "legitimate_users_alerted": 36426,
+        "ml_incidents": 80596,
+        "ml_incident_precision": 0.04077125415653382,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[max]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "max",
+        "features": [
+          "d_asn_fail_ratio",
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.1,
+      "threshold": 1.0,
+      "order": 53,
+      "val_a": {
+        "incremental_incidents": 59545,
+        "incremental_attack_incidents": 1902,
+        "incremental_precision": 0.03194222856663028,
+        "incremental_ci_low": 0.030357435179402755,
+        "incremental_ci_high": 0.033517532617682755,
+        "attacking_ips_incremental": 1718,
+        "ml_alerts": 100177,
+        "ml_attack_alerts": 4859,
+        "ml_alert_precision": 0.0485041476586442,
+        "ml_alert_ci_low": 0.043061398572630034,
+        "ml_alert_ci_high": 0.05418928685907475,
+        "attacking_ips_flagged": 2330,
+        "benign_ips_flagged": 67506,
+        "legitimate_users_alerted": 36426,
+        "ml_incidents": 80596,
+        "ml_incident_precision": 0.04077125415653382,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[max]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "max",
+        "features": [
+          "d_asn_fail_ratio",
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.2,
+      "threshold": 0.8,
+      "order": 54,
+      "val_a": {
+        "incremental_incidents": 74327,
+        "incremental_attack_incidents": 3333,
+        "incremental_precision": 0.044842385674115734,
+        "incremental_ci_low": 0.043155347981905096,
+        "incremental_ci_high": 0.04652085516228393,
+        "attacking_ips_incremental": 2836,
+        "ml_alerts": 128931,
+        "ml_attack_alerts": 8795,
+        "ml_alert_precision": 0.06821478154982122,
+        "ml_alert_ci_low": 0.06350765945632855,
+        "ml_alert_ci_high": 0.07351099546485372,
+        "attacking_ips_flagged": 3718,
+        "benign_ips_flagged": 80899,
+        "legitimate_users_alerted": 44063,
+        "ml_incidents": 105317,
+        "ml_incident_precision": 0.0615380233010815,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    },
+    {
+      "name": "C3:reputation[max]",
+      "family": "C3",
+      "kind": "candidate",
+      "meta": {
+        "score": "max",
+        "features": [
+          "d_asn_fail_ratio",
+          "d_ip_fail_ratio"
+        ],
+        "with_D": true
+      },
+      "quantile": 0.3,
+      "threshold": 0.7142857142857143,
+      "order": 55,
+      "val_a": {
+        "incremental_incidents": 105506,
+        "incremental_attack_incidents": 5733,
+        "incremental_precision": 0.05433814190662142,
+        "incremental_ci_low": 0.05274875888240128,
+        "incremental_ci_high": 0.056203892010018,
+        "attacking_ips_incremental": 4418,
+        "ml_alerts": 211505,
+        "ml_attack_alerts": 27715,
+        "ml_alert_precision": 0.13103709132171817,
+        "ml_alert_ci_low": 0.12427623584417874,
+        "ml_alert_ci_high": 0.1382135762185383,
+        "attacking_ips_flagged": 5781,
+        "benign_ips_flagged": 107935,
+        "legitimate_users_alerted": 70517,
+        "ml_incidents": 157940,
+        "ml_incident_precision": 0.10064581486640496,
+        "meets_primary": false,
+        "meets_phase3b_alert_criterion": false
+      }
+    }
+  ]
+}
