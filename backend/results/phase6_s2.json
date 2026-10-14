@@ -1,0 +1,137 @@
+{
+  "protocol": "eval/PROTOCOL.md amendment 9, S2",
+  "half": "may",
+  "dev_rows_equal_phase4_cache": true,
+  "dev_rows_checked": 6392584,
+  "events": {
+    "all": 2158083,
+    "new_attackers": 1974163
+  },
+  "fits": {
+    "hgb[A-E|lr=0.05|leaves=15]": {
+      "feature_set": "A-E",
+      "is_phase4_reference": false,
+      "all": {
+        "roc_auc": 0.7814675868480059,
+        "pr_auc": 0.23130234877501374,
+        "tpr_at_1pct_fpr": 0.07110152571294179
+      },
+      "new_attackers": {
+        "roc_auc": 0.7729466667583136,
+        "pr_auc": 0.06152355795409361,
+        "tpr_at_1pct_fpr": 0.07723704866562009
+      }
+    },
+    "hgb[A-E|lr=0.05|leaves=63]": {
+      "feature_set": "A-E",
+      "is_phase4_reference": false,
+      "all": {
+        "roc_auc": 0.8041525667015443,
+        "pr_auc": 0.2646791848314799,
+        "tpr_at_1pct_fpr": 0.07661090567000765
+      },
+      "new_attackers": {
+        "roc_auc": 0.753061265406982,
+        "pr_auc": 0.04757244142227548,
+        "tpr_at_1pct_fpr": 0.06172684458398744
+      }
+    },
+    "hgb[A-E|lr=0.1|leaves=15]": {
+      "feature_set": "A-E",
+      "is_phase4_reference": true,
+      "all": {
+        "roc_auc": 0.8021805505273467,
+        "pr_auc": 0.26189950670091683,
+        "tpr_at_1pct_fpr": 0.08097437462782912
+      },
+      "new_attackers": {
+        "roc_auc": 0.7466109485382482,
+        "pr_auc": 0.05623939889614685,
+        "tpr_at_1pct_fpr": 0.08244897959183674
+      }
+    },
+    "hgb[A-E|lr=0.1|leaves=63]": {
+      "feature_set": "A-E",
+      "is_phase4_reference": false,
+      "all": {
+        "roc_auc": 0.7319076185411731,
+        "pr_auc": 0.2208470341759772,
+        "tpr_at_1pct_fpr": 0.06840938546144185
+      },
+      "new_attackers": {
+        "roc_auc": 0.7703590654959137,
+        "pr_auc": 0.031540007985676174,
+        "tpr_at_1pct_fpr": 0.05262166405023548
+      }
+    },
+    "hgb[-D|lr=0.05|leaves=15]": {
+      "feature_set": "-D",
+      "is_phase4_reference": false,
+      "all": {
+        "roc_auc": 0.8111500251885937,
+        "pr_auc": 0.26261966131306486,
+        "tpr_at_1pct_fpr": 0.045741364384685824
+      },
+      "new_attackers": {
+        "roc_auc": 0.5582242116472365,
+        "pr_auc": 0.00830080215124343,
+        "tpr_at_1pct_fpr": 0.005902668759811617
+      }
+    },
+    "hgb[-D|lr=0.05|leaves=63]": {
+      "feature_set": "-D",
+      "is_phase4_reference": true,
+      "all": {
+        "roc_auc": 0.8126931426717678,
+        "pr_auc": 0.2702459180040837,
+        "tpr_at_1pct_fpr": 0.05156099098783533
+      },
+      "new_attackers": {
+        "roc_auc": 0.5553571380511372,
+        "pr_auc": 0.008456418729749813,
+        "tpr_at_1pct_fpr": 0.00967032967032967
+      }
+    },
+    "hgb[-D|lr=0.1|leaves=15]": {
+      "feature_set": "-D",
+      "is_phase4_reference": false,
+      "all": {
+        "roc_auc": 0.811373772753115,
+        "pr_auc": 0.26466996087302885,
+        "tpr_at_1pct_fpr": 0.04821833357519228
+      },
+      "new_attackers": {
+        "roc_auc": 0.5554644314589137,
+        "pr_auc": 0.00833129253055252,
+        "tpr_at_1pct_fpr": 0.006970172684458399
+      }
+    },
+    "hgb[-D|lr=0.1|leaves=63]": {
+      "feature_set": "-D",
+      "is_phase4_reference": false,
+      "all": {
+        "roc_auc": 0.8125054740879565,
+        "pr_auc": 0.27070649207358977,
+        "tpr_at_1pct_fpr": 0.05157600292232325
+      },
+      "new_attackers": {
+        "roc_auc": 0.5540200931891158,
+        "pr_auc": 0.008670018059544503,
+        "tpr_at_1pct_fpr": 0.01130298273155416
+      }
+    }
+  },
+  "timings_seconds": {
+    "Phase 4 features, one causal pass (8,550,667 events)": 673.5,
+    "check against the Phase 4 feature cache": 5.4,
+    "S2 hgb[A-E|lr=0.05|leaves=15]": 30.6,
+    "S2 hgb[A-E|lr=0.05|leaves=63]": 19.9,
+    "S2 hgb[A-E|lr=0.1|leaves=15]": 14.9,
+    "S2 hgb[A-E|lr=0.1|leaves=63]": 28.1,
+    "S2 hgb[-D|lr=0.05|leaves=15]": 27.4,
+    "S2 hgb[-D|lr=0.05|leaves=63]": 24.3,
+    "S2 hgb[-D|lr=0.1|leaves=15]": 18.4,
+    "S2 hgb[-D|lr=0.1|leaves=63]": 17.7,
+    "total": 875.2
+  }
+}
