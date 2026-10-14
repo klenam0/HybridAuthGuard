@@ -115,6 +115,59 @@ def test_tiers_use_the_previous_days_cutoff_and_are_sticky():
     assert tr2.assess({"ip": "8.8.8.8"}, DAY + 5, [OFF])["tier"] == "queue"
 
 
+def test_admission_is_capped_per_day_first_come():
+    """Amendment 7: at most k incidents enter a tier per day, in arrival
+    order; an incident in a higher tier takes no lower slot; a queue
+    incident can still move up; slots are not returned; caps reset daily."""
+    tr = tracker("T1", {"block": 0, "step_up": 1, "queue": 2})
+    ev = lambda ip: {"ip": ip, "user": "u", "status": "FAILED", "asn": 1}   # noqa: E731
+    for k in range(5):                      # day 0: five 1-detector incidents
+        tr.observe(ev(f"10.0.0.{k}"), 10 + k)
+        tr.assess(ev(f"10.0.0.{k}"), 10 + k, [BF])
+    # Day 1: every incident reaches both cutoffs (1 detector).
+    tiers = []
+    for k in range(5):
+        tr.observe(ev(f"10.1.0.{k}"), DAY + k)
+        tiers.append(tr.assess(ev(f"10.1.0.{k}"), DAY + k, [BF])["tier"])
+    # First to step-up (slot 1/1); the next two to the queue (2/2); the rest stay at log.
+    assert tiers == ["step_up", "queue", "queue", "log", "log"]
+    assert tr.admitted == {"block": 0, "step_up": 1, "queue": 2}
+    # Re-alerting does not re-admit or take a slot.
+    assert tr.assess(ev("10.1.0.3"), DAY + 9, [BF])["tier"] == "log"
+    # Queue -> step-up when a step-up slot is free (fresh tracker, step-up cap 2).
+    tr2 = tracker("T1", {"block": 0, "step_up": 2, "queue": 5})
+    for k in range(3):
+        tr2.observe(ev(f"10.0.0.{k}"), 10 + k)
+        tr2.assess(ev(f"10.0.0.{k}"), 10 + k, [BF, CS][:k % 2 + 1])
+    # Day-0 finals (T1): (2, 1.0), (1, 1.0), (1, 0.0): step-up cutoff (1, 1.0), queue all.
+    tr2.observe(ev("1.1.1.1"), DAY + 1)
+    assert tr2.assess(ev("1.1.1.1"), DAY + 1, [BF])["tier"] == "step_up"
+    tr2.observe(ev("1.1.1.2"), DAY + 2)
+    assert tr2.assess(ev("1.1.1.2"), DAY + 2, [BF])["tier"] == "step_up"
+    tr2.observe(ev("1.1.1.3"), DAY + 3)
+    assert tr2.assess(ev("1.1.1.3"), DAY + 3, [BF])["tier"] == "queue"
+    assert tr2.admitted["step_up"] == 2 and tr2.admitted["queue"] == 1
+    # Next day the caps reset.
+    tr2.observe(ev("1.1.1.9"), 2 * DAY + 1)
+    tr2.assess(ev("1.1.1.9"), 2 * DAY + 1, [BF, CS])
+    assert tr2.admitted == {"block": 0, "step_up": 1, "queue": 0}
+
+
+def test_queue_incident_moves_up_when_a_step_up_slot_opens_later():
+    tr = tracker("T1", {"block": 0, "step_up": 1, "queue": 3})
+    ev = lambda ip: {"ip": ip, "user": "u", "status": "FAILED", "asn": 1}   # noqa: E731
+    # Day 0: finals 2 detectors and 1 detector, 1 detector.
+    for k, dets in enumerate([[BF, CS], [BF], [BF]]):
+        tr.observe(ev(f"10.0.0.{k}"), 10 + k)
+        tr.assess(ev(f"10.0.0.{k}"), 10 + k, dets)
+    # Day 1: step-up cutoff = 2 detectors, queue cutoff = 1 detector.
+    tr.observe(ev("2.2.2.2"), DAY + 1)
+    assert tr.assess(ev("2.2.2.2"), DAY + 1, [BF])["tier"] == "queue"
+    out = tr.assess(ev("2.2.2.2"), DAY + 2, [CS])          # now 2 detectors
+    assert (out["tier"], out["previous_tier"]) == ("step_up", "queue")
+    assert tr.admitted == {"block": 0, "step_up": 1, "queue": 1}   # the queue slot stays used
+
+
 def test_asn_reputation_matches_features_v4():
     from ml import features_v4 as F
     rng = np.random.default_rng(3)
@@ -224,12 +277,14 @@ def test_severity_map_is_derived_from_the_tiers():
 
 
 def test_config_holds_the_val_a_choice_and_measured_tiers():
-    sel_p = os.path.join(BACKEND, "results", "phase5_selection.json")
-    resp_p = os.path.join(BACKEND, "results", "phase5_response.json")
+    sel_p = os.path.join(BACKEND, "results", "phase5b_selection.json")
+    resp_p = os.path.join(BACKEND, "results", "phase5b_response.json")
     if not (os.path.exists(sel_p) and os.path.exists(resp_p)):
-        pytest.skip("Phase 5 results not present")
+        pytest.skip("Phase 5b results not present")
     sel, resp = json.load(open(sel_p)), json.load(open(resp_p))
-    assert config.TRIAGE_SCORE == sel["chosen"]
+    p5 = os.path.join(BACKEND, "results", "phase5_selection.json")
+    if os.path.exists(p5):
+        assert config.TRIAGE_SCORE == json.load(open(p5))["chosen"] == sel["chosen"]
     t = sel["tiers"]
     assert config.RESPONSE_TIER_RATES == {"block": t["block_rate"], "step_up": t["step_up_rate"],
                                           "queue": t["queue_rate"]}

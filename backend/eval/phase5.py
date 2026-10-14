@@ -530,14 +530,18 @@ def deployed(S, sel, t3):
     tiers = sel["tiers"]
     rates = {"block": tiers["block_rate"], "step_up": tiers["step_up_rate"], "queue": tiers["queue_rate"]}
     C = Causal(S, ch, t3)
+    return deployed_run(S, C, {t: C.entry(k) for t, k in rates.items() if k}, rates)
+
+
+def deployed_run(S, C, entries, rates):
+    """deployed() from each tier's per-incident entry index (-1: never)."""
     I = C.I
     pos_inc = np.arange(len(I.p))
     tier_ev = np.full(len(I.p), 3, np.int8)               # index into TIERS
     for ti, tier in reversed(list(enumerate(TR.RATED_TIERS))):
-        k = rates[tier]
-        if not k:
+        if tier not in entries:
             continue
-        e = C.entry(k)
+        e = entries[tier]
         inside = (e[I.inc] >= 0) & (pos_inc >= e[I.inc])
         tier_ev = np.where(inside, np.int8(ti), tier_ev)
     prev = (pd.Series(tier_ev).groupby(I.inc, sort=False).shift(1)

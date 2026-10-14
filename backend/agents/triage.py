@@ -23,9 +23,13 @@ Scores (higher = more urgent, compared as tuples):
 Tiers are rate-based and causal: for a daily rate k the cutoff on day d is
 the k-th highest final score of the most recent earlier day that had
 incidents (every incident qualifies if that day had fewer than k; none does
-before the first day closes). An incident enters a tier at its first
-alerted event whose running score is >= the tier's cutoff and stays there.
-The tier is the highest one entered: block > step_up > queue > log.
+before the first day closes). Admission is capped (amendment 7): an
+incident enters a tier at its first alerted event whose running score is
+>= the tier's cutoff while fewer than k incidents have entered that tier
+today, and stays there. Tiers admit from the top; an incident already in a
+higher tier takes no slot of a lower one, and a used slot is not returned.
+So a tier admits at most k incidents a day. The tier is the highest one
+entered: block > step_up > queue > log.
 
 Only the eight rule detectors (agents.rules_v3.RULE_DETECTORS) form
 incidents; ML alerts are not part of the incident features.
@@ -126,6 +130,7 @@ class IncidentTriage:
         self.ipday = {}
         self.incidents = {}
         self.cutoffs = {t: NONE for t in RATED_TIERS}
+        self.admitted = {t: 0 for t in RATED_TIERS}      # today's entries per tier
         self.days_closed = 0
 
     # ── per event ───────────────────────────────────────────────────────
@@ -172,9 +177,14 @@ class IncidentTriage:
         inc.alerts += n
         inc.score = self.score(inc, d)
         before = inc.tier
-        for tier in RATED_TIERS:
-            if self.rates[tier] and tier not in inc.regions and self._qualifies(inc.score, tier):
+        for tier in RATED_TIERS:                  # top down
+            if tier in inc.regions:               # nothing below it can apply
+                break
+            k = self.rates[tier]
+            if k and self.admitted[tier] < k and self._qualifies(inc.score, tier):
                 inc.regions.add(tier)
+                self.admitted[tier] += 1
+                break
         inc.tier = next((x for x in RATED_TIERS if x in inc.regions), "log")
         return {"incident_id": f"{ip}|{self.day}", "ip": ip, "day": self.day,
                 "score": list(inc.score), "tier": inc.tier, "previous_tier": before,
@@ -223,6 +233,7 @@ class IncidentTriage:
             self.days_closed += 1
         self.ipday = {}
         self.incidents = {}
+        self.admitted = {t: 0 for t in RATED_TIERS}
 
     def state_sizes(self):
         return {"ips_today": len(self.ipday), "incidents_today": len(self.incidents),

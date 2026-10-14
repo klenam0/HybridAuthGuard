@@ -251,12 +251,15 @@ V3_BLOCK_DETECTORS = ()
 # its score is TRIAGE_SCORE ("T0".."T3", agents/triage.py). Tiers are
 # rate-based: a tier's cutoff on day d is the k-th highest final incident
 # score of the previous day with incidents (k = RESPONSE_TIER_RATES[tier];
-# 0 = the tier is off). Highest tier wins: block > step_up > queue > log.
+# 0 = the tier is off), and at most k incidents enter the tier per day, first
+# come (amendment 7). Highest tier wins: block > step_up > queue > log.
 # Chosen on val_a (results/phase5_selection.json): T2 = (detector tier,
 # max ASN prior failure ratio). Block: no rate reached the 0.80 lower bound,
-# so there is no block tier. Step-up: the largest rate whose band met 0.2149.
+# so there is no block tier. Step-up (results/phase5b_selection.json): the
+# rate with the most attacking IPs challenged whose band met 0.2149 with at
+# most U = 200 legitimate users challenged per day on val_a.
 TRIAGE_SCORE = "T2"
-RESPONSE_TIER_RATES = {"block": 0, "step_up": 5000, "queue": 500}
+RESPONSE_TIER_RATES = {"block": 0, "step_up": 200, "queue": 500}
 # val_a alert precision (point estimate) of each rule detector at its
 # amendment 3 setting: the T0/T2 detector tier (results/phase3b_selection.json).
 TRIAGE_DETECTOR_PRECISION = {
@@ -294,15 +297,16 @@ V3_SEVERITY_MAP = {tier: ("HIGH" if tier in EMAIL_TIERS else "MEDIUM" if tier ==
                    for tier in ("block", "step_up", "queue", "log")}
 
 # Incident precision of each tier measured on val_a (the deployed causal
-# run, eval/phase5.py `response`; 95% IP-clustered bootstrap interval) and
-# the bar its rate was chosen against. Source: results/phase5_response.json.
+# run, eval/phase5b.py `response`; 95% IP-clustered bootstrap interval) and
+# the bar its rate was chosen against. Source: results/phase5b_response.json.
 RESPONSE_TIER_VAL_A = {
     "block":   {"incidents": 0, "precision": None, "ci_low": None, "ci_high": None, "bar": 0.80},
-    "step_up": {"incidents": 81023, "precision": 0.23619219234044653,
-                "ci_low": 0.22594324386494108, "ci_high": 0.2463267424897642, "bar": 0.2149},
-    "queue":   {"incidents": 0, "precision": None, "ci_low": None, "ci_high": None, "bar": None},
-    "log":     {"incidents": 33921, "precision": 0.0334600984640783,
-                "ci_low": 0.0313664518430941, "ci_high": 0.03568401925765111, "bar": None},
+    "step_up": {"incidents": 3143, "precision": 0.45529748647788737,
+                "ci_low": 0.4267034165160253, "ci_high": 0.48310723715143405, "bar": 0.2149},
+    "queue":   {"incidents": 7935, "precision": 0.2838059231253938,
+                "ci_low": 0.265716433623392, "ci_high": 0.3032622786276811, "bar": None},
+    "log":     {"incidents": 103866, "precision": 0.15971540253788535,
+                "ci_low": 0.15331378609441376, "ci_high": 0.16633562562914908, "bar": None},
 }
 
 
@@ -321,7 +325,7 @@ def response_policy_table():
             threshold = "every incident below the tiers above"
         elif k:
             threshold = (f"running {TRIAGE_SCORE} score >= the {k}th highest final score "
-                         f"of the previous day with incidents ({k}/day)")
+                         f"of the previous day with incidents, first {k} incidents a day")
         else:
             threshold = "off: no rate met the bar on val_a"
         rows.append({"tier": tier, "enabled": bool(k) or tier == "log", "rate_per_day": k or None,
