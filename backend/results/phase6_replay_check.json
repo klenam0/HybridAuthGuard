@@ -1,0 +1,149 @@
+{
+  "equivalent": true,
+  "events": 8550667,
+  "events_may": 2158083,
+  "limit": 0,
+  "defaults": {
+    "RULES_MODE": "v3",
+    "ML_MODE": "v4",
+    "ML_V4_IFOREST": "retired",
+    "TRIAGE_SCORE": "T2",
+    "RESPONSE_TIER_RATES": {
+      "block": 0,
+      "step_up": 200,
+      "queue": 500
+    },
+    "RESPONSE_FLOOR_DETECTORS": [
+      "Slow Brute Force",
+      "Credential Stuffing",
+      "Invalid Account Spraying",
+      "Distributed Brute Force",
+      "Success After Failures"
+    ]
+  },
+  "alerts_saved": 2635105,
+  "ml_alerts": 0,
+  "detector_alert_mismatches": {
+    "Brute Force Attack": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0,
+      "may": 0
+    },
+    "Slow Brute Force": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0,
+      "may": 0
+    },
+    "Credential Stuffing": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0,
+      "may": 0
+    },
+    "Invalid Account Spraying": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0,
+      "may": 0
+    },
+    "Distributed Brute Force": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0,
+      "may": 0
+    },
+    "Success After Failures": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0,
+      "may": 0
+    },
+    "Multiple IP Login": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0,
+      "may": 0
+    },
+    "Suspicious Login Time": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0,
+      "may": 0
+    }
+  },
+  "alerted_events_compared": 2156548,
+  "alerted_events_missing": 0,
+  "tier_mismatches": 0,
+  "score_mismatches": 0,
+  "tier_or_score_mismatches_by_span": {},
+  "blocked_state_mismatches": {
+    "dev_train": 0,
+    "val_a": 0,
+    "val_b": 0,
+    "may": 0
+  },
+  "challenged_state_mismatches": {
+    "dev_train": 0,
+    "val_a": 0,
+    "val_b": 0,
+    "may": 0
+  },
+  "email_log_mismatches": 0,
+  "incident_email_outcome_mismatches": 0,
+  "email_log_entries": 14319,
+  "blocked_source_events": 0,
+  "challenged_source_events": 53128,
+  "duplicate_events": 0,
+  "state_sizes_end": {
+    "rules": {
+      "ips": 165313,
+      "accounts": 52887,
+      "account_history": 511282,
+      "cooldowns": 615,
+      "recent_events": 2443
+    },
+    "triage": {
+      "ips_today": 25882,
+      "incidents_today": 5928,
+      "asns": 8024,
+      "days_closed": 118
+    }
+  },
+  "S5": {
+    "may_events": 2158083,
+    "us_per_event": {
+      "triage_response": 29.4,
+      "rules": 30.08,
+      "analysis": 6.43,
+      "store_record": 13.65
+    },
+    "calls_in_may": {
+      "triage_response": 6871299,
+      "rules": 2158083,
+      "analysis": 668793,
+      "store_record": 668793
+    },
+    "total_us_per_event_mean": 87.03,
+    "total_us_per_event_p50": 24.2,
+    "total_us_per_event_p99": 363.2,
+    "note": "the timers' own overhead is inside each bucket; 'total' is the whole MonitoringAgent._process_event call",
+    "store_sqlite_insert_per_alert_ms": {
+      "day": "2020-05-15",
+      "alerts": 23327,
+      "mean": 1.187,
+      "p50": 0.256,
+      "p99": 55.596
+    }
+  },
+  "replay_seconds": 696.9,
+  "replay_us_per_event": 81.5,
+  "peak_rss_mb": 7772,
+  "timings_seconds": {
+    "stream and the offline twin": 14.4,
+    "real agents, frozen defaults (8,550,667 events)": 696.9,
+    "comparison": 8.5,
+    "total": 719.8
+  }
+}
