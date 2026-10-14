@@ -809,3 +809,124 @@ changed, why, and what had already been seen.
    email log with 0 mismatches, or the floor is void. The legacy gate
    stays byte-identical. The locked May test month stays the only clean
    check.
+
+9. 2026-10-14, Phase 6, before the test month is read. The final test
+   plan. Seen before this amendment: every development result up to and
+   including Phase 5c (amendments 1 to 8), `results/FREEZE.json` (tag
+   `v3.0.0-frozen`), and of the test month only its row count (2,158,083)
+   and file hash from `results/test_lock.txt`. No May row has been decoded
+   (`results/test_access.log` does not exist). This amendment lists every
+   number Phase 6 computes; anything else computed on May is labelled
+   **post hoc** wherever it is reported.
+
+   **Frozen system.** The code and settings hashed in `FREEZE.json`.
+   `python -m eval.freeze --verify` must pass before the test is read and
+   again after scoring; nothing in it changes in Phase 6.
+
+   **Test access.** `FINAL_EVAL=1` is set only for the one command that
+   reads the test month: `load("test")` with all columns, written to a
+   cache under `results/phase6_cache/` (gitignored). Every later
+   computation reads that cache, never `load("test")`. The access log is
+   reproduced in the report.
+
+   **Stream and state.** One causal stream: dev (2020-02-03 to 2020-04-30)
+   then May (2020-05-01 to 2020-05-31), in time order. All causal state
+   (rule windows, de-duplication, triage counters, ASN prior failure
+   ratios, previous-day cutoffs, email cooldowns) runs through dev without
+   being reset; only May events are scored. The 1 May cutoff comes from
+   30 April. The val_a and val_b figures are recomputed by the same code on
+   the same stream and must equal Phase 5c's (val_b is marked previously
+   seen); they are the comparison columns.
+
+   **Base rate and bars.** May base rate = attack events / May events
+   (label as in "Data"). Each detector and tier is reported against
+   2 x the May base rate and against the val_a bar 0.2149.
+
+   **Strata on May** (only events in the stratum form alerts and
+   incidents, as in amendments 3 and 6): all events; excluding the
+   placeholder ID; cold users (User ID with no event before 1 May); new
+   attackers (events whose IP has no attack-labelled event before 1 May;
+   benign IPs stay in); returning attackers (the complement). The val_a /
+   val_b comparison columns keep their original definitions (dev_train).
+
+   **Primary results** (frozen system, default mode; definitions,
+   intervals and seeds as in amendments 3, 6, 7 and 8; IP-clustered
+   bootstrap = amendment 3's, day-clustered = amendment 6's over the 31 May
+   days):
+   - P1. Per rule detector (the eight), on May, per stratum: alerts,
+     alert precision with its IP-clustered 95% interval, attacking and
+     benign IPs flagged; whether it meets (>= 30 alerts and lower bound
+     >= bar) 2 x the May base rate, and 0.2149.
+   - P2. End-of-day triage of May incidents (amendment 3's incidents and
+     budgets), T2 (deployed) and T0, at B = 100, 500 and 2,000, per
+     stratum: mean daily incident precision with its day-clustered
+     interval, mean daily attacking IPs caught, attacking IPs caught over
+     the month and their share; and whether T2's lower bound at B = 500 is
+     >= T0's point value (amendment 6's test).
+   - P3. Response tiers as deployed (the one causal run): per tier on May
+     incidents: incidents (total, per day), precision with its interval,
+     attacking IPs; step-up against 0.2149 and 2 x the May base rate;
+     legitimate users challenged per day (mean and maximum; amendment 7's
+     definition) and in total; benign and attacking IPs challenged (total
+     and per day); benign and attack events challenged; the same response
+     cost per stratum; the log tier's share of May attacking IPs (attacking
+     IPs whose highest tier over May is log, among those with an attack
+     incident); blocks placed (expected 0); emails and digests per day
+     (mean, maximum) and outcomes; maximum admissions per day per tier; how
+     often the amendment 8 floor binds in May.
+   - P4. Rule incidents per day and incident precision with its interval
+     on May, per stratum; rule alerts per day.
+
+   **Secondary results:**
+   - S1. Leakage replication. The Phase 2 forest variants (a) original,
+     (b) maps and known sets from all dev_train rows, (c) label-free,
+     built exactly as amendment 5's D1 (dev_train rows only; 30-day
+     windowed `failed_rate` computed causally over the whole stream), at
+     seeds 42, 43 and 44 (variant (a) at seed 42 must reproduce the cached
+     Phase 3 decisions on dev events); on May events, overall and new
+     attackers: event ROC-AUC, PR-AUC and TPR at 1% FPR, per seed and as
+     mean and range.
+   - S2. Supervised reference. The eight cached Phase 4 HGB fits (not
+     refitted; the two Phase 4 reference settings marked), on Phase 4
+     features (`ml/features_v4`) computed in one causal pass over the whole
+     stream; on May events, overall and new attackers: ROC-AUC, PR-AUC and
+     TPR at 1% FPR.
+   - S3. Legacy system. `RULES_MODE` and `ML_MODE` "legacy",
+     `data/model.pkl` (SHA-256 b47e9533...870be), through `eval/harness`
+     (real agents, exact batch scorer), on May at natural prevalence. Its
+     state is cumulative and never expires (audit F02), so it starts empty
+     at 2020-05-01 00:00 rather than carrying three months of permanent
+     blocks. Per legacy alert type (ML by confidence): alerts, precision
+     with its IP-clustered interval, attacking and benign IPs flagged;
+     overall alert precision, event recall, campaign recall and FPR; HIGH-
+     alert simulated blocks: benign and attacking IPs blocked, benign
+     events and successes after a block, and benign users affected
+     (distinct users with a benign event from an IP after its first HIGH
+     alert).
+   - S4. Label audit on May (descriptive; amendment 7's groups and
+     statistics, with "returning" = attack-labelled event before 1 May;
+     strict misuse over the IP's whole history to 31 May; the ASN cue
+     against attacking IPs seen before 1 May).
+   - S5. Operations. From the real-agent replay: wall time per May event
+     in microseconds for rules (detection), triage and response, analysis,
+     and in total; store insert time per alert into SQLite for one May day
+     (2020-05-15); peak memory. Timers are wrapped around the agents'
+     methods by the replay script; no frozen file changes.
+   - S6. Functional test. The Phase 5c live demo (a copy of the frozen
+     backend, an empty data directory, one seeded previous day, the live
+     simulator for 150 s): incidents form, simulated attacks reach step-up,
+     pipeline stats are written while running. No RBA data, no metrics.
+
+   **Gates.** Freeze verified before and after; test lock verified. The
+   real agents (frozen defaults) replayed over dev and May must reproduce
+   the offline twin (rule alerts per detector, running scores, tiers,
+   blocked and challenged state before every event, the email log and
+   outcomes) with 0 mismatches on dev_train, val_a, val_b and May; the
+   primary results are the agents' outputs. The legacy gate stays
+   byte-identical.
+
+   **Bug policy.** A defect in evaluation code found after the test is
+   read may be fixed only if the fix uses no test result to choose
+   anything; it is logged with before and after values, and only the
+   affected metric is rerun. A defect in the frozen system is reported,
+   not fixed.
