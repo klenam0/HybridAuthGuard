@@ -82,3 +82,4 @@ backend/results/phase3_cache/
 backend/results/phase3b_cache/
 # Phase 4 evaluation intermediates (backend/eval/phase4.py)
 backend/results/phase4_cache/
+backend/results/phase5_cache/

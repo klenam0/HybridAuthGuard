@@ -242,6 +242,45 @@ V3_SEVERITY_MAP = {
     "ML Anomaly Detected":      "HIGH",
 }
 
+# ── Incident triage and response tiers (agents/triage.py; RULES_MODE "v3") ─
+# eval/PROTOCOL.md amendment 6. An incident is (source IP, calendar day);
+# its score is TRIAGE_SCORE ("T0".."T3", agents/triage.py). Tiers are
+# rate-based: a tier's cutoff on day d is the k-th highest final incident
+# score of the previous day with incidents (k = RESPONSE_TIER_RATES[tier];
+# 0 = the tier is off). Highest tier wins: block > step_up > queue > log.
+TRIAGE_SCORE = "T0"
+RESPONSE_TIER_RATES = {"block": 0, "step_up": 0, "queue": 500}
+# val_a alert precision (point estimate) of each rule detector at its
+# amendment 3 setting: the T0/T2 detector tier (results/phase3b_selection.json).
+TRIAGE_DETECTOR_PRECISION = {
+    "Brute Force Attack":       0.296875,
+    "Slow Brute Force":         0.26303378128817795,
+    "Credential Stuffing":      0.2734399587994621,
+    "Invalid Account Spraying": 0.2312331060221457,
+    "Distributed Brute Force":  0.25163256421419244,
+    "Success After Failures":   0.24568661971830985,
+    "Multiple IP Login":        0.1455357142857143,
+    "Suspicious Login Time":    0.13086334010043807,
+}
+# T3 (logistic regression, dev_train incidents) parameters, if chosen.
+TRIAGE_T3 = None
+STEP_UP_TTL_SECONDS = 3600
+
+
+def triage_t3_params():
+    if TRIAGE_T3 is None:
+        raise ValueError("TRIAGE_SCORE 'T3' needs TRIAGE_T3 parameters")
+    return TRIAGE_T3
+
+
+# Email for the v3 tiers: one per incident on entering an EMAIL_TIERS tier,
+# at most one per IP per EMAIL_IP_COOLDOWN_SECONDS, at most
+# EMAIL_MAX_PER_HOUR per clock hour of event time; the rest go into that
+# hour's digest, sent when the hour closes.
+EMAIL_TIERS = ("block", "step_up")
+EMAIL_MAX_PER_HOUR = int(os.environ.get("EMAIL_MAX_PER_HOUR", "20"))
+EMAIL_IP_COOLDOWN_SECONDS = int(os.environ.get("EMAIL_IP_COOLDOWN_SECONDS", "86400"))
+
 # ── Email (utils/email_alerter.py) ────────────────────────────────────────
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 465                            # implicit TLS (SMTP_SSL)

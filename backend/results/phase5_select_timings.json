@@ -1,0 +1,8 @@
+{
+  "timings_seconds": {
+    "stream, counters, alerts, T3 params": 7.2,
+    "budget curves T0-T3 x strata on val_a": 3.5,
+    "causal regions and tier calibration (T2) on val_a": 7.0,
+    "total": 17.6
+  }
+}
