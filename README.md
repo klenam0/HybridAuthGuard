@@ -7,9 +7,17 @@
 [![React](https://img.shields.io/badge/frontend-React-61DAFB.svg)](https://react.dev/)
 [![Status](https://img.shields.io/badge/status-research%20prototype-orange.svg)]()
 
-A multi-agent intrusion detection system that combines rule-based detection, unsupervised machine learning (Isolation Forest), and LLM-based alert enrichment to detect and respond to authentication-based cyber threats in real time - developed as a final-year BSc Information Technology research project in the Department of Computer Science, University of Ghana. The name HybridAuthGuard reflects its hybrid rule-based plus machine-learning detection engine.
+A multi-agent system that detects and triages authentication attacks in a stream of login events, developed as a final-year BSc Information Technology research project in the Department of Computer Science, University of Ghana. It is a research prototype: responses are simulated and nothing is enforced.
 
-> **TL;DR** - Four cooperating agents (Monitoring → Detection → Analysis → Response) watch a stream of login events, flag suspicious behaviour using five deterministic rules _and_ an Isolation Forest model trained on 561,464 normal login events from the RBA Dataset (a privacy-preserving synthesis of real logins), enrich each alert with a locally-run LLM explanation, map it to MITRE ATT&CK, and surface everything on a live React dashboard.
+> **TL;DR** - Four agents (Monitoring → Detection → Analysis → Response) process login events in three stages:
+>
+> 1. **v3 rules.** Eight windowed rule detectors with parameters chosen on held-out RBA Dataset data.
+> 2. **Label-free triage.** Alerts are grouped into incidents (source IP, day). Each incident is scored from its detectors' validation precision (fixed constants) and its ASN's prior failure ratio; no label is read at run time.
+> 3. **Capped response tiers.** At most 200 incidents a day get a simulated step-up (MFA) challenge, and 500 a day go to an analyst queue. Only incidents with an alert from one of the five detectors that held on validation data are eligible. Everything else is logged. There is no block tier.
+>
+> The default mode (`RULES_MODE = "v3"`, `ML_MODE = "v4"`) has **no ML step**: no ML candidate met the pre-declared bar, so no ML alert is raised. Alerts are mapped to MITRE ATT&CK (v20), optionally enriched by a local LLM, and shown on a React dashboard. Performance figures for this configuration come from the locked final test (Phase 6), not from this README.
+>
+> **Legacy mode** (`RULES_MODE = "legacy"`, `ML_MODE = "legacy"`) keeps the original five rules and the Isolation Forest in `data/model.pkl`. That model was fitted on the non-attack rows of its training data, so it used the labels to filter its training set. The Detection Engine and ML Model Performance sections below describe this legacy mode.
 
 ---
 
@@ -46,14 +54,13 @@ This project explores a **hybrid** answer: deterministic rules for known attack 
 
 ## Key Features
 
-- **Four-agent pipeline** - Monitoring, Detection, Analysis, and Response agents operate as a sequential pipeline, each with a single clear responsibility.
-- **Six detectors, two paradigms** - five deterministic rule-based detectors (brute force, slow/evasive brute force, credential stuffing, multi-IP login, off-hours login) plus one Isolation Forest anomaly detector trained on the RBA Dataset, a privacy-preserving synthesis of real login data.
-- **Feature-level ML explainability** - every ML-flagged alert ships with a per-feature standard-deviation breakdown against the training baseline, so "the model flagged this" is never a black box.
-- **LLM-powered enrichment** - a locally-hosted `phi3:mini` model (via Ollama) generates structured, analyst-style explanations for every alert, running asynchronously so it never blocks the detection pipeline.
-- **MITRE ATT&CK mapping** - every alert type is mapped to a specific ATT&CK technique ID and tactic.
-- **Automated response simulation** - severity-driven actions: simulated IP blocking and admin alerting, plus real Gmail SMTP email alerts for HIGH-severity alerts (confirmed working in live mode).
-- **Live and batch operation** - a live streaming mode (`/api/ingest` + polling agent) alongside a deterministic batch/demo mode that guarantees all six attack scenarios fire for reproducible evaluation.
-- **Full-featured React dashboard** - eleven pages covering live alerts, alert history, detection engine internals, MITRE mapping, blocked IPs, email alert log, system health, and threat analytics, with light/dark theming and a fully responsive mobile layout.
+- **Four-agent pipeline** - Monitoring, Detection, Analysis and Response agents, each with one responsibility.
+- **v3 rule engine** - eight sliding-window detectors (brute force, slow brute force, credential stuffing, invalid-account spraying, distributed brute force, success after failures, multi-IP login, off-hours login), with protocol-driven parameter selection (`backend/eval/PROTOCOL.md`).
+- **Incident triage and capped tiers** - per-incident score, causal daily cutoffs, at most 200 step-up challenges and 500 queue entries a day, a detector floor, one email per incident with an hourly limit and digest.
+- **MITRE ATT&CK mapping** - one technique per detector, ATT&CK v20, served at `/api/config`.
+- **LLM enrichment** - optional, asynchronous, via a local Ollama model.
+- **Live and batch operation** - `/api/ingest` with a live polling agent, and a batch/demo mode.
+- **React dashboard** - alerts, incidents and tiers, challenges, email outcomes, detector settings and system health, all read from the backend's configuration.
 
 ## Screenshots
 
@@ -92,12 +99,12 @@ flowchart LR
 
     subgraph Pipeline["Agent Pipeline (main.py)"]
         MON[Monitoring Agent]
-        DET["Detection Agent<br/>5 rules + Isolation Forest"]
+        DET["Detection Agent<br/>v3: 8 rules · legacy: 5 rules + Isolation Forest"]
         ANA["Analysis Agent<br/>severity · MITRE · LLM hook"]
-        RESP["Response Agent<br/>block / notify / email"]
+        RESP["Response Agent<br/>v3: incident triage, step-up / queue / log, email"]
     end
 
-    STORE[("alerts.json<br/>FileLock-protected")]
+    STORE[("alerts.db (SQLite, v3)<br/>alerts.json (legacy)")]
     DASH[React Dashboard]
 
     SIM -->|POST events| INGEST
@@ -109,6 +116,8 @@ flowchart LR
 ```
 
 ## Detection Engine
+
+_Legacy mode only. The v3 detectors and their settings are listed on the dashboard's Detection Engine page and at `/api/config`._
 
 | Detector              | Type             | Trigger                                                              | MITRE ATT&CK                          |
 | --------------------- | ---------------- | -------------------------------------------------------------------- | ------------------------------------- |
@@ -122,6 +131,8 @@ flowchart LR
 Detector evaluation order is deliberate - slow brute force and credential stuffing are checked _before_ the fast brute-force threshold to prevent misclassification (see [`docs/DECISIONS.md`](docs/DECISIONS.md), Decision 9).
 
 ## ML Model Performance
+
+_Legacy mode only (`data/model.pkl`). The default mode runs no ML step._
 
 Evaluated on a held-out, user-disjoint test split of the RBA Dataset (a privacy-preserving synthesis of real logins, see [Dataset & Attribution](#dataset--attribution)). No user in the test split appears in training, and `contamination` was chosen on the validation split only.
 
