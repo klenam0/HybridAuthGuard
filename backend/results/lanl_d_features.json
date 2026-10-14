@@ -1,0 +1,101 @@
+{
+  "days": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "per_day": {
+    "00": {
+      "filtered_rows": 2168941,
+      "positives": 0,
+      "seconds": 7.9
+    },
+    "01": {
+      "filtered_rows": 2498705,
+      "positives": 10,
+      "seconds": 10.1
+    },
+    "02": {
+      "filtered_rows": 1999388,
+      "positives": 15,
+      "seconds": 8.3
+    },
+    "03": {
+      "filtered_rows": 1469407,
+      "positives": 0,
+      "seconds": 6.4
+    },
+    "04": {
+      "filtered_rows": 1452770,
+      "positives": 0,
+      "seconds": 6.4
+    },
+    "05": {
+      "filtered_rows": 2874515,
+      "positives": 21,
+      "seconds": 12.5
+    },
+    "06": {
+      "filtered_rows": 3070941,
+      "positives": 3,
+      "seconds": 12.3
+    },
+    "07": {
+      "filtered_rows": 3091343,
+      "positives": 1,
+      "seconds": 11.9
+    },
+    "08": {
+      "filtered_rows": 3066800,
+      "positives": 261,
+      "seconds": 11.9
+    },
+    "09": {
+      "filtered_rows": 2361596,
+      "positives": 5,
+      "seconds": 9.5
+    },
+    "10": {
+      "filtered_rows": 1575601,
+      "positives": 0,
+      "seconds": 6.7
+    },
+    "11": {
+      "filtered_rows": 1565075,
+      "positives": 0,
+      "seconds": 6.6
+    },
+    "12": {
+      "filtered_rows": 3089692,
+      "positives": 207,
+      "seconds": 12.0
+    },
+    "13": {
+      "filtered_rows": 3293742,
+      "positives": 75,
+      "seconds": 12.8
+    }
+  },
+  "seconds": 135.3,
+  "peak_working_set_bytes": 5156429824,
+  "features": [
+    "hour_sin",
+    "hour_cos",
+    "src_freq",
+    "user_freq",
+    "dst_freq",
+    "fail_rate_30d",
+    "is_new_src"
+  ]
+}

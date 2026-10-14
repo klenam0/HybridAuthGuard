@@ -1,0 +1,15 @@
+{
+  "val_a": {
+    "smoke_rows": 1000000,
+    "seconds": 4.4,
+    "estimate_split_seconds": 37,
+    "split_rows": 8569072
+  },
+  "val_b": {
+    "smoke_rows": 1000000,
+    "seconds": 4.4,
+    "estimate_split_seconds": 28,
+    "split_rows": 6383434
+  },
+  "peak_working_set_bytes": 1109585920
+}

@@ -1,0 +1,43 @@
+{
+  "fit_rows": 18626010,
+  "features": [
+    "hour_sin",
+    "hour_cos",
+    "src_freq",
+    "user_freq",
+    "dst_freq",
+    "fail_rate_30d",
+    "is_new_src"
+  ],
+  "forest": {
+    "n_estimators": 200,
+    "max_samples": 100000,
+    "max_features": 1.0,
+    "n_jobs": -1,
+    "random_state": 42,
+    "contamination": 0.4
+  },
+  "scaler_mean": [
+    0.019603495986404783,
+    -0.2647086768879862,
+    0.0015284427405444481,
+    0.005177224356880378,
+    0.04703779454486256,
+    0.008334774008266444,
+    0.0
+  ],
+  "scaler_scale": [
+    0.6889364598278822,
+    0.674471328994877,
+    0.0034035759019431793,
+    0.016311320156199984,
+    0.02623648263438623,
+    0.029997219825638178,
+    1.0
+  ],
+  "model_path": "C:\\Users\\Dell\\datasets\\lanl\\l2_work\\d\\d1_model.pkl",
+  "model_sha256": "48bf2436ff8a4403eb140cfe1ce1d55a8118893c356d385aa91bd6a5edaccfb3",
+  "fit_seconds": 393.6,
+  "seconds": 398.9,
+  "peak_working_set_bytes": 6695219200
+}

@@ -1,0 +1,2047 @@
+{
+  "val_a": {
+    "redteam_events": 288,
+    "redteam_users": 45,
+    "filtered_rows": 8569072,
+    "positive_rows": 266,
+    "all": {
+      "redteam_users": 45,
+      "redteam_events": 288,
+      "D1": {
+        "population_rows": 8569072,
+        "positives": 266,
+        "base_rate": 3.10418677775143e-05,
+        "roc_auc": 0.9797405381220861,
+        "pr_auc": 0.002225746857428962,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 266,
+          "events_caught": 0,
+          "events": 276,
+          "users_caught": 0,
+          "users": 45,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 288,
+            "users_caught": 0,
+            "users": 45,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top1000": {
+          "rows_caught": 27,
+          "positives": 266,
+          "events_caught": 27,
+          "events": 276,
+          "users_caught": 1,
+          "users": 45,
+          "precision": 0.00675,
+          "lift": 217.44825563909774,
+          "all_redteam": {
+            "events_caught": 27,
+            "events": 288,
+            "users_caught": 1,
+            "users": 45,
+            "events_caught_share_ci95": [
+              0.0,
+              0.28739014801110074
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.08888888888888889
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.027
+          ],
+          "lift_ci95": [
+            0.0,
+            657.4120518314105
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.2957858971565529
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.08888888888888889
+          ]
+        },
+        "top10000": {
+          "rows_caught": 141,
+          "positives": 266,
+          "events_caught": 141,
+          "events": 276,
+          "users_caught": 23,
+          "users": 45,
+          "precision": 0.003525,
+          "lift": 113.55631127819548,
+          "all_redteam": {
+            "events_caught": 141,
+            "events": 288,
+            "users_caught": 23,
+            "users": 45,
+            "events_caught_share_ci95": [
+              0.3203467682667389,
+              0.6416453045590712
+            ],
+            "users_caught_share_ci95": [
+              0.37722222222222224,
+              0.6666666666666666
+            ]
+          },
+          "precision_ci95": [
+            0.00195,
+            0.005475625
+          ],
+          "lift_ci95": [
+            75.83175527017553,
+            144.96783303480814
+          ],
+          "events_caught_share_ci95": [
+            0.33768148820326677,
+            0.6598653226472775
+          ],
+          "users_caught_share_ci95": [
+            0.37722222222222224,
+            0.6666666666666666
+          ]
+        },
+        "roc_auc_ci95": [
+          0.9702051272513433,
+          0.987992623243769
+        ],
+        "pr_auc_ci95": [
+          0.0008955256177023492,
+          0.006241381709725286
+        ],
+        "mode": "bootstrap"
+      },
+      "D2": {
+        "population_rows": 8569072,
+        "positives": 266,
+        "base_rate": 3.10418677775143e-05,
+        "roc_auc": 0.9299244583429114,
+        "pr_auc": 0.00473094095247123,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 266,
+          "events_caught": 0,
+          "events": 276,
+          "users_caught": 0,
+          "users": 45,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 288,
+            "users_caught": 0,
+            "users": 45,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 266,
+          "events_caught": 0,
+          "events": 276,
+          "users_caught": 0,
+          "users": 45,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 288,
+            "users_caught": 0,
+            "users": 45,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top10000": {
+          "rows_caught": 18,
+          "positives": 266,
+          "events_caught": 22,
+          "events": 276,
+          "users_caught": 10,
+          "users": 45,
+          "precision": 0.00045,
+          "lift": 14.496550375939849,
+          "all_redteam": {
+            "events_caught": 22,
+            "events": 288,
+            "users_caught": 10,
+            "users": 45,
+            "events_caught_share_ci95": [
+              0.024691358024691357,
+              0.13953488372093023
+            ],
+            "users_caught_share_ci95": [
+              0.1111111111111111,
+              0.35555555555555557
+            ]
+          },
+          "precision_ci95": [
+            0.000175,
+            0.0008006249999999995
+          ],
+          "lift_ci95": [
+            5.436271478133132,
+            26.920257232526705
+          ],
+          "events_caught_share_ci95": [
+            0.025883744087627586,
+            0.14486735001507384
+          ],
+          "users_caught_share_ci95": [
+            0.1111111111111111,
+            0.35555555555555557
+          ]
+        },
+        "roc_auc_ci95": [
+          0.9090118162722614,
+          0.9516844351383598
+        ],
+        "pr_auc_ci95": [
+          0.0034277109830797422,
+          0.006477588191900225
+        ],
+        "mode": "bootstrap"
+      },
+      "D3": {
+        "population_rows": 8569072,
+        "positives": 266,
+        "base_rate": 3.10418677775143e-05,
+        "roc_auc": 0.9398486597300099,
+        "pr_auc": 0.0007968079489805141,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 266,
+          "events_caught": 0,
+          "events": 276,
+          "users_caught": 0,
+          "users": 45,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 288,
+            "users_caught": 0,
+            "users": 45,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 266,
+          "events_caught": 0,
+          "events": 276,
+          "users_caught": 0,
+          "users": 45,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 288,
+            "users_caught": 0,
+            "users": 45,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top10000": {
+          "rows_caught": 17,
+          "positives": 266,
+          "events_caught": 17,
+          "events": 276,
+          "users_caught": 5,
+          "users": 45,
+          "precision": 0.000425,
+          "lift": 13.691186466165412,
+          "all_redteam": {
+            "events_caught": 17,
+            "events": 288,
+            "users_caught": 5,
+            "users": 45,
+            "events_caught_share_ci95": [
+              0.017479482323232324,
+              0.10204952288082468
+            ],
+            "users_caught_share_ci95": [
+              0.022222222222222223,
+              0.2
+            ]
+          },
+          "precision_ci95": [
+            0.0001,
+            0.0008
+          ],
+          "lift_ci95": [
+            4.259206855414023,
+            23.12059260495799
+          ],
+          "events_caught_share_ci95": [
+            0.018939616701836928,
+            0.10543920580280304
+          ],
+          "users_caught_share_ci95": [
+            0.022222222222222223,
+            0.2
+          ]
+        },
+        "roc_auc_ci95": [
+          0.9062970903314519,
+          0.9639775044890939
+        ],
+        "pr_auc_ci95": [
+          0.00037907963599017805,
+          0.0013589435259431868
+        ],
+        "mode": "bootstrap"
+      }
+    },
+    "new_users": {
+      "redteam_users": 44,
+      "redteam_events": 278,
+      "D1": {
+        "population_rows": 8569064,
+        "positives": 258,
+        "base_rate": 3.010830587798154e-05,
+        "roc_auc": 0.9794402198577187,
+        "pr_auc": 0.0022150400133939888,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 258,
+          "events_caught": 0,
+          "events": 268,
+          "users_caught": 0,
+          "users": 44,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 278,
+            "users_caught": 0,
+            "users": 44,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top1000": {
+          "rows_caught": 27,
+          "positives": 258,
+          "events_caught": 27,
+          "events": 268,
+          "users_caught": 1,
+          "users": 44,
+          "precision": 0.00675,
+          "lift": 224.19062790697674,
+          "all_redteam": {
+            "events_caught": 27,
+            "events": 278,
+            "users_caught": 1,
+            "users": 44,
+            "events_caught_share_ci95": [
+              0.0,
+              0.27744508738781287
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.06818181818181818
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.02025
+          ],
+          "lift_ci95": [
+            0.0,
+            635.6624399867178
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.2862190812720848
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.06818181818181818
+          ]
+        },
+        "top10000": {
+          "rows_caught": 140,
+          "positives": 258,
+          "events_caught": 140,
+          "events": 268,
+          "users_caught": 22,
+          "users": 44,
+          "precision": 0.0035,
+          "lift": 116.24699224806201,
+          "all_redteam": {
+            "events_caught": 140,
+            "events": 278,
+            "users_caught": 22,
+            "users": 44,
+            "events_caught_share_ci95": [
+              0.33459460919353967,
+              0.6570165189363415
+            ],
+            "users_caught_share_ci95": [
+              0.36363636363636365,
+              0.6590909090909091
+            ]
+          },
+          "precision_ci95": [
+            0.001874375,
+            0.005425625
+          ],
+          "lift_ci95": [
+            78.84103242405025,
+            147.75396782276476
+          ],
+          "events_caught_share_ci95": [
+            0.35428027012637653,
+            0.6763989267657184
+          ],
+          "users_caught_share_ci95": [
+            0.36363636363636365,
+            0.6590909090909091
+          ]
+        },
+        "roc_auc_ci95": [
+          0.9686661594313065,
+          0.9876116598197924
+        ],
+        "pr_auc_ci95": [
+          0.000841913477898869,
+          0.0055544202908446895
+        ],
+        "mode": "bootstrap"
+      },
+      "D2": {
+        "population_rows": 8569064,
+        "positives": 258,
+        "base_rate": 3.010830587798154e-05,
+        "roc_auc": 0.9291334339242658,
+        "pr_auc": 0.004555146254012709,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 258,
+          "events_caught": 0,
+          "events": 268,
+          "users_caught": 0,
+          "users": 44,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 278,
+            "users_caught": 0,
+            "users": 44,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 258,
+          "events_caught": 0,
+          "events": 268,
+          "users_caught": 0,
+          "users": 44,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 278,
+            "users_caught": 0,
+            "users": 44,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top10000": {
+          "rows_caught": 18,
+          "positives": 258,
+          "events_caught": 22,
+          "events": 268,
+          "users_caught": 10,
+          "users": 44,
+          "precision": 0.00045,
+          "lift": 14.946041860465115,
+          "all_redteam": {
+            "events_caught": 22,
+            "events": 278,
+            "users_caught": 10,
+            "users": 44,
+            "events_caught_share_ci95": [
+              0.02724505206683142,
+              0.1445125844163214
+            ],
+            "users_caught_share_ci95": [
+              0.11363636363636363,
+              0.36363636363636365
+            ]
+          },
+          "precision_ci95": [
+            0.000175,
+            0.0008
+          ],
+          "lift_ci95": [
+            5.7656367029867255,
+            27.9910951314981
+          ],
+          "events_caught_share_ci95": [
+            0.028554006968641115,
+            0.15167814788978023
+          ],
+          "users_caught_share_ci95": [
+            0.11363636363636363,
+            0.36363636363636365
+          ]
+        },
+        "roc_auc_ci95": [
+          0.9048755167371163,
+          0.9509710595005417
+        ],
+        "pr_auc_ci95": [
+          0.0032469480247609077,
+          0.00632405215302568
+        ],
+        "mode": "bootstrap"
+      },
+      "D3": {
+        "population_rows": 8569064,
+        "positives": 258,
+        "base_rate": 3.010830587798154e-05,
+        "roc_auc": 0.9384133678483589,
+        "pr_auc": 0.0007550473437838909,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 258,
+          "events_caught": 0,
+          "events": 268,
+          "users_caught": 0,
+          "users": 44,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 278,
+            "users_caught": 0,
+            "users": 44,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 258,
+          "events_caught": 0,
+          "events": 268,
+          "users_caught": 0,
+          "users": 44,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 278,
+            "users_caught": 0,
+            "users": 44,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top10000": {
+          "rows_caught": 17,
+          "positives": 258,
+          "events_caught": 17,
+          "events": 268,
+          "users_caught": 5,
+          "users": 44,
+          "precision": 0.000425,
+          "lift": 14.115706201550386,
+          "all_redteam": {
+            "events_caught": 17,
+            "events": 278,
+            "users_caught": 5,
+            "users": 44,
+            "events_caught_share_ci95": [
+              0.016,
+              0.10662396160754377
+            ],
+            "users_caught_share_ci95": [
+              0.022727272727272728,
+              0.20454545454545456
+            ]
+          },
+          "precision_ci95": [
+            0.0001,
+            0.0008
+          ],
+          "lift_ci95": [
+            3.7546527136309877,
+            23.89999343678375
+          ],
+          "events_caught_share_ci95": [
+            0.016750618188478797,
+            0.10813267813267811
+          ],
+          "users_caught_share_ci95": [
+            0.022727272727272728,
+            0.20454545454545456
+          ]
+        },
+        "roc_auc_ci95": [
+          0.9036255420345166,
+          0.9631102932434039
+        ],
+        "pr_auc_ci95": [
+          0.00034256607762218894,
+          0.0013119692795560123
+        ],
+        "mode": "bootstrap"
+      }
+    },
+    "returning_users": {
+      "redteam_users": 1,
+      "redteam_events": 10,
+      "D1": {
+        "population_rows": 8568814,
+        "positives": 8,
+        "base_rate": 9.336181179799211e-07,
+        "roc_auc": 0.9894258021479305,
+        "pr_auc": 4.97388099449015e-05,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 8,
+          "events_caught": 0,
+          "events": 8,
+          "users_caught": 0,
+          "users": 1,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 10,
+            "users_caught": 0,
+            "users": 1
+          }
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 8,
+          "events_caught": 0,
+          "events": 8,
+          "users_caught": 0,
+          "users": 1,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 10,
+            "users_caught": 0,
+            "users": 1
+          }
+        },
+        "top10000": {
+          "rows_caught": 1,
+          "positives": 8,
+          "events_caught": 1,
+          "events": 8,
+          "users_caught": 1,
+          "users": 1,
+          "precision": 2.5e-05,
+          "lift": 26.777543750000003,
+          "all_redteam": {
+            "events_caught": 1,
+            "events": 10,
+            "users_caught": 1,
+            "users": 1
+          }
+        },
+        "mode": "exact counts"
+      },
+      "D2": {
+        "population_rows": 8568814,
+        "positives": 8,
+        "base_rate": 9.336181179799211e-07,
+        "roc_auc": 0.9554349958442285,
+        "pr_auc": 0.0002151403086017479,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 8,
+          "events_caught": 0,
+          "events": 8,
+          "users_caught": 0,
+          "users": 1,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 10,
+            "users_caught": 0,
+            "users": 1
+          }
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 8,
+          "events_caught": 0,
+          "events": 8,
+          "users_caught": 0,
+          "users": 1,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 10,
+            "users_caught": 0,
+            "users": 1
+          }
+        },
+        "top10000": {
+          "rows_caught": 0,
+          "positives": 8,
+          "events_caught": 0,
+          "events": 8,
+          "users_caught": 0,
+          "users": 1,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 10,
+            "users_caught": 0,
+            "users": 1
+          }
+        },
+        "mode": "exact counts"
+      },
+      "D3": {
+        "population_rows": 8568814,
+        "positives": 8,
+        "base_rate": 9.336181179799211e-07,
+        "roc_auc": 0.9861368229132507,
+        "pr_auc": 5.668444922161179e-05,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 8,
+          "events_caught": 0,
+          "events": 8,
+          "users_caught": 0,
+          "users": 1,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 10,
+            "users_caught": 0,
+            "users": 1
+          }
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 8,
+          "events_caught": 0,
+          "events": 8,
+          "users_caught": 0,
+          "users": 1,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 10,
+            "users_caught": 0,
+            "users": 1
+          }
+        },
+        "top10000": {
+          "rows_caught": 0,
+          "positives": 8,
+          "events_caught": 0,
+          "events": 8,
+          "users_caught": 0,
+          "users": 1,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 10,
+            "users_caught": 0,
+            "users": 1
+          }
+        },
+        "mode": "exact counts"
+      }
+    }
+  },
+  "val_b": {
+    "redteam_events": 290,
+    "redteam_users": 50,
+    "filtered_rows": 6383434,
+    "positive_rows": 282,
+    "all": {
+      "redteam_users": 50,
+      "redteam_events": 290,
+      "D1": {
+        "population_rows": 6383434,
+        "positives": 282,
+        "base_rate": 4.4176849012616096e-05,
+        "roc_auc": 0.9807961935415548,
+        "pr_auc": 0.004906914894956722,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 282,
+          "events_caught": 0,
+          "events": 288,
+          "users_caught": 0,
+          "users": 50,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 290,
+            "users_caught": 0,
+            "users": 50,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 282,
+          "events_caught": 0,
+          "events": 288,
+          "users_caught": 0,
+          "users": 50,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 290,
+            "users_caught": 0,
+            "users": 50,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top10000": {
+          "rows_caught": 89,
+          "positives": 282,
+          "events_caught": 89,
+          "events": 288,
+          "users_caught": 3,
+          "users": 50,
+          "precision": 0.00445,
+          "lift": 100.7314939716312,
+          "all_redteam": {
+            "events_caught": 89,
+            "events": 290,
+            "users_caught": 3,
+            "users": 50,
+            "events_caught_share_ci95": [
+              0.0,
+              0.6235553754296446
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.14
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.01325
+          ],
+          "lift_ci95": [
+            0.0,
+            200.99641954975579
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.6268120360551431
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.14
+          ]
+        },
+        "roc_auc_ci95": [
+          0.9592941367676144,
+          0.9916765507364607
+        ],
+        "pr_auc_ci95": [
+          0.0007941316501545338,
+          0.022364146559816285
+        ],
+        "mode": "bootstrap"
+      },
+      "D2": {
+        "population_rows": 6383434,
+        "positives": 282,
+        "base_rate": 4.4176849012616096e-05,
+        "roc_auc": 0.8409128159089797,
+        "pr_auc": 0.003758106850320666,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 282,
+          "events_caught": 0,
+          "events": 288,
+          "users_caught": 0,
+          "users": 50,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 290,
+            "users_caught": 0,
+            "users": 50,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 282,
+          "events_caught": 0,
+          "events": 288,
+          "users_caught": 0,
+          "users": 50,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 290,
+            "users_caught": 0,
+            "users": 50,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top10000": {
+          "rows_caught": 108,
+          "positives": 282,
+          "events_caught": 108,
+          "events": 288,
+          "users_caught": 35,
+          "users": 50,
+          "precision": 0.0054,
+          "lift": 122.23597021276596,
+          "all_redteam": {
+            "events_caught": 108,
+            "events": 290,
+            "users_caught": 35,
+            "users": 50,
+            "events_caught_share_ci95": [
+              0.23074074074074075,
+              0.4747042107982433
+            ],
+            "users_caught_share_ci95": [
+              0.58,
+              0.82
+            ]
+          },
+          "precision_ci95": [
+            0.00244875,
+            0.01055125
+          ],
+          "lift_ci95": [
+            77.08955291443701,
+            154.84257669372406
+          ],
+          "events_caught_share_ci95": [
+            0.2307511737089202,
+            0.47746107526256637
+          ],
+          "users_caught_share_ci95": [
+            0.58,
+            0.82
+          ]
+        },
+        "roc_auc_ci95": [
+          0.7928954860020554,
+          0.8742592575403737
+        ],
+        "pr_auc_ci95": [
+          0.0016642326086883299,
+          0.00726456296827114
+        ],
+        "mode": "bootstrap"
+      },
+      "D3": {
+        "population_rows": 6383434,
+        "positives": 282,
+        "base_rate": 4.4176849012616096e-05,
+        "roc_auc": 0.910474488652548,
+        "pr_auc": 0.0012620598689328992,
+        "top100": {
+          "rows_caught": 1,
+          "positives": 282,
+          "events_caught": 1,
+          "events": 288,
+          "users_caught": 1,
+          "users": 50,
+          "precision": 0.005,
+          "lift": 113.18145390070922,
+          "all_redteam": {
+            "events_caught": 1,
+            "events": 290,
+            "users_caught": 1,
+            "users": 50,
+            "events_caught_share_ci95": [
+              0.0,
+              0.007317073170731708
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.06
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.015
+          ],
+          "lift_ci95": [
+            0.0,
+            234.68970588235294
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.007326231225986727
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.06
+          ]
+        },
+        "top1000": {
+          "rows_caught": 2,
+          "positives": 282,
+          "events_caught": 2,
+          "events": 288,
+          "users_caught": 2,
+          "users": 50,
+          "precision": 0.001,
+          "lift": 22.63629078014184,
+          "all_redteam": {
+            "events_caught": 2,
+            "events": 290,
+            "users_caught": 2,
+            "users": 50,
+            "events_caught_share_ci95": [
+              0.0,
+              0.017123776908023483
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.1
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0025
+          ],
+          "lift_ci95": [
+            0.0,
+            56.32342941176471
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.017241379310344827
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.1
+          ]
+        },
+        "top10000": {
+          "rows_caught": 52,
+          "positives": 282,
+          "events_caught": 52,
+          "events": 288,
+          "users_caught": 3,
+          "users": 50,
+          "precision": 0.0026,
+          "lift": 58.85435602836879,
+          "all_redteam": {
+            "events_caught": 52,
+            "events": 290,
+            "users_caught": 3,
+            "users": 50,
+            "events_caught_share_ci95": [
+              0.0,
+              0.3016057585825027
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.14
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.007306249999999994
+          ],
+          "lift_ci95": [
+            0.0,
+            97.70784583575228
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.30377924528301886
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.14
+          ]
+        },
+        "roc_auc_ci95": [
+          0.8176551642403715,
+          0.9574666143710123
+        ],
+        "pr_auc_ci95": [
+          0.00022606921165740595,
+          0.0041283766060416114
+        ],
+        "mode": "bootstrap"
+      }
+    },
+    "new_users": {
+      "redteam_users": 35,
+      "redteam_events": 145,
+      "D1": {
+        "population_rows": 6383295,
+        "positives": 143,
+        "base_rate": 2.240222330316866e-05,
+        "roc_auc": 0.9804319924649191,
+        "pr_auc": 0.000781200742342085,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 143,
+          "events_caught": 0,
+          "events": 143,
+          "users_caught": 0,
+          "users": 35,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 145,
+            "users_caught": 0,
+            "users": 35,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 143,
+          "events_caught": 0,
+          "events": 143,
+          "users_caught": 0,
+          "users": 35,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 145,
+            "users_caught": 0,
+            "users": 35,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top10000": {
+          "rows_caught": 6,
+          "positives": 143,
+          "events_caught": 6,
+          "events": 143,
+          "users_caught": 2,
+          "users": 35,
+          "precision": 0.0003,
+          "lift": 13.391527972027971,
+          "all_redteam": {
+            "events_caught": 6,
+            "events": 145,
+            "users_caught": 2,
+            "users": 35,
+            "events_caught_share_ci95": [
+              0.0,
+              0.12504960317460312
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.14285714285714285
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0008
+          ],
+          "lift_ci95": [
+            0.0,
+            40.75508096431022
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.12769389155799585
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.14285714285714285
+          ]
+        },
+        "roc_auc_ci95": [
+          0.9613360788276754,
+          0.9882641197429095
+        ],
+        "pr_auc_ci95": [
+          0.0005125482329221334,
+          0.0011426421259807151
+        ],
+        "mode": "bootstrap"
+      },
+      "D2": {
+        "population_rows": 6383295,
+        "positives": 143,
+        "base_rate": 2.240222330316866e-05,
+        "roc_auc": 0.8461569268161372,
+        "pr_auc": 0.0020459765916982045,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 143,
+          "events_caught": 0,
+          "events": 143,
+          "users_caught": 0,
+          "users": 35,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 145,
+            "users_caught": 0,
+            "users": 35,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 143,
+          "events_caught": 0,
+          "events": 143,
+          "users_caught": 0,
+          "users": 35,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 145,
+            "users_caught": 0,
+            "users": 35,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top10000": {
+          "rows_caught": 45,
+          "positives": 143,
+          "events_caught": 45,
+          "events": 143,
+          "users_caught": 25,
+          "users": 35,
+          "precision": 0.00225,
+          "lift": 100.43645979020978,
+          "all_redteam": {
+            "events_caught": 45,
+            "events": 145,
+            "users_caught": 25,
+            "users": 35,
+            "events_caught_share_ci95": [
+              0.20583397832817338,
+              0.4452117061021171
+            ],
+            "users_caught_share_ci95": [
+              0.5714285714285714,
+              0.8571428571428571
+            ]
+          },
+          "precision_ci95": [
+            0.0015,
+            0.0031
+          ],
+          "lift_ci95": [
+            66.5591093305726,
+            143.6342768611111
+          ],
+          "events_caught_share_ci95": [
+            0.20854089979550103,
+            0.4500347222222222
+          ],
+          "users_caught_share_ci95": [
+            0.5714285714285714,
+            0.8571428571428571
+          ]
+        },
+        "roc_auc_ci95": [
+          0.7696204779814623,
+          0.9041849303822204
+        ],
+        "pr_auc_ci95": [
+          0.0011932154984746987,
+          0.00315897725205455
+        ],
+        "mode": "bootstrap"
+      },
+      "D3": {
+        "population_rows": 6383295,
+        "positives": 143,
+        "base_rate": 2.240222330316866e-05,
+        "roc_auc": 0.8881809072172705,
+        "pr_auc": 0.00032083253594631495,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 143,
+          "events_caught": 0,
+          "events": 143,
+          "users_caught": 0,
+          "users": 35,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 145,
+            "users_caught": 0,
+            "users": 35,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 143,
+          "events_caught": 0,
+          "events": 143,
+          "users_caught": 0,
+          "users": 35,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 145,
+            "users_caught": 0,
+            "users": 35,
+            "events_caught_share_ci95": [
+              0.0,
+              0.0
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.0
+          ],
+          "lift_ci95": [
+            0.0,
+            0.0
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "top10000": {
+          "rows_caught": 7,
+          "positives": 143,
+          "events_caught": 7,
+          "events": 143,
+          "users_caught": 1,
+          "users": 35,
+          "precision": 0.00035,
+          "lift": 15.623449300699301,
+          "all_redteam": {
+            "events_caught": 7,
+            "events": 145,
+            "users_caught": 1,
+            "users": 35,
+            "events_caught_share_ci95": [
+              0.0,
+              0.109375
+            ],
+            "users_caught_share_ci95": [
+              0.0,
+              0.08571428571428572
+            ]
+          },
+          "precision_ci95": [
+            0.0,
+            0.00105
+          ],
+          "lift_ci95": [
+            0.0,
+            35.096293365665474
+          ],
+          "events_caught_share_ci95": [
+            0.0,
+            0.10996211077431799
+          ],
+          "users_caught_share_ci95": [
+            0.0,
+            0.08571428571428572
+          ]
+        },
+        "roc_auc_ci95": [
+          0.7693403806193069,
+          0.9464001185346933
+        ],
+        "pr_auc_ci95": [
+          9.754151065233532e-05,
+          0.0007434510437658768
+        ],
+        "mode": "bootstrap"
+      }
+    },
+    "returning_users": {
+      "redteam_users": 15,
+      "redteam_events": 145,
+      "D1": {
+        "population_rows": 6383291,
+        "positives": 139,
+        "base_rate": 2.1775601331664185e-05,
+        "roc_auc": 0.9811708752247125,
+        "pr_auc": 0.006976703934416553,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 139,
+          "events_caught": 0,
+          "events": 145,
+          "users_caught": 0,
+          "users": 15,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 145,
+            "users_caught": 0,
+            "users": 15
+          }
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 139,
+          "events_caught": 0,
+          "events": 145,
+          "users_caught": 0,
+          "users": 15,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 145,
+            "users_caught": 0,
+            "users": 15
+          }
+        },
+        "top10000": {
+          "rows_caught": 83,
+          "positives": 139,
+          "events_caught": 83,
+          "events": 145,
+          "users_caught": 1,
+          "users": 15,
+          "precision": 0.00415,
+          "lift": 190.58027086330935,
+          "all_redteam": {
+            "events_caught": 83,
+            "events": 145,
+            "users_caught": 1,
+            "users": 15
+          }
+        },
+        "mode": "exact counts"
+      },
+      "D2": {
+        "population_rows": 6383291,
+        "positives": 139,
+        "base_rate": 2.1775601331664185e-05,
+        "roc_auc": 0.8355177953354291,
+        "pr_auc": 0.001899781585507225,
+        "top100": {
+          "rows_caught": 0,
+          "positives": 139,
+          "events_caught": 0,
+          "events": 145,
+          "users_caught": 0,
+          "users": 15,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 145,
+            "users_caught": 0,
+            "users": 15
+          }
+        },
+        "top1000": {
+          "rows_caught": 0,
+          "positives": 139,
+          "events_caught": 0,
+          "events": 145,
+          "users_caught": 0,
+          "users": 15,
+          "precision": 0.0,
+          "lift": 0.0,
+          "all_redteam": {
+            "events_caught": 0,
+            "events": 145,
+            "users_caught": 0,
+            "users": 15
+          }
+        },
+        "top10000": {
+          "rows_caught": 63,
+          "positives": 139,
+          "events_caught": 63,
+          "events": 145,
+          "users_caught": 10,
+          "users": 15,
+          "precision": 0.00315,
+          "lift": 144.65731402877697,
+          "all_redteam": {
+            "events_caught": 63,
+            "events": 145,
+            "users_caught": 10,
+            "users": 15
+          }
+        },
+        "mode": "exact counts"
+      },
+      "D3": {
+        "population_rows": 6383291,
+        "positives": 139,
+        "base_rate": 2.1775601331664185e-05,
+        "roc_auc": 0.9334096119996322,
+        "pr_auc": 0.0011905613837485804,
+        "top100": {
+          "rows_caught": 1,
+          "positives": 139,
+          "events_caught": 1,
+          "events": 145,
+          "users_caught": 1,
+          "users": 15,
+          "precision": 0.005,
+          "lift": 229.61478417266187,
+          "all_redteam": {
+            "events_caught": 1,
+            "events": 145,
+            "users_caught": 1,
+            "users": 15
+          }
+        },
+        "top1000": {
+          "rows_caught": 2,
+          "positives": 139,
+          "events_caught": 2,
+          "events": 145,
+          "users_caught": 2,
+          "users": 15,
+          "precision": 0.001,
+          "lift": 45.92295683453237,
+          "all_redteam": {
+            "events_caught": 2,
+            "events": 145,
+            "users_caught": 2,
+            "users": 15
+          }
+        },
+        "top10000": {
+          "rows_caught": 45,
+          "positives": 139,
+          "events_caught": 45,
+          "events": 145,
+          "users_caught": 2,
+          "users": 15,
+          "precision": 0.00225,
+          "lift": 103.32665287769782,
+          "all_redteam": {
+            "events_caught": 45,
+            "events": 145,
+            "users_caught": 2,
+            "users": 15
+          }
+        },
+        "mode": "exact counts"
+      }
+    }
+  },
+  "check_strict_ranking_vs_sklearn": {
+    "val_a:D1": {
+      "roc_auc_sklearn": 0.9797405381220861,
+      "pr_auc_sklearn": 0.0022257468574289627,
+      "roc_auc": 0.9797405381220861,
+      "pr_auc": 0.002225746857428962
+    },
+    "val_a:D2": {
+      "roc_auc_sklearn": 0.9299244583429113,
+      "pr_auc_sklearn": 0.00473094095247123,
+      "roc_auc": 0.9299244583429114,
+      "pr_auc": 0.00473094095247123
+    },
+    "val_a:D3": {
+      "roc_auc_sklearn": 0.9398486597300099,
+      "pr_auc_sklearn": 0.000796807948980514,
+      "roc_auc": 0.9398486597300099,
+      "pr_auc": 0.0007968079489805141
+    },
+    "val_b:D1": {
+      "roc_auc_sklearn": 0.9807961935415549,
+      "pr_auc_sklearn": 0.0049069148949567225,
+      "roc_auc": 0.9807961935415548,
+      "pr_auc": 0.004906914894956722
+    },
+    "val_b:D2": {
+      "roc_auc_sklearn": 0.8409128159089796,
+      "pr_auc_sklearn": 0.003758106850320666,
+      "roc_auc": 0.8409128159089797,
+      "pr_auc": 0.003758106850320666
+    },
+    "val_b:D3": {
+      "roc_auc_sklearn": 0.910474488652548,
+      "pr_auc_sklearn": 0.0012620598689328992,
+      "roc_auc": 0.910474488652548,
+      "pr_auc": 0.0012620598689328992
+    }
+  },
+  "definitions": "\nLA3.6 metrics with LA3.7 intervals for D1, D2, D3 on val_a and val_b\n(eval/lanl_d.py outputs). No verdict (LA3.8 applies to the test only).\n\nRanking: every score is ranked by (score descending, stream position\nascending) -- LA3.5's tie-break -- so each ranking is strict.\n  ROC-AUC   share of (positive, negative) pairs with the positive ranked first\n  PR-AUC    average precision of the strict ranking (sum over positives of the\n            precision at the positive, / positives; equals\n            sklearn.metrics.average_precision_score of the strict ranking,\n            checked below)\n  daily top-k  ranked within each day; k in {100, 1,000, 10,000}:\n            positives (rows) caught, red-team events caught (events whose\n            matched row is caught), red-team users caught, precision =\n            caught rows / selected rows over the split's days, lift =\n            precision / the split's filtered base rate\n  all-red-team line  events and users caught at each k over every red-team\n            event of the split (unmatched or filter-excluded = missed)\nIntervals: with >= 20 distinct red-team users in the split or stratum, a\n95% percentile bootstrap over red-team users (1,000 resamples, seed 42): a\nuser drawn w times contributes w copies of each of its positive rows, placed\nnext to the original in the ranking; negatives are fixed. Otherwise exact\ncounts. Strata (LA1.5): new vs returning users; a stratum's population is the\nsplit's filtered rows without the other stratum's positives.\n\nWrites results/lanl_d_dev.json.\n",
+  "seconds": 76.9,
+  "peak_working_set_bytes": 1630896128
+}

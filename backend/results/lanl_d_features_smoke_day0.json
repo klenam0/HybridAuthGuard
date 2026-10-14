@@ -1,0 +1,23 @@
+{
+  "days": [
+    0
+  ],
+  "per_day": {
+    "00": {
+      "filtered_rows": 2168941,
+      "positives": 0,
+      "seconds": 8.0
+    }
+  },
+  "seconds": 8.0,
+  "peak_working_set_bytes": 2741723136,
+  "features": [
+    "hour_sin",
+    "hour_cos",
+    "src_freq",
+    "user_freq",
+    "dst_freq",
+    "fail_rate_30d",
+    "is_new_src"
+  ]
+}

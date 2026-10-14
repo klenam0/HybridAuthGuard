@@ -1,0 +1,11 @@
+{
+  "val_a": {
+    "rows": 8569072,
+    "seconds": 29.9
+  },
+  "val_b": {
+    "rows": 6383434,
+    "seconds": 20.3
+  },
+  "peak_working_set_bytes": 1145958400
+}

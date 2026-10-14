@@ -1,0 +1,14 @@
+{
+  "days": [
+    0
+  ],
+  "dev_train_filtered_rows": 2168941,
+  "distinct": {
+    "src": 7609,
+    "user": 7992,
+    "dst": 1252
+  },
+  "seconds": 2.3,
+  "peak_working_set_bytes": 1165103104,
+  "estimate_dev_train_seconds": 18
+}
