@@ -1,0 +1,10 @@
+{
+  "c3": {
+    "time": 1209601,
+    "day": 14
+  },
+  "redteam_file": "redteam.txt.gz",
+  "redteam_sha256": "606635837c684ad11e464075ecf97bc5df325ff7d7f64614d2d8c8af18051669",
+  "test_rows_sha256": "2dca05c14f63da24947a94ec7d4eda67d646ead201b57ff1e2a20170ded3ded1",
+  "test_rows_hash_definition": "SHA-256 over raw lines with time >= c3, file order, UTF-8, each followed by \\n"
+}
