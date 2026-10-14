@@ -9,57 +9,124 @@
     },
     "sqlite_insert": {
       "per_alert_transaction": true,
-      "total_s": 22.46,
-      "us_mean": 996.2,
-      "us_p50": 350.1,
-      "us_p99": 39850.3,
-      "us_max": 102354.0
+      "total_s": 30.05,
+      "us_mean": 1333.2,
+      "us_p50": 342.7,
+      "us_p99": 55442.5,
+      "us_max": 167443.9
     },
     "sqlite_file_mb": 51.99,
     "sqlite_queries": {
       "recent_2000 (/api/alerts)": {
-        "ms_median": 58.093,
-        "ms_max": 152.807,
+        "ms_median": 55.262,
+        "ms_max": 146.095,
         "rows": 2000
       },
       "tier=step_up, 500": {
-        "ms_median": 13.749,
-        "ms_max": 91.866,
+        "ms_median": 11.385,
+        "ms_max": 94.638,
         "rows": 500
       },
       "ip (busiest, 10.0.160.77)": {
-        "ms_median": 2.177,
-        "ms_max": 2.788,
+        "ms_median": 2.111,
+        "ms_max": 2.805,
         "rows": 77
       },
       "incidents tier=step_up, 500 (/api/incidents)": {
-        "ms_median": 6.662,
-        "ms_max": 8.084,
+        "ms_median": 5.644,
+        "ms_max": 7.468,
         "rows": 500
       },
       "stats (/api/stats)": {
-        "ms_median": 162.708,
-        "ms_max": 182.803,
+        "ms_median": 162.802,
+        "ms_max": 190.206,
         "rows": 7
       },
       "hourly (/api/timeline)": {
-        "ms_median": 79.98,
-        "ms_max": 92.464,
+        "ms_median": 77.076,
+        "ms_max": 88.978,
         "rows": 48
       },
       "by_type (/api/detectors)": {
-        "ms_median": 84.212,
-        "ms_max": 94.67,
+        "ms_median": 85.341,
+        "ms_max": 96.207,
         "rows": 8
       },
       "enrichment_counts": {
-        "ms_median": 263.083,
-        "ms_max": 293.384,
+        "ms_median": 272.139,
+        "ms_max": 296.756,
         "rows": 3
       },
       "load_cached, unchanged (LLM scanner)": {
-        "ms_median": 0.014,
-        "ms_max": 53.508,
+        "ms_median": 0.007,
+        "ms_max": 35.077,
+        "rows": 2000
+      }
+    },
+    "tier_query_plan": "SEARCH alerts USING INDEX ix_alerts_tier_id (tier=?)"
+  },
+  "phase5b_day_alerts": {
+    "day": "2020-04-20",
+    "alerts": 22530,
+    "incidents": 7452,
+    "alerts_by_tier": {
+      "log": 18790,
+      "step_up": 1041,
+      "queue": 2699
+    },
+    "sqlite_insert": {
+      "per_alert_transaction": true,
+      "total_s": 25.35,
+      "us_mean": 1124.7,
+      "us_p50": 336.0,
+      "us_p99": 48464.4,
+      "us_max": 76822.2
+    },
+    "sqlite_file_mb": 50.43,
+    "sqlite_queries": {
+      "recent_2000 (/api/alerts)": {
+        "ms_median": 50.348,
+        "ms_max": 211.967,
+        "rows": 2000
+      },
+      "tier=step_up, 500": {
+        "ms_median": 13.529,
+        "ms_max": 154.978,
+        "rows": 500
+      },
+      "ip (busiest, 10.0.160.77)": {
+        "ms_median": 2.382,
+        "ms_max": 3.226,
+        "rows": 77
+      },
+      "incidents tier=step_up, 500 (/api/incidents)": {
+        "ms_median": 2.488,
+        "ms_max": 3.922,
+        "rows": 200
+      },
+      "stats (/api/stats)": {
+        "ms_median": 144.224,
+        "ms_max": 157.088,
+        "rows": 7
+      },
+      "hourly (/api/timeline)": {
+        "ms_median": 79.564,
+        "ms_max": 83.241,
+        "rows": 67
+      },
+      "by_type (/api/detectors)": {
+        "ms_median": 76.843,
+        "ms_max": 104.575,
+        "rows": 8
+      },
+      "enrichment_counts": {
+        "ms_median": 270.232,
+        "ms_max": 288.104,
+        "rows": 3
+      },
+      "load_cached, unchanged (LLM scanner)": {
+        "ms_median": 0.012,
+        "ms_max": 48.864,
         "rows": 2000
       }
     },

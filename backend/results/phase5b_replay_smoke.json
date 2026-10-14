@@ -1,0 +1,126 @@
+{
+  "equivalent": true,
+  "events": 300000,
+  "limit": 300000,
+  "defaults": {
+    "RULES_MODE": "v3",
+    "ML_MODE": "v4",
+    "ML_V4_IFOREST": "retired",
+    "TRIAGE_SCORE": "T2",
+    "RESPONSE_TIER_RATES": {
+      "block": 0,
+      "step_up": 200,
+      "queue": 500
+    }
+  },
+  "alerts_saved": 61009,
+  "ml_alerts": 0,
+  "detector_alert_mismatches": {
+    "Brute Force Attack": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Slow Brute Force": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Credential Stuffing": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Invalid Account Spraying": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Distributed Brute Force": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Success After Failures": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Multiple IP Login": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Suspicious Login Time": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    }
+  },
+  "alerted_events_compared": 53185,
+  "alerted_events_missing": 0,
+  "tier_mismatches": 0,
+  "score_mismatches": 0,
+  "tier_or_score_mismatches_by_span": {},
+  "blocked_state_mismatches": {
+    "dev_train": 0,
+    "val_a": 0,
+    "val_b": 0
+  },
+  "challenged_state_mismatches": {
+    "dev_train": 0,
+    "val_a": 0,
+    "val_b": 0
+  },
+  "email_log_mismatches": 0,
+  "incident_email_outcome_mismatches": 0,
+  "email_log_entries": 273,
+  "emails_per_day": {
+    "2020-02-04": {
+      "email": 56
+    },
+    "2020-02-05": {
+      "email": 68,
+      "digest": 2
+    },
+    "2020-02-06": {
+      "email": 56,
+      "digest": 2
+    },
+    "2020-02-07": {
+      "email": 73,
+      "digest": 2
+    }
+  },
+  "blocked_source_events": 0,
+  "challenged_source_events": 1135,
+  "duplicate_events": 0,
+  "state_sizes_end": {
+    "rules": {
+      "ips": 117932,
+      "accounts": 34467,
+      "account_history": 95097,
+      "cooldowns": 1315,
+      "recent_events": 1374
+    },
+    "triage": {
+      "ips_today": 14112,
+      "incidents_today": 4709,
+      "asns": 2664,
+      "days_closed": 4
+    }
+  },
+  "store_day": "2020-04-20",
+  "store_inline_inserts": 0,
+  "store_inline_insert_us_mean": null,
+  "store_inline_insert_us_p99": null,
+  "replay_seconds": 69.6,
+  "replay_us_per_event": 232.0,
+  "peak_rss_mb": 5973,
+  "timings_seconds": {
+    "load stream and the offline deployed run": 13.5,
+    "real agents, new defaults (300,000 events)": 69.6,
+    "comparison": 1.4,
+    "total": 84.6
+  }
+}
