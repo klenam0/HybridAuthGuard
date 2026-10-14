@@ -1,0 +1,54 @@
+{
+  "tag": "fresh7_8",
+  "days": [
+    7,
+    8
+  ],
+  "fresh_start": true,
+  "per_day": {
+    "07": {
+      "events": 19394277,
+      "alerted_events": 1431318,
+      "alerts": {
+        "Brute Force Attack": 1195,
+        "Slow Brute Force": 6218,
+        "Credential Stuffing": 3171,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 5650,
+        "Success After Failures": 1134241,
+        "Multiple IP Login": 160824,
+        "Suspicious Login Time": 226869
+      },
+      "seconds": 44.3
+    },
+    "08": {
+      "events": 19374681,
+      "alerted_events": 1553569,
+      "alerts": {
+        "Brute Force Attack": 1208,
+        "Slow Brute Force": 7777,
+        "Credential Stuffing": 4066,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 8591,
+        "Success After Failures": 1310772,
+        "Multiple IP Login": 34863,
+        "Suspicious Login Time": 229631
+      },
+      "seconds": 49.0
+    }
+  },
+  "events": 38768958,
+  "accounts": 37401,
+  "ips": 12168,
+  "email_log_entries": 104,
+  "seconds": 93.3,
+  "seconds_by_part": {
+    "load_encode": 5.6,
+    "failure_detectors": 1.0,
+    "saf": 22.5,
+    "multi": 19.8,
+    "emit": 9.3,
+    "triage_response": 33.8
+  },
+  "peak_working_set_bytes": 6043643904
+}

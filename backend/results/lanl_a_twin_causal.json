@@ -1,0 +1,246 @@
+{
+  "tag": "causal",
+  "days": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "fresh_start": false,
+  "per_day": {
+    "00": {
+      "events": 15740952,
+      "alerted_events": 983519,
+      "alerts": {
+        "Brute Force Attack": 1191,
+        "Slow Brute Force": 5364,
+        "Credential Stuffing": 3362,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 4745,
+        "Success After Failures": 821111,
+        "Multiple IP Login": 139372,
+        "Suspicious Login Time": 101071
+      },
+      "seconds": 34.3
+    },
+    "01": {
+      "events": 17562370,
+      "alerted_events": 1321592,
+      "alerts": {
+        "Brute Force Attack": 1112,
+        "Slow Brute Force": 7017,
+        "Credential Stuffing": 4153,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 7623,
+        "Success After Failures": 1120210,
+        "Multiple IP Login": 35750,
+        "Suspicious Login Time": 188955
+      },
+      "seconds": 43.5
+    },
+    "02": {
+      "events": 15585920,
+      "alerted_events": 1268309,
+      "alerts": {
+        "Brute Force Attack": 924,
+        "Slow Brute Force": 5576,
+        "Credential Stuffing": 3184,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 5974,
+        "Success After Failures": 1068619,
+        "Multiple IP Login": 14819,
+        "Suspicious Login Time": 196447
+      },
+      "seconds": 42.1
+    },
+    "03": {
+      "events": 13473144,
+      "alerted_events": 1112095,
+      "alerts": {
+        "Brute Force Attack": 610,
+        "Slow Brute Force": 2912,
+        "Credential Stuffing": 1466,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 2471,
+        "Success After Failures": 929442,
+        "Multiple IP Login": 4730,
+        "Suspicious Login Time": 186744
+      },
+      "seconds": 35.3
+    },
+    "04": {
+      "events": 13398091,
+      "alerted_events": 1108094,
+      "alerts": {
+        "Brute Force Attack": 611,
+        "Slow Brute Force": 2969,
+        "Credential Stuffing": 1496,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 2448,
+        "Success After Failures": 925431,
+        "Multiple IP Login": 3163,
+        "Suspicious Login Time": 186678
+      },
+      "seconds": 36.4
+    },
+    "05": {
+      "events": 18557390,
+      "alerted_events": 1503775,
+      "alerts": {
+        "Brute Force Attack": 1261,
+        "Slow Brute Force": 8295,
+        "Credential Stuffing": 5170,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 6298,
+        "Success After Failures": 1308235,
+        "Multiple IP Login": 30662,
+        "Suspicious Login Time": 186552
+      },
+      "seconds": 55.5
+    },
+    "06": {
+      "events": 19381629,
+      "alerted_events": 1665958,
+      "alerts": {
+        "Brute Force Attack": 1197,
+        "Slow Brute Force": 8763,
+        "Credential Stuffing": 5579,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 8357,
+        "Success After Failures": 1439759,
+        "Multiple IP Login": 14105,
+        "Suspicious Login Time": 223220
+      },
+      "seconds": 58.8
+    },
+    "07": {
+      "events": 19394277,
+      "alerted_events": 1698200,
+      "alerts": {
+        "Brute Force Attack": 1191,
+        "Slow Brute Force": 8778,
+        "Credential Stuffing": 5598,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 9210,
+        "Success After Failures": 1471660,
+        "Multiple IP Login": 9493,
+        "Suspicious Login Time": 226869
+      },
+      "seconds": 64.0
+    },
+    "08": {
+      "events": 19374681,
+      "alerted_events": 1677069,
+      "alerts": {
+        "Brute Force Attack": 1209,
+        "Slow Brute Force": 8748,
+        "Credential Stuffing": 5325,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 9253,
+        "Success After Failures": 1447368,
+        "Multiple IP Login": 7531,
+        "Suspicious Login Time": 229631
+      },
+      "seconds": 64.0
+    },
+    "09": {
+      "events": 18141675,
+      "alerted_events": 1491498,
+      "alerts": {
+        "Brute Force Attack": 904,
+        "Slow Brute Force": 6040,
+        "Credential Stuffing": 3741,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 5852,
+        "Success After Failures": 1267552,
+        "Multiple IP Login": 24057,
+        "Suspicious Login Time": 218323
+      },
+      "seconds": 58.9
+    },
+    "10": {
+      "events": 14170706,
+      "alerted_events": 1236741,
+      "alerts": {
+        "Brute Force Attack": 552,
+        "Slow Brute Force": 3015,
+        "Credential Stuffing": 1864,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 2481,
+        "Success After Failures": 1043443,
+        "Multiple IP Login": 980,
+        "Suspicious Login Time": 201717
+      },
+      "seconds": 44.6
+    },
+    "11": {
+      "events": 14012614,
+      "alerted_events": 1223966,
+      "alerts": {
+        "Brute Force Attack": 555,
+        "Slow Brute Force": 2889,
+        "Credential Stuffing": 1714,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 2325,
+        "Success After Failures": 1037149,
+        "Multiple IP Login": 737,
+        "Suspicious Login Time": 194809
+      },
+      "seconds": 42.8
+    },
+    "12": {
+      "events": 19870851,
+      "alerted_events": 1586058,
+      "alerts": {
+        "Brute Force Attack": 1167,
+        "Slow Brute Force": 8693,
+        "Credential Stuffing": 5351,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 5991,
+        "Success After Failures": 1386103,
+        "Multiple IP Login": 9910,
+        "Suspicious Login Time": 197311
+      },
+      "seconds": 64.6
+    },
+    "13": {
+      "events": 20807328,
+      "alerted_events": 1681365,
+      "alerts": {
+        "Brute Force Attack": 1227,
+        "Slow Brute Force": 8576,
+        "Credential Stuffing": 5416,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 8290,
+        "Success After Failures": 1456283,
+        "Multiple IP Login": 5838,
+        "Suspicious Login Time": 225209
+      },
+      "seconds": 64.5
+    }
+  },
+  "events": 239471628,
+  "accounts": 62681,
+  "ips": 13793,
+  "email_log_entries": 652,
+  "seconds": 709.4,
+  "seconds_by_part": {
+    "load_encode": 36.2,
+    "failure_detectors": 8.7,
+    "saf": 233.2,
+    "multi": 117.3,
+    "emit": 85.9,
+    "triage_response": 219.7
+  },
+  "peak_working_set_bytes": 7717265408
+}

@@ -1,0 +1,38 @@
+{
+  "tag": "fresh8",
+  "days": [
+    8
+  ],
+  "fresh_start": true,
+  "per_day": {
+    "08": {
+      "events": 19374681,
+      "alerted_events": 1382566,
+      "alerts": {
+        "Brute Force Attack": 1212,
+        "Slow Brute Force": 6108,
+        "Credential Stuffing": 2989,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 5524,
+        "Success After Failures": 1080463,
+        "Multiple IP Login": 160378,
+        "Suspicious Login Time": 229631
+      },
+      "seconds": 44.3
+    }
+  },
+  "events": 19374681,
+  "accounts": 32251,
+  "ips": 11684,
+  "email_log_entries": 0,
+  "seconds": 44.3,
+  "seconds_by_part": {
+    "load_encode": 2.8,
+    "failure_detectors": 0.5,
+    "saf": 9.9,
+    "multi": 10.3,
+    "emit": 4.0,
+    "triage_response": 16.2
+  },
+  "peak_working_set_bytes": 5214617600
+}

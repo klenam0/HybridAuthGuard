@@ -1,0 +1,38 @@
+{
+  "tag": "smoke0",
+  "days": [
+    0
+  ],
+  "fresh_start": false,
+  "per_day": {
+    "00": {
+      "events": 15740952,
+      "alerted_events": 983519,
+      "alerts": {
+        "Brute Force Attack": 1191,
+        "Slow Brute Force": 5364,
+        "Credential Stuffing": 3362,
+        "Invalid Account Spraying": 0,
+        "Distributed Brute Force": 4745,
+        "Success After Failures": 821111,
+        "Multiple IP Login": 139372,
+        "Suspicious Login Time": 101071
+      },
+      "seconds": 32.1
+    }
+  },
+  "events": 15740952,
+  "accounts": 33593,
+  "ips": 9711,
+  "email_log_entries": 0,
+  "seconds": 32.1,
+  "seconds_by_part": {
+    "load_encode": 2.2,
+    "failure_detectors": 0.5,
+    "saf": 7.5,
+    "multi": 6.6,
+    "emit": 3.4,
+    "triage_response": 11.5
+  },
+  "peak_working_set_bytes": 4333232128
+}

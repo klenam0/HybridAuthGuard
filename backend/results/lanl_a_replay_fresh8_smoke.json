@@ -1,0 +1,79 @@
+{
+  "days": [
+    8
+  ],
+  "twin_tag": "fresh8",
+  "limit": 300000,
+  "fresh_start": true,
+  "per_day": {
+    "08": {
+      "events": 300000,
+      "detector_alerts": {
+        "Brute Force Attack": {
+          "twin": 18,
+          "agents": 18,
+          "mismatches": 0
+        },
+        "Slow Brute Force": {
+          "twin": 52,
+          "agents": 52,
+          "mismatches": 0
+        },
+        "Credential Stuffing": {
+          "twin": 20,
+          "agents": 20,
+          "mismatches": 0
+        },
+        "Invalid Account Spraying": {
+          "twin": 0,
+          "agents": 0,
+          "mismatches": 0
+        },
+        "Distributed Brute Force": {
+          "twin": 64,
+          "agents": 64,
+          "mismatches": 0
+        },
+        "Success After Failures": {
+          "twin": 15455,
+          "agents": 15455,
+          "mismatches": 0
+        },
+        "Multiple IP Login": {
+          "twin": 31514,
+          "agents": 31514,
+          "mismatches": 0
+        },
+        "Suspicious Login Time": {
+          "twin": 18927,
+          "agents": 18927,
+          "mismatches": 0
+        }
+      },
+      "ml_alerts": 0,
+      "alerted_events_compared": 52471,
+      "alerted_events_missing": 0,
+      "alerted_events_by_tier_agents": {
+        "log": 52471
+      },
+      "tier_mismatches": 0,
+      "score_mismatches": 0,
+      "challenged_events_agents": 0,
+      "challenged_state_mismatches": 0,
+      "blocked_events": 0,
+      "email_outcomes_agents": {},
+      "email_outcome_mismatches": 0,
+      "replay_seconds": 14.2,
+      "us_per_event": 47.5
+    }
+  },
+  "estimate_full_day_seconds": 920,
+  "equivalent": true,
+  "email_log_entries_agents": 0,
+  "email_log_mismatches": 0,
+  "duplicate_events": 0,
+  "challenged_source_events": 0,
+  "replay_seconds": 14.7,
+  "us_per_event": 49.0,
+  "peak_working_set_bytes": 1373626368
+}
