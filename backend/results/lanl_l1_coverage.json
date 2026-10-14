@@ -1,0 +1,11 @@
+{
+  "c3_day": 14,
+  "test_end_day": 57,
+  "last_redteam_day": 29,
+  "test_days": 44,
+  "test_end_before_last_redteam_day": false,
+  "test_days_with_redteam": 9,
+  "test_days_without_redteam_la2_7": 35,
+  "redteam_rows_after_test_end": 0,
+  "note": "test end >= last red-team day, so all red-team rows with time >= c3 are inside the test; counts from L0 (lanl_split_la2.json) apply"
+}

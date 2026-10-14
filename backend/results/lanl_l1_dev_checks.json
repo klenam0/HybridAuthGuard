@@ -1,0 +1,376 @@
+{
+  "scope": "dev partitions only (auth/dev), days 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13",
+  "dev_days": 14,
+  "dev_rows_total": 239471628,
+  "dev_rows_total_matches_convert_json": true,
+  "per_day": {
+    "00": {
+      "rows": 15740952,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.5785963898498643,
+        "logon_type": 0.15814634337237035,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 109734,
+          "share": 0.0069712429083069434
+        },
+        "Success": {
+          "rows": 15631218,
+          "share": 0.993028757091693
+        }
+      }
+    },
+    "01": {
+      "rows": 17562370,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.575480245547725,
+        "logon_type": 0.1480947616978802,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 110709,
+          "share": 0.006303761963789625
+        },
+        "Success": {
+          "rows": 17451661,
+          "share": 0.9936962380362103
+        }
+      }
+    },
+    "02": {
+      "rows": 15585920,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.5780336354863878,
+        "logon_type": 0.14783772789800026,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 90713,
+          "share": 0.005820188991089393
+        },
+        "Success": {
+          "rows": 15495207,
+          "share": 0.9941798110089106
+        }
+      }
+    },
+    "03": {
+      "rows": 13473144,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.5714373720046338,
+        "logon_type": 0.13387521130925342,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 76012,
+          "share": 0.00564174182358624
+        },
+        "Success": {
+          "rows": 13397132,
+          "share": 0.9943582581764138
+        }
+      }
+    },
+    "04": {
+      "rows": 13398091,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.571068744047193,
+        "logon_type": 0.1327004720299332,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 75573,
+          "share": 0.005640579691539638
+        },
+        "Success": {
+          "rows": 13322518,
+          "share": 0.9943594203084604
+        }
+      }
+    },
+    "05": {
+      "rows": 18557390,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.5785925175900275,
+        "logon_type": 0.15518787933001355,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 116984,
+          "share": 0.006303903727841038
+        },
+        "Success": {
+          "rows": 18440406,
+          "share": 0.9936960962721589
+        }
+      }
+    },
+    "06": {
+      "rows": 19381629,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.5807765693998167,
+        "logon_type": 0.15713441837112865,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 111487,
+          "share": 0.0057521996732060035
+        },
+        "Success": {
+          "rows": 19270142,
+          "share": 0.994247800326794
+        }
+      }
+    },
+    "07": {
+      "rows": 19394277,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.580067821038134,
+        "logon_type": 0.15652725801534134,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 125131,
+          "share": 0.006451954873079311
+        },
+        "Success": {
+          "rows": 19269146,
+          "share": 0.9935480451269207
+        }
+      }
+    },
+    "08": {
+      "rows": 19374681,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.5805514939833074,
+        "logon_type": 0.15553556726946885,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 121254,
+          "share": 0.006258374008841746
+        },
+        "Success": {
+          "rows": 19253427,
+          "share": 0.9937416259911582
+        }
+      }
+    },
+    "09": {
+      "rows": 18141675,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.5744816286258022,
+        "logon_type": 0.1408909045057857,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 84517,
+          "share": 0.004658720873348243
+        },
+        "Success": {
+          "rows": 18057158,
+          "share": 0.9953412791266517
+        }
+      }
+    },
+    "10": {
+      "rows": 14170706,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.5709090993772646,
+        "logon_type": 0.12995943885929184,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 59866,
+          "share": 0.004224630727643351
+        },
+        "Success": {
+          "rows": 14110840,
+          "share": 0.9957753692723567
+        }
+      }
+    },
+    "11": {
+      "rows": 14012614,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.5713432911232693,
+        "logon_type": 0.13034591547301597,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 89125,
+          "share": 0.006360340761545276
+        },
+        "Success": {
+          "rows": 13923489,
+          "share": 0.9936396592384548
+        }
+      }
+    },
+    "12": {
+      "rows": 19870851,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.5764208085501723,
+        "logon_type": 0.14822802506042645,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 169605,
+          "share": 0.008535366703720943
+        },
+        "Success": {
+          "rows": 19701246,
+          "share": 0.9914646332962791
+        }
+      }
+    },
+    "13": {
+      "rows": 20807328,
+      "rows_match_convert_json": true,
+      "share_question_mark": {
+        "src_user": 0.0,
+        "dst_user": 0.0,
+        "src_computer": 0.0,
+        "dst_computer": 0.0,
+        "auth_type": 0.5760964118026111,
+        "logon_type": 0.14487857354870362,
+        "auth_orientation": 0.0,
+        "success": 0.0
+      },
+      "success_field": {
+        "Fail": {
+          "rows": 154836,
+          "share": 0.0074414167931605634
+        },
+        "Success": {
+          "rows": 20652492,
+          "share": 0.9925585832068394
+        }
+      }
+    }
+  },
+  "distinct_over_dev": {
+    "src_user": 62681,
+    "dst_user": 77410,
+    "src_computer": 13793,
+    "dst_computer": 13354
+  },
+  "redteam_match": {
+    "dev_redteam_events": 628,
+    "events_with_time_src_dst_match": 614,
+    "events_a_src_user": 614,
+    "events_b_dst_user": 614,
+    "events_both": 614,
+    "events_a_only": 0,
+    "events_b_only": 0,
+    "events_neither": 14,
+    "matched_rows_a": 614,
+    "matched_rows_b": 614,
+    "matched_rows_a_or_b": 614,
+    "success_values_rows_a": {
+      "Success": 614
+    },
+    "success_values_rows_b": {
+      "Success": 614
+    },
+    "success_values_rows_a_or_b": {
+      "Success": 614
+    },
+    "events_by_success_values_of_a_or_b_rows": {
+      "Success": 614
+    }
+  },
+  "elapsed_seconds": 73.5
+}

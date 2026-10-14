@@ -1,0 +1,69 @@
+{
+  "resources_before": {
+    "output_drive": "C:\\",
+    "disk_free_bytes": 86820241408,
+    "disk_total_bytes": 1022926573568,
+    "mem_total_bytes": 34135404544,
+    "mem_available_bytes": 17168216064
+  },
+  "output_root": "C:\\Users\\Dell\\datasets\\lanl\\parquet",
+  "convert": {
+    "t0": 1,
+    "c3_day": 14,
+    "lines_read": 1051430459,
+    "decompressed_bytes": 73413019178,
+    "compressed_bytes_consumed": 7626505158,
+    "rows_written_dev": 239471628,
+    "rows_written_test": 811958831,
+    "rows_written_total": 1051430459,
+    "malformed_lines": 0,
+    "malformed_sidecar": {
+      "path": "C:\\Users\\Dell\\datasets\\lanl\\parquet\\malformed_lines.tsv",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "check_lines_eq_rows_plus_malformed": true,
+    "check_lines_eq_rows_written": true,
+    "time_non_decreasing": true,
+    "first_out_of_order_row": null,
+    "last_row_day": 57,
+    "dev_days_written": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13
+    ],
+    "dev_rows_per_day": {
+      "00": 15740952,
+      "01": 17562370,
+      "02": 15585920,
+      "03": 13473144,
+      "04": 13398091,
+      "05": 18557390,
+      "06": 19381629,
+      "07": 19394277,
+      "08": 19374681,
+      "09": 18141675,
+      "10": 14170706,
+      "11": 14012614,
+      "12": 19870851,
+      "13": 20807328
+    },
+    "output_bytes_total": 7345818123,
+    "elapsed_seconds": 1061.0,
+    "rows_per_second": 990989,
+    "peak_working_set_bytes": 2144256000,
+    "pyarrow_peak_pool_bytes": 870167988,
+    "test_end_day": 57,
+    "test_end_rule": "LA2.1: day index of the last row of auth.txt.gz"
+  }
+}
