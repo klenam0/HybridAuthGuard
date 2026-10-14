@@ -39,8 +39,12 @@ def v3(monkeypatch):
     for k, v in PINNED.items():
         monkeypatch.setattr(config, k, v, raising=False)
     monkeypatch.setattr(config, "UNKNOWN_ACCOUNT_IDS", [PLACEHOLDER])
-    monkeypatch.setattr(config, "V3_BLOCK_DETECTORS", (BF,))
+    monkeypatch.setattr(config, "ML_MODE", "legacy")
     monkeypatch.setattr(config, "BLOCK_TTL_SECONDS", 3600)
+    # Block tier at rate 1/day on T0 (amendment 6 mechanics; the deployed
+    # policy has no block tier).
+    monkeypatch.setattr(config, "TRIAGE_SCORE", "T0")
+    monkeypatch.setattr(config, "RESPONSE_TIER_RATES", {"block": 1, "step_up": 0, "queue": 0})
     return monkeypatch
 
 
@@ -48,29 +52,40 @@ def types_of(agent, e):
     return {a["type"] for a in agent.analyze_all(dict(e))}
 
 
+class _Store:
+    def __init__(self):
+        self.saved = []
+
+    def save_alert(self, a):
+        self.saved.append(a)
+
+
 def test_blocked_source_is_still_detected_and_the_block_expires(v3):
+    from agents.monitoring_agent import MonitoringAgent
     ml = FlagEverything()
-    agent = DetectionAgent(anomaly_detector=ml)
-    analysis, response = AnalysisAgent(), ResponseAgent(email_alerter=_NoEmail())
-    assert agent.__class__.__name__ == "V3DetectionAgent" and response.mode == "v3"
+    store = _Store()
+    mon = MonitoringAgent(anomaly_detector=ml, alert_manager=store,
+                          responder=ResponseAgent(email_alerter=_NoEmail()))
+    assert mon.detector.__class__.__name__ == "V3DetectionAgent" and mon.responder.mode == "v3"
 
-    def process(e):
-        blocked = response.is_blocked(e["ip"], e["timestamp"])
-        alerts = agent.analyze_all(dict(e))
-        for a in alerts:
-            a["timestamp"] = e["timestamp"]
-            response.take_action(analysis.evaluate_alert(a))
-        return blocked, {a["type"] for a in alerts}
-
-    out = [process(ev(T + timedelta(seconds=i), "zoe", "6.6.6.1", "FAILED")) for i in range(5)]
-    assert BF in out[4][1] and not any(b for b, _ in out)
+    # Day 1: a Brute Force incident from another IP sets the day-2 cutoff.
+    for i in range(5):
+        mon._process_event(ev(T - timedelta(days=1) + timedelta(seconds=i), "amy", "6.6.6.9", "FAILED"))
+    # Day 2: the same incident score from 6.6.6.1 reaches the block tier.
+    for i in range(5):
+        mon._process_event(ev(T + timedelta(seconds=i), "zoe", "6.6.6.1", "FAILED"))
+    assert mon.blocked_source_events == 0
+    bf = [a for a in store.saved if a["type"] == BF and a["ip"] == "6.6.6.1"]
+    assert bf and bf[0]["response"]["tier"] == "block" and bf[0]["severity"] == "HIGH"
+    assert bf[0]["response"]["simulated_block"]
     # Within the TTL: blocked, but every detector and the ML step still run.
-    blocked, _ = process(ev(T + timedelta(seconds=30), "zoe", "6.6.6.1", "SUCCESS"))
-    assert blocked
-    assert len(ml.scored) == 6
-    # After the TTL the block has expired.
-    blocked, _ = process(ev(T + timedelta(seconds=3700), "zoe", "6.6.6.1", "FAILED"))
-    assert not blocked
+    n = len(ml.scored)
+    mon._process_event(ev(T + timedelta(seconds=30), "zoe", "6.6.6.1", "SUCCESS"))
+    assert mon.blocked_source_events == 1 and len(ml.scored) == n + 1
+    assert store.saved[-1]["blocked_source"] is True
+    # After the TTL (from the last block-tier alert) the block has expired.
+    mon._process_event(ev(T + timedelta(seconds=3700), "zoe", "6.6.6.1", "FAILED"))
+    assert mon.blocked_source_events == 1
 
 
 def test_dedup_suppresses_inside_cooldown_and_expires(v3):
@@ -178,6 +193,7 @@ def test_windowed_ml_failed_rate():
 
 def test_legacy_mode_is_unchanged_engine(monkeypatch):
     monkeypatch.setattr(config, "RULES_MODE", "legacy")
+    monkeypatch.setattr(config, "ML_MODE", "legacy")
     agent = DetectionAgent()
     assert agent.__class__.__name__ == "LegacyDetectionAgent"
     assert AnalysisAgent().mode == "legacy" and ResponseAgent(email_alerter=_NoEmail()).mode == "legacy"

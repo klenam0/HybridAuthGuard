@@ -239,3 +239,15 @@ class AlertManager:
                     # Keep serving the last good copy; retry on the next call.
                     log.warning("Could not read alerts.json (%s); serving cached copy", e)
             return self._cache
+
+
+def open_alert_store(path=None, mode=None):
+    """The alert store for config.RULES_MODE (or mode): SQLite
+    (data/alerts.db, utils/alert_store_sqlite.py) for "v3", this JSON store
+    for "legacy", which the legacy gate and its tests keep using."""
+    import config
+    mode = mode or config.RULES_MODE
+    if mode == "v3":
+        from utils.alert_store_sqlite import SqliteAlertStore
+        return SqliteAlertStore(path)
+    return AlertManager(path)

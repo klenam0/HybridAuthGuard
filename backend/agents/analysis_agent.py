@@ -18,8 +18,9 @@ class AnalysisAgent:
 
     def __init__(self, mode=None):
 
-        # "v3" takes severities from config.V3_SEVERITY_MAP and does not
-        # upgrade ML alerts by confidence (audit F10, F29).
+        # "v3" takes the severity from the alert's incident tier
+        # (config.V3_SEVERITY_MAP, derived from the response tiers) and does
+        # not upgrade ML alerts by confidence (audit F10, F29).
         self.mode = mode or config.RULES_MODE
         self.severity_mapping = (config.V3_SEVERITY_MAP if self.mode == "v3"
                                  else config.SEVERITY_MAP)
@@ -28,7 +29,11 @@ class AnalysisAgent:
     def evaluate_alert(self, alert):
         alert = alert.copy()  
         alert_type = alert.get("type", "Unknown Threat")
-        severity   = self.severity_mapping.get(alert_type, config.DEFAULT_SEVERITY)
+        if self.mode == "v3":
+            tier = (alert.get("incident") or {}).get("tier", "log")
+            severity = self.severity_mapping.get(tier, config.DEFAULT_SEVERITY)
+        else:
+            severity = self.severity_mapping.get(alert_type, config.DEFAULT_SEVERITY)
 
         # Upgrade ML anomaly severity if model confidence is High
         if alert_type == "ML Anomaly Detected" and self.mode != "v3":

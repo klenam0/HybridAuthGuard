@@ -50,6 +50,14 @@ class NullEmailAlerter:
         self.sent.append(alert.get("alert_id"))
         return True
 
+    def send_incident(self, incident):
+        self.sent.append(incident.get("incident_id"))
+        return True
+
+    def send_digest(self, hour, incidents):
+        self.sent.append(("digest", hour, len(incidents)))
+        return True
+
 
 # ── Scorers ──────────────────────────────────────────────────────────────────
 

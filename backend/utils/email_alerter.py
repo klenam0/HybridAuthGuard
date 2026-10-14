@@ -189,3 +189,66 @@ class EmailAlerter:
         except Exception as e:
             log.warning(f"⚠ Email failed: {e}")
             return False
+    # ── v3: one email per incident, and the hourly digest ──────────────────
+
+    def _send(self, subject, html):
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = " ".join(subject.split())   # no CR/LF in headers
+        msg["From"]    = self.sender
+        msg["To"]      = self.receiver
+        msg.attach(MIMEText(html, "html"))
+        with smtplib.SMTP_SSL(config.SMTP_HOST, config.SMTP_PORT,
+                              timeout=config.SMTP_TIMEOUT_SECONDS) as server:
+            server.login(self.sender, self.password)
+            server.sendmail(self.sender, self.receiver, msg.as_string())
+
+    @staticmethod
+    def incident_html(incident):
+        esc = lambda v: html_escape(str(v), quote=True)   # noqa: E731
+        rows = "".join(
+            f"<tr><td style='padding:4px 12px 4px 0;color:#64748b'>{esc(k)}</td>"
+            f"<td style='padding:4px 0;font-family:monospace'>{esc(v)}</td></tr>"
+            for k, v in (("Incident", incident.get("incident_id")), ("Source IP", incident.get("ip")),
+                         ("Tier", incident.get("tier")), ("Score", incident.get("score")),
+                         ("Detectors", ", ".join(incident.get("detectors") or [])),
+                         ("Alerts so far", incident.get("alerts"))))
+        return f"<table style='border-collapse:collapse'>{rows}</table>"
+
+    @staticmethod
+    def digest_html(hour, incidents):
+        esc = lambda v: html_escape(str(v), quote=True)   # noqa: E731
+        items = "".join(
+            f"<tr><td style='padding:2px 10px 2px 0'>{esc(i.get('tier'))}</td>"
+            f"<td style='padding:2px 10px 2px 0;font-family:monospace'>{esc(i.get('ip'))}</td>"
+            f"<td style='padding:2px 0'>{esc(', '.join(i.get('detectors') or []))}</td></tr>"
+            for i in incidents)
+        return (f"<p>{len(incidents)} incident(s) over the hourly email limit in hour "
+                f"{esc(hour)} (event time, hours since 1970-01-01 UTC):</p>"
+                f"<table style='border-collapse:collapse'>{items}</table>")
+
+    def send_incident(self, incident):
+        """One email for an incident entering the block or step-up tier."""
+        if not self.enabled:
+            return False
+        try:
+            tier = str(incident.get("tier", "")).upper()
+            self._send(f"🚨 [{tier}] Incident {incident.get('ip')} - HybridAuthGuard",
+                       self.incident_html(incident))
+            log.info("📧 Incident email sent → %s [%s]", self.receiver, incident.get("incident_id"))
+            return True
+        except Exception as e:
+            log.warning(f"⚠ Email failed: {e}")
+            return False
+
+    def send_digest(self, hour, incidents):
+        """The hourly digest of incidents over EMAIL_MAX_PER_HOUR."""
+        if not self.enabled:
+            return False
+        try:
+            self._send(f"HybridAuthGuard digest: {len(incidents)} incident(s) over the hourly limit",
+                       self.digest_html(hour, incidents))
+            log.info("📧 Digest sent → %s (%d incidents)", self.receiver, len(incidents))
+            return True
+        except Exception as e:
+            log.warning(f"⚠ Email failed: {e}")
+            return False

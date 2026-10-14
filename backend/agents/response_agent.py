@@ -45,21 +45,26 @@ class BlockList:
 
 class ResponseAgent:
     """
-    Executes automated responses based on alert severity.
+    Executes the (simulated) response to alerts.
 
-    Severity mapping:
-      HIGH   → Block IP (simulated) + Email notification
-      MEDIUM → Admin notification (simulated) 
-      LOW    → Log for review
+    Legacy mode (config.RULES_MODE "legacy"), by alert severity:
+      HIGH   -> block IP (simulated) + email
+      MEDIUM -> admin notification (simulated)
+      LOW    -> log for review
 
-    In production, the simulated actions would interface with
-    a firewall API (e.g. iptables, AWS Security Groups, Palo Alto)
-    and a ticketing system (e.g. PagerDuty, ServiceNow).
+    v3 mode: the graded policy of eval/PROTOCOL.md amendment 6, per incident
+    (source IP, calendar day), from agents/triage.py:
+      block    -> TTL block of the IP (BLOCK_TTL_SECONDS of event time)
+      step_up  -> simulated MFA challenge for the IP's logins
+                  (STEP_UP_TTL_SECONDS); recorded, never enforced
+      queue    -> placed in the analyst queue
+      log      -> logged only
+    One email per incident on entering an EMAIL_TIERS tier (cooldown, hourly
+    limit and digest in agents/triage.IncidentNotifier). Nothing here is
+    enforced: a production system would call a firewall or IdP API.
     """
 
-    def __init__(self, email_alerter=None, mode=None):
-        # "legacy": block on SIMULATED_BLOCK_SEVERITIES. "v3": block only on
-        # alerts from config.V3_BLOCK_DETECTORS, into a TTL block list.
+    def __init__(self, email_alerter=None, mode=None, email_log_max=1000):
         self.mode = mode or config.RULES_MODE
         self.block_list = BlockList(config.BLOCK_TTL_SECONDS)
         # Bounded: a long live run must not keep every alert in memory (F23).
@@ -67,12 +72,62 @@ class ResponseAgent:
         # Injectable so the evaluation harness can stub email out.
         self.email_alerter = email_alerter if email_alerter is not None else EmailAlerter()
         self.last_response = None
+        if self.mode == "v3":
+            from agents.triage import IncidentNotifier, IncidentTriage
+            self.triage = IncidentTriage()
+            self.challenge_list = BlockList(config.STEP_UP_TTL_SECONDS)
+            self.notifier = IncidentNotifier(self.email_alerter)
+            if email_log_max is not None:
+                self.notifier.log = deque(maxlen=email_log_max)
+            self.queue = deque(maxlen=config.ACTIONS_LOG_MAX)   # recent queue placements
+
+    # ── v3: per event and per incident ─────────────────────────────────────
+
+    def status(self, event):
+        """Block / challenge state of the event's IP before the event."""
+        t = epoch_seconds(event["timestamp"])
+        ip = event.get("ip")
+        return {"blocked": self.block_list.is_blocked(ip, t),
+                "challenged": self.challenge_list.is_blocked(ip, t)}
+
+    def observe(self, event):
+        """Every non-duplicate event, before its alerts are assessed."""
+        t = epoch_seconds(event["timestamp"])
+        self.notifier.flush(t)
+        self.triage.observe(event, t)
+
+    def assess(self, event, alerts):
+        """
+        Score the event's incident from its rule alerts, place the tier's
+        block or challenge, and notify once per incident. Returns the
+        incident (shared by every alert of the event) or None.
+        """
+        t = epoch_seconds(event["timestamp"])
+        incident = self.triage.assess(event, t, [a.get("type") for a in alerts])
+        if incident is None:
+            return None
+        ip, tier = incident["ip"], incident["tier"]
+        if tier == "block":
+            self.block_list.block(ip, t)
+        elif tier == "step_up":
+            self.challenge_list.block(ip, t)
+        elif tier == "queue" and incident["previous_tier"] != "queue":
+            self.queue.append(incident["incident_id"])
+        incident["email"] = (self.notifier.notify(incident, t)
+                             if self.notifier.wants(incident) else "not_required")
+        return incident
+
+    def flush(self):
+        """Send a pending email digest now (end of a run)."""
+        if self.mode == "v3":
+            self.notifier.flush()
 
     def decide(self, alert):
         """
         The response policy for an alert, before anything is executed.
         email is "pending" (will be sent), "disabled" (would be sent but
-        email is not configured) or "not_required".
+        email is not configured) or "not_required"; in v3 it is the
+        incident's notification outcome.
         """
         severity = alert.get("severity", "LOW")
         ip       = alert.get("ip",       "Unknown IP")
@@ -102,25 +157,25 @@ class ResponseAgent:
         }
 
     def _decide_v3(self, alert):
-        severity = alert.get("severity", "LOW")
-        ip       = alert.get("ip",       "Unknown IP")
-        user     = alert.get("user",     "Unknown User")
-        block = alert.get("type") in config.V3_BLOCK_DETECTORS
-        if block:
-            action = f"Simulated: Block IP {ip} for {config.BLOCK_TTL_SECONDS} s."
-        elif severity in config.ADMIN_NOTIFY_SEVERITIES:
-            action = f"Simulated: Notify admin about {user} at {ip} (alert only)."
-        else:
-            action = f"Simulated: Log alert for {ip} (alert only)."
-        if severity in config.EMAIL_SEVERITIES:
-            email = "pending" if getattr(self.email_alerter, "enabled", True) else "disabled"
-        else:
-            email = "not_required"
+        ip = alert.get("ip", "Unknown IP")
+        incident = alert.get("incident") or {}
+        tier = incident.get("tier", "log")
+        action = {
+            "block":   f"Simulated: Block IP {ip} for {config.BLOCK_TTL_SECONDS} s (incident tier block).",
+            "step_up": (f"Simulated: Step-up challenge (MFA) for logins from {ip} for "
+                        f"{config.STEP_UP_TTL_SECONDS} s (not enforced)."),
+            "queue":   f"Placed incident {incident.get('incident_id', ip)} in the analyst queue.",
+            "log":     f"Logged alert for {ip}.",
+        }[tier]
         return {
             "action":            action,
-            "simulated_block":   block,
-            "admin_notify_simulated": severity in config.ADMIN_NOTIFY_SEVERITIES,
-            "email":             email,
+            "tier":              tier,
+            "incident_id":       incident.get("incident_id"),
+            "simulated_block":   tier == "block",
+            "step_up":           tier == "step_up",
+            "queue":             tier == "queue",
+            "admin_notify_simulated": tier == "queue",
+            "email":             incident.get("email", "not_required"),
         }
 
     def is_blocked(self, ip, timestamp):
@@ -131,16 +186,14 @@ class ResponseAgent:
         """
         Execute the response. Returns the action text; the full outcome,
         with email "sent" or "failed" once attempted, is in last_response.
+        In v3 the block, challenge and email are per incident (assess()).
         """
         response = self.decide(alert)
         action = response["action"]
 
-        if response["email"] == "pending":
+        if self.mode != "v3" and response["email"] == "pending":
             sent = self.email_alerter.send_alert(alert)
             response["email"] = "sent" if sent else "failed"
-
-        if self.mode == "v3" and response["simulated_block"] and alert.get("timestamp"):
-            self.block_list.block(alert.get("ip"), epoch_seconds(alert["timestamp"]))
 
         self.last_response = response
         self.actions_log.append({

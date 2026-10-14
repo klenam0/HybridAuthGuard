@@ -105,6 +105,13 @@ ML_FAILED_RATE_WINDOW_DAYS = 30
 # amendment 4 fallback applied, v4 scores every event but raises no ML alert.
 ML_MODE = "legacy"
 ML_V4_MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "model_v4.pkl")
+# The v4 Isolation Forest (model_v4.pkl, Phase 4 fallback, alerting off).
+# "retired" (eval/PROTOCOL.md amendment 6): the chosen triage score T2 reads
+# the ASN prior failure ratio itself (agents/triage.AsnReputation), the
+# forest makes no decision, so v4 runs no ML step and loads no model; the
+# only v4 feature computed is the one the triage needs. "on" restores the
+# Phase 4 behaviour (score every event, never alert).
+ML_V4_IFOREST = "retired"
 
 # ── ML (ml/anomaly_model.py, ml/train_from_dataset.py, main.py) ───────────
 ML_CONTAMINATION = 0.4                     # deployed RBA model (ADR-13)
@@ -220,27 +227,13 @@ SIMULATED_BLOCK_SEVERITIES = ("HIGH",)
 EMAIL_SEVERITIES = ("HIGH",)
 ADMIN_NOTIFY_SEVERITIES = ("MEDIUM",)
 
-# v3 response policy (RULES_MODE = "v3"). Blocking is a response-layer
-# block list with a TTL in event time; detection never consults it. Only
-# alerts from V3_BLOCK_DETECTORS place a (simulated) block; every other
-# detector alerts only. Empty: under eval/PROTOCOL.md amendment 3 every
-# detector, ML included, is alert-only; the blocking policy is Phase 5's.
+# v3 response policy (RULES_MODE = "v3"): the incident tiers below
+# (agents/triage.py, eval/PROTOCOL.md amendment 6). Blocking is a
+# response-layer block list with a TTL in event time; detection never
+# consults it. V3_BLOCK_DETECTORS (per-detector blocking, amendments 2-3) is
+# superseded by the tiers and stays empty.
 BLOCK_TTL_SECONDS = 3600
 V3_BLOCK_DETECTORS = ()
-# Severity per v3 alert type (email for HIGH, admin notice for MEDIUM):
-# HIGH for the detectors that blocked under the Phase 3 interim policy,
-# MEDIUM for the advisory ones (to be revisited with the Phase 5 policy).
-V3_SEVERITY_MAP = {
-    "Brute Force Attack":       "HIGH",
-    "Slow Brute Force":         "HIGH",
-    "Credential Stuffing":      "HIGH",
-    "Invalid Account Spraying": "HIGH",
-    "Distributed Brute Force":  "HIGH",
-    "Success After Failures":   "HIGH",
-    "Multiple IP Login":        "MEDIUM",
-    "Suspicious Login Time":    "MEDIUM",
-    "ML Anomaly Detected":      "HIGH",
-}
 
 # ── Incident triage and response tiers (agents/triage.py; RULES_MODE "v3") ─
 # eval/PROTOCOL.md amendment 6. An incident is (source IP, calendar day);
@@ -248,8 +241,11 @@ V3_SEVERITY_MAP = {
 # rate-based: a tier's cutoff on day d is the k-th highest final incident
 # score of the previous day with incidents (k = RESPONSE_TIER_RATES[tier];
 # 0 = the tier is off). Highest tier wins: block > step_up > queue > log.
-TRIAGE_SCORE = "T0"
-RESPONSE_TIER_RATES = {"block": 0, "step_up": 0, "queue": 500}
+# Chosen on val_a (results/phase5_selection.json): T2 = (detector tier,
+# max ASN prior failure ratio). Block: no rate reached the 0.80 lower bound,
+# so there is no block tier. Step-up: the largest rate whose band met 0.2149.
+TRIAGE_SCORE = "T2"
+RESPONSE_TIER_RATES = {"block": 0, "step_up": 5000, "queue": 500}
 # val_a alert precision (point estimate) of each rule detector at its
 # amendment 3 setting: the T0/T2 detector tier (results/phase3b_selection.json).
 TRIAGE_DETECTOR_PRECISION = {
@@ -280,6 +276,48 @@ def triage_t3_params():
 EMAIL_TIERS = ("block", "step_up")
 EMAIL_MAX_PER_HOUR = int(os.environ.get("EMAIL_MAX_PER_HOUR", "20"))
 EMAIL_IP_COOLDOWN_SECONDS = int(os.environ.get("EMAIL_IP_COOLDOWN_SECONDS", "86400"))
+
+# Severity of a v3 alert = its incident tier's (derived, not hand-set):
+# the email tiers are HIGH, the analyst queue MEDIUM, log only LOW.
+V3_SEVERITY_MAP = {tier: ("HIGH" if tier in EMAIL_TIERS else "MEDIUM" if tier == "queue" else "LOW")
+                   for tier in ("block", "step_up", "queue", "log")}
+
+# Incident precision of each tier measured on val_a (the deployed causal
+# run, eval/phase5.py `response`; 95% IP-clustered bootstrap interval) and
+# the bar its rate was chosen against. Source: results/phase5_response.json.
+RESPONSE_TIER_VAL_A = {
+    "block":   {"incidents": 0, "precision": None, "ci_low": None, "ci_high": None, "bar": 0.80},
+    "step_up": {"incidents": 81023, "precision": 0.23619219234044653,
+                "ci_low": 0.22594324386494108, "ci_high": 0.2463267424897642, "bar": 0.2149},
+    "queue":   {"incidents": 0, "precision": None, "ci_low": None, "ci_high": None, "bar": None},
+    "log":     {"incidents": 33921, "precision": 0.0334600984640783,
+                "ci_low": 0.0313664518430941, "ci_high": 0.03568401925765111, "bar": None},
+}
+
+
+def response_policy_table():
+    """The v3 policy table (tier, threshold, measured val_a precision)."""
+    actions = {
+        "block": f"block the IP for {BLOCK_TTL_SECONDS} s (simulated)",
+        "step_up": f"step-up challenge (simulated MFA) for {STEP_UP_TTL_SECONDS} s, not enforced",
+        "queue": "analyst queue",
+        "log": "log only",
+    }
+    rows = []
+    for tier in ("block", "step_up", "queue", "log"):
+        k = RESPONSE_TIER_RATES.get(tier, 0)
+        if tier == "log":
+            threshold = "every incident below the tiers above"
+        elif k:
+            threshold = (f"running {TRIAGE_SCORE} score >= the {k}th highest final score "
+                         f"of the previous day with incidents ({k}/day)")
+        else:
+            threshold = "off: no rate met the bar on val_a"
+        rows.append({"tier": tier, "enabled": bool(k) or tier == "log", "rate_per_day": k or None,
+                     "threshold": threshold, "action": actions[tier],
+                     "email": tier in EMAIL_TIERS, "severity": V3_SEVERITY_MAP[tier],
+                     "val_a": dict(RESPONSE_TIER_VAL_A[tier])})
+    return rows
 
 # ── Email (utils/email_alerter.py) ────────────────────────────────────────
 SMTP_HOST = "smtp.gmail.com"
@@ -322,6 +360,10 @@ INGEST_MAX_FIELD_CHARS = {
     "status": 16,
     "country": 64,
     "device_type": 64,
+    "region": 128,
+    "user_agent": 1024,
+    "browser": 128,
+    "os": 128,
 }
 
 DETECTORS = [
@@ -346,11 +388,21 @@ V3_DETECTORS = [
 ]
 
 
+def active_detectors():
+    """The detectors of the configured engine (the ML step only if it runs)."""
+    if RULES_MODE == "legacy":
+        return list(DETECTORS)
+    if ML_MODE == "v4" and ML_V4_IFOREST == "retired":
+        return [d for d in V3_DETECTORS if d != "ML Anomaly Detected"]
+    return list(V3_DETECTORS)
+
+
 def public_config():
     """Read-only view served at /api/config. No secrets belong here."""
     return {
         "rules_mode": RULES_MODE,
         "ml_mode": ML_MODE,
+        "ml_v4_iforest": ML_V4_IFOREST,
         "rules": {
             "brute_force_threshold": BRUTE_FORCE_THRESHOLD,
             "suspicious_hour_start": SUSPICIOUS_HOUR_START,
@@ -386,8 +438,18 @@ def public_config():
             "simulated_block_severities": list(SIMULATED_BLOCK_SEVERITIES),
             "email_severities": list(EMAIL_SEVERITIES),
             "admin_notify_severities": list(ADMIN_NOTIFY_SEVERITIES),
+            "v3_policy": {
+                "triage_score": TRIAGE_SCORE,
+                "tier_rates": dict(RESPONSE_TIER_RATES),
+                "table": response_policy_table(),
+                "block_ttl_seconds": BLOCK_TTL_SECONDS,
+                "step_up_ttl_seconds": STEP_UP_TTL_SECONDS,
+                "email": {"tiers": list(EMAIL_TIERS), "max_per_hour": EMAIL_MAX_PER_HOUR,
+                          "ip_cooldown_seconds": EMAIL_IP_COOLDOWN_SECONDS,
+                          "over_limit": "hourly digest"},
+            },
         },
-        "detectors": list(DETECTORS) if RULES_MODE == "legacy" else list(V3_DETECTORS),
+        "detectors": active_detectors(),
         "v3": {
             "unknown_account_ids": list(UNKNOWN_ACCOUNT_IDS),
             "brute_force": {"window_s": V3_BF_WINDOW_SECONDS, "min_failures": V3_BF_MIN_FAILURES},
@@ -407,7 +469,7 @@ def public_config():
             "dedup_seconds": dict(V3_DEDUP_SECONDS),
             "block_ttl_seconds": BLOCK_TTL_SECONDS,
             "block_detectors": list(V3_BLOCK_DETECTORS),
-            "severity": dict(V3_SEVERITY_MAP),
+            "severity_by_tier": dict(V3_SEVERITY_MAP),
             "ml_failed_rate_window_days": ML_FAILED_RATE_WINDOW_DAYS,
         },
     }

@@ -7,7 +7,7 @@ from datetime import datetime
 from .detection_agent import DetectionAgent
 from .analysis_agent  import AnalysisAgent
 from .response_agent  import ResponseAgent
-from utils.alert_manager import AlertManager
+from utils.alert_manager import open_alert_store
 from utils.event_schema import normalize_event
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,18 +16,22 @@ log = logging.getLogger(__name__)
 
 class MonitoringAgent:
 
-    def __init__(self, log_file=None, threshold=None, anomaly_detector=None):
+    def __init__(self, log_file=None, threshold=None, anomaly_detector=None,
+                 alert_manager=None, responder=None):
         self.log_file        = log_file
         self.detector        = DetectionAgent(
             threshold=threshold,
             anomaly_detector=anomaly_detector
         )
         self.analyzer        = AnalysisAgent()
-        self.responder       = ResponseAgent()
-        self.alert_manager   = AlertManager()
+        self.responder       = responder if responder is not None else ResponseAgent()
+        # v3: SQLite (data/alerts.db); legacy: data/alerts.json.
+        self.alert_manager   = alert_manager if alert_manager is not None else open_alert_store()
         self.alerts_generated = 0
         self.events_processed = 0
-        self.blocked_source_events = 0   # v3: events from an IP on the block list
+        self.blocked_source_events = 0     # v3: events from an IP on the block list
+        self.challenged_source_events = 0  # v3: events from an IP under step-up
+        self.duplicate_events = 0          # v3: repeated deliveries, ignored
         self.start_time       = None
 
         self._stats_path = os.path.join(BASE, "data", "pipeline_stats.json")
@@ -41,13 +45,10 @@ class MonitoringAgent:
         """
         Run a single log event through the full detection pipeline. Every
         alert the engine raises for the event is analysed, saved and acted
-        on. Under the v3 engine an event from an address on the response
-        layer's block list is still detected as usual; it is counted and
-        logged as "event from blocked source", and its alerts carry
-        blocked_source=True.
+        on. The v3 engine has its own path (_process_event_v3).
         """
-        v3 = self.responder.mode == "v3"
-        blocked = v3 and self.responder.is_blocked(event.get("ip"), event.get("timestamp"))
+        if self.responder.mode == "v3":
+            return self._process_event_v3(event)
         alerts = self.detector.analyze_all(event)
         self.events_processed += 1
 
@@ -56,14 +57,9 @@ class MonitoringAgent:
         ip   = event.get("ip", "?")
         st   = event.get("status", "?")
         log.info("🟢 %s | %s @ %s | %s", ts, user, ip, st)
-        if blocked:
-            self.blocked_source_events += 1
-            log.info("⛔ Event from blocked source %s (detection still applied)", ip)
 
         for alert in alerts:
             alert["timestamp"] = event.get("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-            if v3:
-                alert["blocked_source"] = blocked
             analyzed = self.analyzer.evaluate_alert(alert)
             # Store what the response layer will do, then the real outcome
             # (e.g. whether the email was actually sent) once it has run.
@@ -74,6 +70,49 @@ class MonitoringAgent:
             outcome = self.responder.last_response
             if outcome is not None and outcome != analyzed["response"]:
                 self.alert_manager.update_fields(analyzed["alert_id"], {"response": outcome})
+            self.alerts_generated += 1
+
+    def _process_event_v3(self, event):
+        """
+        v3: the IP's block / step-up state before the event, detection, the
+        incident's triage (agents/triage.py), then every alert analysed
+        (severity from the incident's tier), saved and acted on. An event
+        from a blocked or challenged address is still detected as usual;
+        it is counted, logged, and its alerts carry blocked_source /
+        challenged_source. A repeated delivery is counted and skipped.
+        """
+        state = self.responder.status(event)
+        det = self.detector.analyze(event)
+        self.events_processed += 1
+
+        ts, ip = event.get("timestamp", ""), event.get("ip", "?")
+        log.info("🟢 %s | %s @ %s | %s", ts, event.get("user", "?"), ip, event.get("status", "?"))
+        if det.duplicate:
+            self.duplicate_events += 1
+            return
+        self.responder.observe(event)
+        if state["blocked"]:
+            self.blocked_source_events += 1
+            log.info("⛔ Event from blocked source %s (detection still applied)", ip)
+        elif state["challenged"]:
+            self.challenged_source_events += 1
+            log.info("🔐 Step-up challenge (simulated, not enforced) for login from %s", ip)
+        if not det.alerts:
+            return
+
+        incident = self.responder.assess(event, det.alerts)
+        for alert in det.alerts:
+            alert["timestamp"] = event.get("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            alert["blocked_source"] = state["blocked"]
+            alert["challenged_source"] = state["challenged"]
+            if incident is not None:
+                alert["incident"] = dict(incident)
+            analyzed = self.analyzer.evaluate_alert(alert)
+            analyzed["response"] = self.responder.decide(analyzed)
+            log.info(f"🚨 ALERT: {analyzed.get('type')} | {analyzed.get('severity')} | "
+                     f"{analyzed['response']['tier']} | #{analyzed.get('alert_id','?')}")
+            self.alert_manager.save_alert(analyzed)
+            self.responder.take_action(analyzed)
             self.alerts_generated += 1
 
     # ── Batch mode ────────────────────────────────────────────────────────────
@@ -98,6 +137,7 @@ class MonitoringAgent:
                 log.error("Skipping event that failed processing: %s: %s",
                           type(e).__name__, e)
 
+        self.responder.flush()
         self._save_stats()
         log.info(f"\n📊 Processed {self.events_processed} events → {self.alerts_generated} alerts")
 
@@ -134,6 +174,7 @@ class MonitoringAgent:
             log.info(f"\n\n⏹ Live streaming stopped after {elapsed}s")
             log.info(f"   Events processed: {self.events_processed:,}")
             log.info(f"   Alerts generated: {self.alerts_generated}")
+            self.responder.flush()
             self._save_stats()
 
     def _poll_queue(self, offset):
