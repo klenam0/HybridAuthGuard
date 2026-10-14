@@ -28,8 +28,11 @@ incident enters a tier at its first alerted event whose running score is
 >= the tier's cutoff while fewer than k incidents have entered that tier
 today, and stays there. Tiers admit from the top; an incident already in a
 higher tier takes no slot of a lower one, and a used slot is not returned.
-So a tier admits at most k incidents a day. The tier is the highest one
-entered: block > step_up > queue > log.
+So a tier admits at most k incidents a day. Score floor (amendment 8): an
+incident is admitted to a rated tier only at an event where it carries an
+alert of a config.RESPONSE_FLOOR_DETECTORS detector; until then it stays
+at log and uses no slot. The tier is the highest one entered: block >
+step_up > queue > log.
 
 Only the eight rule detectors (agents.rules_v3.RULE_DETECTORS) form
 incidents; ML alerts are not part of the incident features.
@@ -113,7 +116,8 @@ class _Incident:
 
 class IncidentTriage:
 
-    def __init__(self, score=None, rates=None, precision=None, t3=None, unknown_ids=None):
+    def __init__(self, score=None, rates=None, precision=None, t3=None, unknown_ids=None,
+                 floor=None):
         self.score_name = score or config.TRIAGE_SCORE
         if self.score_name not in SCORES:
             raise ValueError(f"unknown TRIAGE_SCORE {self.score_name!r}")
@@ -125,6 +129,10 @@ class IncidentTriage:
                                             if self.score_name == "T3" else None)
         ids = config.UNKNOWN_ACCOUNT_IDS if unknown_ids is None else unknown_ids
         self.unknown = frozenset(normalize_account(u) for u in ids)
+        floor = config.RESPONSE_FLOOR_DETECTORS if floor is None else floor
+        self.floor = 0                                    # 0: no floor
+        for x in floor:
+            self.floor |= 1 << _BIT[x]
         self.asn = AsnReputation()
         self.day = None
         self.ipday = {}
@@ -177,7 +185,8 @@ class IncidentTriage:
         inc.alerts += n
         inc.score = self.score(inc, d)
         before = inc.tier
-        for tier in RATED_TIERS:                  # top down
+        floor_ok = not self.floor or inc.mask & self.floor
+        for tier in (RATED_TIERS if floor_ok else ()):    # top down
             if tier in inc.regions:               # nothing below it can apply
                 break
             k = self.rates[tier]

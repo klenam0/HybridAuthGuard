@@ -277,6 +277,19 @@ TRIAGE_DETECTOR_PRECISION = {
     "Multiple IP Login":        0.1455357142857143,
     "Suspicious Login Time":    0.13086334010043807,
 }
+# Score floor (amendment 8): an incident enters a rated tier (block,
+# step-up, queue) only at an alerted event where it carries an alert of one
+# of these detectors: the five that met amendment 3's criterion on val_a and
+# held on val_b (results/phase3b_confirm.json). Incidents with only Brute
+# Force (failed on val_b), Multiple IP Login or Suspicious Login Time stay at
+# log. The cutoffs and the cap are unchanged. () = no floor.
+RESPONSE_FLOOR_DETECTORS = (
+    "Slow Brute Force",
+    "Credential Stuffing",
+    "Invalid Account Spraying",
+    "Distributed Brute Force",
+    "Success After Failures",
+)
 # T3 (logistic regression, dev_train incidents) parameters, if chosen.
 TRIAGE_T3 = None
 STEP_UP_TTL_SECONDS = 3600
@@ -302,16 +315,17 @@ V3_SEVERITY_MAP = {tier: ("HIGH" if tier in EMAIL_TIERS else "MEDIUM" if tier ==
                    for tier in ("block", "step_up", "queue", "log")}
 
 # Incident precision of each tier measured on val_a (the deployed causal
-# run, eval/phase5b.py `response`; 95% IP-clustered bootstrap interval) and
-# the bar its rate was chosen against. Source: results/phase5b_response.json.
+# run with the amendment 8 floor, eval/phase5c.py `floor`; 95% IP-clustered
+# bootstrap interval) and the bar its rate was chosen against (amendment 7,
+# without the floor). Source: results/phase5c_floor.json.
 RESPONSE_TIER_VAL_A = {
     "block":   {"incidents": 0, "precision": None, "ci_low": None, "ci_high": None, "bar": 0.80},
-    "step_up": {"incidents": 3143, "precision": 0.45529748647788737,
-                "ci_low": 0.4267034165160253, "ci_high": 0.48310723715143405, "bar": 0.2149},
+    "step_up": {"incidents": 3142, "precision": 0.4563971992361553,
+                "ci_low": 0.42947546255261687, "ci_high": 0.48383047733446194, "bar": 0.2149},
     "queue":   {"incidents": 7935, "precision": 0.2838059231253938,
                 "ci_low": 0.265716433623392, "ci_high": 0.3032622786276811, "bar": None},
-    "log":     {"incidents": 103866, "precision": 0.15971540253788535,
-                "ci_low": 0.15331378609441376, "ci_high": 0.16633562562914908, "bar": None},
+    "log":     {"incidents": 103867, "precision": 0.15968498175551427,
+                "ci_low": 0.15293680258547893, "ci_high": 0.1664921317126258, "bar": None},
 }
 
 
@@ -331,6 +345,8 @@ def response_policy_table():
         elif k:
             threshold = (f"running {TRIAGE_SCORE} score >= the {k}th highest final score "
                          f"of the previous day with incidents, first {k} incidents a day")
+            if RESPONSE_FLOOR_DETECTORS:
+                threshold += ", only incidents with an alert of " + ", ".join(RESPONSE_FLOOR_DETECTORS)
         else:
             threshold = "off: no rate met the bar on val_a"
         rows.append({"tier": tier, "enabled": bool(k) or tier == "log", "rate_per_day": k or None,
@@ -461,6 +477,7 @@ def public_config():
             "v3_policy": {
                 "triage_score": TRIAGE_SCORE,
                 "tier_rates": dict(RESPONSE_TIER_RATES),
+                "floor_detectors": list(RESPONSE_FLOOR_DETECTORS),
                 "table": response_policy_table(),
                 "block_ttl_seconds": BLOCK_TTL_SECONDS,
                 "step_up_ttl_seconds": STEP_UP_TTL_SECONDS,

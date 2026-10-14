@@ -45,6 +45,7 @@ def v3(monkeypatch):
     # policy has no block tier).
     monkeypatch.setattr(config, "TRIAGE_SCORE", "T0")
     monkeypatch.setattr(config, "RESPONSE_TIER_RATES", {"block": 1, "step_up": 0, "queue": 0})
+    monkeypatch.setattr(config, "RESPONSE_FLOOR_DETECTORS", ())
     return monkeypatch
 
 

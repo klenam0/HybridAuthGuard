@@ -61,11 +61,14 @@ def v3(monkeypatch):
         monkeypatch.setattr(config, k, v, raising=False)
     monkeypatch.setattr(config, "UNKNOWN_ACCOUNT_IDS", [PLACEHOLDER])
     monkeypatch.setattr(config, "ML_MODE", "legacy")
+    # Amendment 6/7 mechanics; the floor (amendment 8) has its own tests.
+    monkeypatch.setattr(config, "RESPONSE_FLOOR_DETECTORS", ())
     return monkeypatch
 
 
-def tracker(score="T1", rates=None):
-    return TR.IncidentTriage(score=score, rates=rates or {"block": 1, "step_up": 2, "queue": 3})
+def tracker(score="T1", rates=None, floor=()):
+    return TR.IncidentTriage(score=score, rates=rates or {"block": 1, "step_up": 2, "queue": 3},
+                             floor=floor)
 
 
 def inc(ip, tier, prev="log"):
@@ -166,6 +169,35 @@ def test_queue_incident_moves_up_when_a_step_up_slot_opens_later():
     out = tr.assess(ev("2.2.2.2"), DAY + 2, [CS])          # now 2 detectors
     assert (out["tier"], out["previous_tier"]) == ("step_up", "queue")
     assert tr.admitted == {"block": 0, "step_up": 1, "queue": 1}   # the queue slot stays used
+
+
+def test_floor_keeps_incidents_without_a_surviving_detector_at_log():
+    """Amendment 8: an incident is admitted only at an event where it carries
+    an alert of a floor detector; below the floor it uses no slot."""
+    tr = tracker("T1", {"block": 0, "step_up": 1, "queue": 5}, floor=(CS,))
+    ev = lambda ip: {"ip": ip, "user": "u", "status": "FAILED", "asn": 1}   # noqa: E731
+    tr.observe(ev("9.9.9.9"), 5)
+    tr.assess(ev("9.9.9.9"), 5, [CS])            # day 0: one incident -> every one qualifies
+    tr.observe(ev("1.1.1.1"), DAY + 1)
+    a = tr.assess(ev("1.1.1.1"), DAY + 1, [OFF, BF])
+    assert a["tier"] == "log" and tr.admitted == {"block": 0, "step_up": 0, "queue": 0}
+    tr.observe(ev("2.2.2.2"), DAY + 2)
+    assert tr.assess(ev("2.2.2.2"), DAY + 2, [CS])["tier"] == "step_up"
+    # A below-floor incident enters once a floor detector alerts in it.
+    out = tr.assess(ev("1.1.1.1"), DAY + 3, [CS])
+    assert (out["tier"], out["previous_tier"]) == ("queue", "log")
+
+
+def test_deployed_floor_is_the_phase3b_survivors():
+    assert TR.IncidentTriage().floor != 0
+    p = os.path.join(BACKEND, "results", "phase3b_confirm.json")
+    if not os.path.exists(p):
+        pytest.skip("Phase 3b results not present")
+    conf = json.load(open(p))["detectors"]
+    assert list(config.RESPONSE_FLOOR_DETECTORS) == [
+        d for d in TR.RULE_DETECTORS if conf[d]["val_a_meets"] and conf[d]["val_b_holds"]]
+    assert set(TR.RULE_DETECTORS) - set(config.RESPONSE_FLOOR_DETECTORS) == {
+        BF, "Multiple IP Login", OFF}
 
 
 def test_asn_reputation_matches_features_v4():
@@ -288,6 +320,11 @@ def test_config_holds_the_val_a_choice_and_measured_tiers():
     t = sel["tiers"]
     assert config.RESPONSE_TIER_RATES == {"block": t["block_rate"], "step_up": t["step_up_rate"],
                                           "queue": t["queue_rate"]}
+    floor_p = os.path.join(BACKEND, "results", "phase5c_floor.json")
+    if os.path.exists(floor_p):     # amendment 8: the table shows the floored run
+        fl = json.load(open(floor_p))
+        assert fl["floor"] == list(config.RESPONSE_FLOOR_DETECTORS) and fl["rates"] == config.RESPONSE_TIER_RATES
+        resp = {"tiers_per_half": {"val_a": fl["halves"]["val_a"]["with_floor"]["tiers"]}}
     for tier, r in resp["tiers_per_half"]["val_a"].items():
         c = config.RESPONSE_TIER_VAL_A[tier]
         assert c["incidents"] == r["incidents"]

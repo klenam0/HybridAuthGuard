@@ -62,17 +62,21 @@ def cpath(name):
 
 # ── Capped admission (offline twin of agents/triage.IncidentTriage) ──────────
 
-def capped_entries(C, rates):
+def capped_entries(C, rates, floor=()):
     """Per rated tier: per incident, the index (into I.p) of the alerted
     event at which it entered the tier, or -1. Top down: an event is
     eligible for a tier if the running rank reaches the day's cutoff and the
     incident is not yet in a higher tier; each day the first k eligible
-    incidents (by their first eligible event, stream order) are admitted."""
+    incidents (by their first eligible event, stream order) are admitted.
+    `floor` (amendment 8): detectors of which the incident must carry an
+    alert at the event (running indicator); () = no floor."""
     I = C.I
     n_ev = len(I.p)
     pos = np.arange(n_ev)
     ev_day_idx = np.searchsorted(C.days, I.day[I.inc])
     higher = np.full(I.n_inc, -1, np.int64)          # earliest entry into a higher tier
+    floor_ok = (I.ind[:, [P5.DETS.index(d) for d in floor]].any(1) if floor
+                else np.ones(n_ev, bool))
     out = {}
     for tier in TR.RATED_TIERS:
         k = int(rates.get(tier) or 0)
@@ -80,7 +84,7 @@ def capped_entries(C, rates):
             continue
         cut = C.cutoff(k)
         c_ev = np.array([cut[int(d)] for d in C.days], dtype=np.float64)
-        hit = C.rank >= c_ev[ev_day_idx]
+        hit = (C.rank >= c_ev[ev_day_idx]) & floor_ok
         h = higher[I.inc]
         elig = hit & ~((h >= 0) & (pos >= h))
         first = np.full(I.n_inc, n_ev, np.int64)
@@ -98,9 +102,9 @@ def capped_entries(C, rates):
     return out
 
 
-def run(S, C, rates):
+def run(S, C, rates, floor=()):
     rates = {t: int(rates.get(t) or 0) for t in TR.RATED_TIERS}
-    D = P5.deployed_run(S, C, capped_entries(C, rates), rates)
+    D = P5.deployed_run(S, C, capped_entries(C, rates, floor), rates)
     tier_inc = np.full(C.I.n_inc, 3, np.int8)
     np.minimum.at(tier_inc, C.I.inc, D["tier_ev"])
     D["tier_inc"] = tier_inc

@@ -1,0 +1,910 @@
+{
+  "protocol": "eval/PROTOCOL.md amendment 8",
+  "chosen": "T2",
+  "rates": {
+    "block": 0,
+    "step_up": 200,
+    "queue": 500
+  },
+  "floor": [
+    "Slow Brute Force",
+    "Credential Stuffing",
+    "Invalid Account Spraying",
+    "Distributed Brute Force",
+    "Success After Failures"
+  ],
+  "previously_seen": "val_a and val_b are both previously seen",
+  "halves": {
+    "val_a": {
+      "previously_seen": true,
+      "without_floor": {
+        "tiers": {
+          "block": {
+            "incidents": 0,
+            "attack_incidents": 0,
+            "precision": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "attacking_ips": 0,
+            "benign_incident_ips": 0,
+            "per_day": 0.0
+          },
+          "step_up": {
+            "incidents": 3143,
+            "attack_incidents": 1431,
+            "precision": 0.45529748647788737,
+            "ci_low": 0.4267034165160253,
+            "ci_high": 0.48310723715143405,
+            "attacking_ips": 752,
+            "benign_incident_ips": 1299,
+            "per_day": 196.4375
+          },
+          "queue": {
+            "incidents": 7935,
+            "attack_incidents": 2252,
+            "precision": 0.2838059231253938,
+            "ci_low": 0.265716433623392,
+            "ci_high": 0.3032622786276811,
+            "attacking_ips": 770,
+            "benign_incident_ips": 1748,
+            "per_day": 495.9375
+          },
+          "log": {
+            "incidents": 103866,
+            "attack_incidents": 16589,
+            "precision": 0.15971540253788535,
+            "ci_low": 0.15331378609441376,
+            "ci_high": 0.16633562562914908,
+            "attacking_ips": 3441,
+            "benign_incident_ips": 49375,
+            "per_day": 6491.625
+          }
+        },
+        "step_up_cost": {
+          "all": {
+            "ips_placed_attacking": 752,
+            "ips_placed_benign": 1299,
+            "legitimate_users_affected": 1097,
+            "legitimate_users_per_day": 69.75,
+            "benign_events_affected": 3768,
+            "attack_events_affected": 2735,
+            "legitimate_users_max_day": 189
+          },
+          "excl_placeholder": {
+            "ips_placed_attacking": 752,
+            "ips_placed_benign": 1299,
+            "legitimate_users_affected": 1097,
+            "legitimate_users_per_day": 69.75,
+            "benign_events_affected": 2294,
+            "attack_events_affected": 1331
+          },
+          "cold_users": {
+            "ips_placed_attacking": 746,
+            "ips_placed_benign": 1273,
+            "legitimate_users_affected": 884,
+            "legitimate_users_per_day": 55.8125,
+            "benign_events_affected": 1830,
+            "attack_events_affected": 1042
+          },
+          "new_attackers": {
+            "ips_placed_attacking": 7,
+            "ips_placed_benign": 1299,
+            "legitimate_users_affected": 1097,
+            "legitimate_users_per_day": 69.75,
+            "benign_events_affected": 3768,
+            "attack_events_affected": 24
+          },
+          "returning_attackers": {
+            "ips_placed_attacking": 745,
+            "ips_placed_benign": 0,
+            "legitimate_users_affected": 0,
+            "legitimate_users_per_day": 0.0,
+            "benign_events_affected": 0,
+            "attack_events_affected": 2711
+          }
+        }
+      },
+      "with_floor": {
+        "tiers": {
+          "block": {
+            "incidents": 0,
+            "attack_incidents": 0,
+            "precision": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "attacking_ips": 0,
+            "benign_incident_ips": 0,
+            "per_day": 0.0
+          },
+          "step_up": {
+            "incidents": 3142,
+            "attack_incidents": 1434,
+            "precision": 0.4563971992361553,
+            "ci_low": 0.42947546255261687,
+            "ci_high": 0.48383047733446194,
+            "attacking_ips": 753,
+            "benign_incident_ips": 1294,
+            "per_day": 196.375
+          },
+          "queue": {
+            "incidents": 7935,
+            "attack_incidents": 2252,
+            "precision": 0.2838059231253938,
+            "ci_low": 0.265716433623392,
+            "ci_high": 0.3032622786276811,
+            "attacking_ips": 770,
+            "benign_incident_ips": 1748,
+            "per_day": 495.9375
+          },
+          "log": {
+            "incidents": 103867,
+            "attack_incidents": 16586,
+            "precision": 0.15968498175551427,
+            "ci_low": 0.15293680258547893,
+            "ci_high": 0.1664921317126258,
+            "attacking_ips": 3441,
+            "benign_incident_ips": 49380,
+            "per_day": 6491.6875
+          }
+        },
+        "step_up_cost": {
+          "all": {
+            "ips_placed_attacking": 753,
+            "ips_placed_benign": 1294,
+            "legitimate_users_affected": 1092,
+            "legitimate_users_per_day": 69.4375,
+            "benign_events_affected": 3734,
+            "attack_events_affected": 2741,
+            "legitimate_users_max_day": 189
+          },
+          "excl_placeholder": {
+            "ips_placed_attacking": 753,
+            "ips_placed_benign": 1294,
+            "legitimate_users_affected": 1092,
+            "legitimate_users_per_day": 69.4375,
+            "benign_events_affected": 2262,
+            "attack_events_affected": 1337
+          },
+          "cold_users": {
+            "ips_placed_attacking": 747,
+            "ips_placed_benign": 1269,
+            "legitimate_users_affected": 880,
+            "legitimate_users_per_day": 55.5625,
+            "benign_events_affected": 1805,
+            "attack_events_affected": 1046
+          },
+          "new_attackers": {
+            "ips_placed_attacking": 7,
+            "ips_placed_benign": 1294,
+            "legitimate_users_affected": 1092,
+            "legitimate_users_per_day": 69.4375,
+            "benign_events_affected": 3734,
+            "attack_events_affected": 24
+          },
+          "returning_attackers": {
+            "ips_placed_attacking": 746,
+            "ips_placed_benign": 0,
+            "legitimate_users_affected": 0,
+            "legitimate_users_per_day": 0.0,
+            "benign_events_affected": 0,
+            "attack_events_affected": 2717
+          }
+        }
+      }
+    },
+    "val_b": {
+      "previously_seen": true,
+      "without_floor": {
+        "tiers": {
+          "block": {
+            "incidents": 0,
+            "attack_incidents": 0,
+            "precision": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "attacking_ips": 0,
+            "benign_incident_ips": 0,
+            "per_day": 0.0
+          },
+          "step_up": {
+            "incidents": 2891,
+            "attack_incidents": 1118,
+            "precision": 0.38671739882393635,
+            "ci_low": 0.3599290432405356,
+            "ci_high": 0.412035181711384,
+            "attacking_ips": 679,
+            "benign_incident_ips": 1384,
+            "per_day": 180.6875
+          },
+          "queue": {
+            "incidents": 6940,
+            "attack_incidents": 1907,
+            "precision": 0.27478386167146973,
+            "ci_low": 0.25673071558832566,
+            "ci_high": 0.29232439303811525,
+            "attacking_ips": 770,
+            "benign_incident_ips": 1822,
+            "per_day": 433.75
+          },
+          "log": {
+            "incidents": 106479,
+            "attack_incidents": 16058,
+            "precision": 0.15080907972464053,
+            "ci_low": 0.14451471668288432,
+            "ci_high": 0.1570322338351139,
+            "attacking_ips": 3471,
+            "benign_incident_ips": 52100,
+            "per_day": 6654.9375
+          }
+        },
+        "step_up_cost": {
+          "all": {
+            "ips_placed_attacking": 679,
+            "ips_placed_benign": 1384,
+            "legitimate_users_affected": 1443,
+            "legitimate_users_per_day": 90.9375,
+            "benign_events_affected": 4356,
+            "attack_events_affected": 2602,
+            "legitimate_users_max_day": 210
+          },
+          "excl_placeholder": {
+            "ips_placed_attacking": 679,
+            "ips_placed_benign": 1384,
+            "legitimate_users_affected": 1443,
+            "legitimate_users_per_day": 90.9375,
+            "benign_events_affected": 2761,
+            "attack_events_affected": 1221
+          },
+          "cold_users": {
+            "ips_placed_attacking": 676,
+            "ips_placed_benign": 1363,
+            "legitimate_users_affected": 1244,
+            "legitimate_users_per_day": 78.3125,
+            "benign_events_affected": 2354,
+            "attack_events_affected": 1029
+          },
+          "new_attackers": {
+            "ips_placed_attacking": 7,
+            "ips_placed_benign": 1384,
+            "legitimate_users_affected": 1443,
+            "legitimate_users_per_day": 90.9375,
+            "benign_events_affected": 4356,
+            "attack_events_affected": 4
+          },
+          "returning_attackers": {
+            "ips_placed_attacking": 672,
+            "ips_placed_benign": 0,
+            "legitimate_users_affected": 0,
+            "legitimate_users_per_day": 0.0,
+            "benign_events_affected": 0,
+            "attack_events_affected": 2598
+          }
+        }
+      },
+      "with_floor": {
+        "tiers": {
+          "block": {
+            "incidents": 0,
+            "attack_incidents": 0,
+            "precision": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "attacking_ips": 0,
+            "benign_incident_ips": 0,
+            "per_day": 0.0
+          },
+          "step_up": {
+            "incidents": 2885,
+            "attack_incidents": 1119,
+            "precision": 0.3878682842287695,
+            "ci_low": 0.36167745124682554,
+            "ci_high": 0.41502315024851544,
+            "attacking_ips": 679,
+            "benign_incident_ips": 1377,
+            "per_day": 180.3125
+          },
+          "queue": {
+            "incidents": 6940,
+            "attack_incidents": 1906,
+            "precision": 0.27463976945244956,
+            "ci_low": 0.25662106844828664,
+            "ci_high": 0.292100241896493,
+            "attacking_ips": 770,
+            "benign_incident_ips": 1822,
+            "per_day": 433.75
+          },
+          "log": {
+            "incidents": 106485,
+            "attack_incidents": 16058,
+            "precision": 0.1508005822416303,
+            "ci_low": 0.14426065748223207,
+            "ci_high": 0.15685894024432617,
+            "attacking_ips": 3471,
+            "benign_incident_ips": 52102,
+            "per_day": 6655.3125
+          }
+        },
+        "step_up_cost": {
+          "all": {
+            "ips_placed_attacking": 679,
+            "ips_placed_benign": 1377,
+            "legitimate_users_affected": 1433,
+            "legitimate_users_per_day": 90.3125,
+            "benign_events_affected": 4326,
+            "attack_events_affected": 2592,
+            "legitimate_users_max_day": 210
+          },
+          "excl_placeholder": {
+            "ips_placed_attacking": 679,
+            "ips_placed_benign": 1377,
+            "legitimate_users_affected": 1433,
+            "legitimate_users_per_day": 90.3125,
+            "benign_events_affected": 2732,
+            "attack_events_affected": 1215
+          },
+          "cold_users": {
+            "ips_placed_attacking": 676,
+            "ips_placed_benign": 1357,
+            "legitimate_users_affected": 1235,
+            "legitimate_users_per_day": 77.75,
+            "benign_events_affected": 2326,
+            "attack_events_affected": 1023
+          },
+          "new_attackers": {
+            "ips_placed_attacking": 7,
+            "ips_placed_benign": 1377,
+            "legitimate_users_affected": 1433,
+            "legitimate_users_per_day": 90.3125,
+            "benign_events_affected": 4326,
+            "attack_events_affected": 4
+          },
+          "returning_attackers": {
+            "ips_placed_attacking": 672,
+            "ips_placed_benign": 0,
+            "legitimate_users_affected": 0,
+            "legitimate_users_per_day": 0.0,
+            "benign_events_affected": 0,
+            "attack_events_affected": 2588
+          }
+        }
+      }
+    }
+  },
+  "binding": {
+    "dev_train": {
+      "days": 56,
+      "incidents": 406855,
+      "below_floor_incidents": 63385,
+      "below_floor_attack_incidents": 2680,
+      "kept_out_of_step_up": 15,
+      "kept_out_of_step_up_attack": 0,
+      "kept_out_of_step_up_days": 12,
+      "moved_into_step_up": 11,
+      "moved_into_step_up_attack": 4,
+      "kept_out_of_queue": 4,
+      "kept_out_of_queue_attack": 1,
+      "kept_out_of_queue_days": 4,
+      "moved_into_queue": 9,
+      "moved_into_queue_attack": 4,
+      "days_floor_binds": 15
+    },
+    "val_a": {
+      "days": 16,
+      "incidents": 114944,
+      "below_floor_incidents": 20100,
+      "below_floor_attack_incidents": 767,
+      "kept_out_of_step_up": 8,
+      "kept_out_of_step_up_attack": 0,
+      "kept_out_of_step_up_days": 5,
+      "moved_into_step_up": 7,
+      "moved_into_step_up_attack": 3,
+      "kept_out_of_queue": 0,
+      "kept_out_of_queue_attack": 0,
+      "kept_out_of_queue_days": 0,
+      "moved_into_queue": 0,
+      "moved_into_queue_attack": 0,
+      "days_floor_binds": 5
+    },
+    "val_b": {
+      "days": 16,
+      "incidents": 116310,
+      "below_floor_incidents": 23159,
+      "below_floor_attack_incidents": 809,
+      "kept_out_of_step_up": 9,
+      "kept_out_of_step_up_attack": 1,
+      "kept_out_of_step_up_days": 6,
+      "moved_into_step_up": 3,
+      "moved_into_step_up_attack": 2,
+      "kept_out_of_queue": 0,
+      "kept_out_of_queue_attack": 0,
+      "kept_out_of_queue_days": 0,
+      "moved_into_queue": 1,
+      "moved_into_queue_attack": 0,
+      "days_floor_binds": 6
+    }
+  },
+  "below_floor_by_detectors": {
+    "Suspicious Login Time": 102714,
+    "Multiple IP Login": 3338,
+    "Multiple IP Login + Suspicious Login Time": 535,
+    "Brute Force Attack": 56,
+    "Brute Force Attack + Suspicious Login Time": 1
+  },
+  "admitted_max_per_day": {
+    "step_up": 200,
+    "queue": 500
+  },
+  "emails_per_day": {
+    "dev_train": {
+      "days": [
+        {
+          "day": "2020-02-03",
+          "emails": 0,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-04",
+          "emails": 54,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-05",
+          "emails": 68,
+          "digests": 2
+        },
+        {
+          "day": "2020-02-06",
+          "emails": 56,
+          "digests": 2
+        },
+        {
+          "day": "2020-02-07",
+          "emails": 72,
+          "digests": 2
+        },
+        {
+          "day": "2020-02-08",
+          "emails": 98,
+          "digests": 2
+        },
+        {
+          "day": "2020-02-09",
+          "emails": 93,
+          "digests": 2
+        },
+        {
+          "day": "2020-02-10",
+          "emails": 199,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-11",
+          "emails": 178,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-12",
+          "emails": 151,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-13",
+          "emails": 184,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-14",
+          "emails": 177,
+          "digests": 2
+        },
+        {
+          "day": "2020-02-15",
+          "emails": 191,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-16",
+          "emails": 186,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-17",
+          "emails": 159,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-18",
+          "emails": 156,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-19",
+          "emails": 197,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-20",
+          "emails": 166,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-21",
+          "emails": 194,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-22",
+          "emails": 184,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-23",
+          "emails": 190,
+          "digests": 1
+        },
+        {
+          "day": "2020-02-24",
+          "emails": 191,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-25",
+          "emails": 190,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-26",
+          "emails": 90,
+          "digests": 3
+        },
+        {
+          "day": "2020-02-27",
+          "emails": 150,
+          "digests": 0
+        },
+        {
+          "day": "2020-02-28",
+          "emails": 51,
+          "digests": 2
+        },
+        {
+          "day": "2020-02-29",
+          "emails": 53,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-01",
+          "emails": 196,
+          "digests": 0
+        },
+        {
+          "day": "2020-03-02",
+          "emails": 103,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-03",
+          "emails": 52,
+          "digests": 1
+        },
+        {
+          "day": "2020-03-04",
+          "emails": 55,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-05",
+          "emails": 43,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-06",
+          "emails": 64,
+          "digests": 3
+        },
+        {
+          "day": "2020-03-07",
+          "emails": 55,
+          "digests": 1
+        },
+        {
+          "day": "2020-03-08",
+          "emails": 66,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-09",
+          "emails": 63,
+          "digests": 3
+        },
+        {
+          "day": "2020-03-10",
+          "emails": 89,
+          "digests": 1
+        },
+        {
+          "day": "2020-03-11",
+          "emails": 73,
+          "digests": 3
+        },
+        {
+          "day": "2020-03-12",
+          "emails": 53,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-13",
+          "emails": 70,
+          "digests": 3
+        },
+        {
+          "day": "2020-03-14",
+          "emails": 94,
+          "digests": 3
+        },
+        {
+          "day": "2020-03-15",
+          "emails": 65,
+          "digests": 3
+        },
+        {
+          "day": "2020-03-16",
+          "emails": 60,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-17",
+          "emails": 87,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-18",
+          "emails": 46,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-19",
+          "emails": 124,
+          "digests": 0
+        },
+        {
+          "day": "2020-03-20",
+          "emails": 66,
+          "digests": 3
+        },
+        {
+          "day": "2020-03-21",
+          "emails": 74,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-22",
+          "emails": 60,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-23",
+          "emails": 66,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-24",
+          "emails": 49,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-25",
+          "emails": 57,
+          "digests": 1
+        },
+        {
+          "day": "2020-03-26",
+          "emails": 73,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-27",
+          "emails": 53,
+          "digests": 1
+        },
+        {
+          "day": "2020-03-28",
+          "emails": 60,
+          "digests": 2
+        },
+        {
+          "day": "2020-03-29",
+          "emails": 97,
+          "digests": 3
+        }
+      ],
+      "mean_per_day": 104.78571428571429,
+      "max_per_day": 199
+    },
+    "val_a": {
+      "days": [
+        {
+          "day": "2020-03-30",
+          "emails": 50,
+          "digests": 1
+        },
+        {
+          "day": "2020-03-31",
+          "emails": 74,
+          "digests": 1
+        },
+        {
+          "day": "2020-04-01",
+          "emails": 197,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-02",
+          "emails": 194,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-03",
+          "emails": 178,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-04",
+          "emails": 188,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-05",
+          "emails": 185,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-06",
+          "emails": 190,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-07",
+          "emails": 192,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-08",
+          "emails": 185,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-09",
+          "emails": 186,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-10",
+          "emails": 153,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-11",
+          "emails": 192,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-12",
+          "emails": 189,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-13",
+          "emails": 186,
+          "digests": 3
+        },
+        {
+          "day": "2020-04-14",
+          "emails": 167,
+          "digests": 0
+        }
+      ],
+      "mean_per_day": 169.4375,
+      "max_per_day": 197
+    },
+    "val_b": {
+      "days": [
+        {
+          "day": "2020-04-15",
+          "emails": 146,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-16",
+          "emails": 51,
+          "digests": 2
+        },
+        {
+          "day": "2020-04-17",
+          "emails": 199,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-18",
+          "emails": 159,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-19",
+          "emails": 50,
+          "digests": 2
+        },
+        {
+          "day": "2020-04-20",
+          "emails": 85,
+          "digests": 3
+        },
+        {
+          "day": "2020-04-21",
+          "emails": 171,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-22",
+          "emails": 164,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-23",
+          "emails": 147,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-24",
+          "emails": 198,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-25",
+          "emails": 146,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-26",
+          "emails": 147,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-27",
+          "emails": 140,
+          "digests": 0
+        },
+        {
+          "day": "2020-04-28",
+          "emails": 56,
+          "digests": 2
+        },
+        {
+          "day": "2020-04-29",
+          "emails": 71,
+          "digests": 2
+        },
+        {
+          "day": "2020-04-30",
+          "emails": 179,
+          "digests": 0
+        }
+      ],
+      "mean_per_day": 132.5,
+      "max_per_day": 199
+    }
+  },
+  "email_outcomes": {
+    "sent": 10606,
+    "cooldown": 634,
+    "digest": 5355
+  },
+  "challenges_placed_events": 49799,
+  "blocks_placed_events": 0,
+  "timings_seconds": {
+    "stream, incidents, running ranks (T2)": 8.7,
+    "deployed runs without / with the floor": 13.5,
+    "tiers, costs, binding, emails": 8.1,
+    "total": 33.5
+  }
+}

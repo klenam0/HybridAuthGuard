@@ -15,6 +15,9 @@ Phase 5 operational stages (called through `python -m eval.phase5`):
            transaction per alert, as the pipeline does), and the legacy JSON
            store on the first 2,000 of them for comparison.
 
+phase="5c" (python -m eval.phase5c replay): the amendment 8 floor on top of
+amendment 7; the offline run is Phase 5c's (results/phase5c_cache).
+
 phase="5b" (python -m eval.phase5b replay / store): the amendment 7 policy;
 the offline run, selection and outputs are Phase 5b's (results/phase5b_*),
 and `store` re-measures the queries on Phase 5's day and on the new one,
@@ -82,6 +85,9 @@ def _phase(phase):
     if phase == "5b":
         from eval import phase5b as P5B
         return P5B.cpath, "phase5b_selection.json", "phase5b"
+    if phase == "5c":
+        from eval import phase5c as P5C
+        return P5C.cpath, "phase5b_selection.json", "phase5c"
     return P5.cpath, "phase5_selection.json", "phase5"
 
 
@@ -99,6 +105,8 @@ def stage_replay(args, phase="5"):
     t_ = sel["tiers"]
     assert config.RESPONSE_TIER_RATES == {"block": t_["block_rate"], "step_up": t_["step_up_rate"],
                                           "queue": t_["queue_rate"]}, "config rates != selection"
+    if phase == "5c":
+        assert list(config.RESPONSE_FLOOR_DETECTORS) == P5.load_json("phase5c_floor.json")["floor"],             "config floor != amendment 8"
     z = np.load(cpath("deployed.npz"))
     with open(cpath("email_log.json")) as f:
         em = json.load(f)
@@ -186,7 +194,8 @@ def stage_replay(args, phase="5"):
     out = {"equivalent": bool(ok), "events": int(n), "limit": int(args.limit),
            "defaults": {"RULES_MODE": config.RULES_MODE, "ML_MODE": config.ML_MODE,
                         "ML_V4_IFOREST": config.ML_V4_IFOREST, "TRIAGE_SCORE": config.TRIAGE_SCORE,
-                        "RESPONSE_TIER_RATES": config.RESPONSE_TIER_RATES},
+                        "RESPONSE_TIER_RATES": config.RESPONSE_TIER_RATES,
+                        "RESPONSE_FLOOR_DETECTORS": list(config.RESPONSE_FLOOR_DETECTORS)},
            "alerts_saved": len(rows), "ml_alerts": int(ml_alerts),
            "detector_alert_mismatches": check["detectors"],
            "alerted_events_compared": len(seen), "alerted_events_missing": int(missing),
