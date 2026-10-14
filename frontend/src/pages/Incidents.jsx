@@ -96,6 +96,13 @@ export default function Incidents({ data }) {
         ))}
       </div>
 
+      {policy.v3 && (backendConfig?.response?.v3_policy?.floor_detectors || []).length > 0 && (
+        <p className="ui-caption text-[color:var(--text-secondary)]">
+          Step-up and queue admit only incidents with an alert of{" "}
+          {backendConfig.response.v3_policy.floor_detectors.join(", ")}; the rest stay at log.
+        </p>
+      )}
+
       {error && (
         <div className="bg-[color:var(--bg-card)] border border-[color:var(--border)] rounded-xl p-4 ui-body text-[color:var(--text-secondary)]">
           {error}

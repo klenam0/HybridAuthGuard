@@ -51,7 +51,15 @@ const PAGES = [
 ];
 
 export default function App() {
-  const [page, setPage] = useState("dashboard");
+  // Optional deep link to one page (?page=incidents), e.g. for screenshots.
+  const [page, setPage] = useState(() => {
+    try {
+      const p = new URLSearchParams(window.location.search).get("page");
+      return PAGES.includes(p) ? p : "dashboard";
+    } catch {
+      return "dashboard";
+    }
+  });
   const [alerts, setAlerts] = useState([]);
   const [stats, setStats] = useState(null);
   const [status, setStatus] = useState(null);
