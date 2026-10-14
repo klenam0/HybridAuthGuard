@@ -1,0 +1,103 @@
+{
+  "t0": 1,
+  "day_convention": "day = floor((time - t0) / 86400)",
+  "redteam_rows": 749,
+  "attempts": [
+    {
+      "rule": "LA1.1",
+      "percentiles": [
+        0.5,
+        0.625,
+        0.75
+      ],
+      "q_times": [
+        1072660,
+        1080147,
+        1163440
+      ],
+      "cuts": {
+        "c1": 1123201,
+        "c2": 1123201,
+        "c3": 1209601
+      },
+      "cut_days": {
+        "c1": 13,
+        "c2": 13,
+        "c3": 14
+      },
+      "counts": {
+        "dev_train": {
+          "redteam_events": 547,
+          "redteam_distinct_days": 8
+        },
+        "val_a": {
+          "redteam_events": 0,
+          "redteam_distinct_days": 0
+        },
+        "val_b": {
+          "redteam_events": 81,
+          "redteam_distinct_days": 1
+        },
+        "test": {
+          "redteam_events": 121,
+          "redteam_distinct_days": 9
+        }
+      },
+      "la1_2": {
+        "val_a": false,
+        "val_b": false,
+        "test": true
+      },
+      "la1_2_pass": false
+    },
+    {
+      "rule": "LA1.3",
+      "percentiles": [
+        0.4,
+        0.55,
+        0.7
+      ],
+      "q_times": [
+        771340,
+        1075345,
+        1095853
+      ],
+      "cuts": {
+        "c1": 777601,
+        "c2": 1123201,
+        "c3": 1123201
+      },
+      "cut_days": {
+        "c1": 9,
+        "c2": 13,
+        "c3": 13
+      },
+      "counts": {
+        "dev_train": {
+          "redteam_events": 323,
+          "redteam_distinct_days": 6
+        },
+        "val_a": {
+          "redteam_events": 224,
+          "redteam_distinct_days": 2
+        },
+        "val_b": {
+          "redteam_events": 0,
+          "redteam_distinct_days": 0
+        },
+        "test": {
+          "redteam_events": 202,
+          "redteam_distinct_days": 10
+        }
+      },
+      "la1_2": {
+        "val_a": true,
+        "val_b": false,
+        "test": true
+      },
+      "la1_2_pass": false
+    }
+  ],
+  "rule_used": null,
+  "status": "LA1.2 failed under LA1.1 and LA1.3: no split chosen"
+}
