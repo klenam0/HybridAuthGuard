@@ -1,0 +1,114 @@
+{
+  "equivalent": true,
+  "events": 300000,
+  "events_may": 0,
+  "limit": 300000,
+  "defaults": {
+    "RULES_MODE": "v3",
+    "ML_MODE": "v4",
+    "ML_V4_IFOREST": "retired",
+    "TRIAGE_SCORE": "T2",
+    "RESPONSE_TIER_RATES": {
+      "block": 0,
+      "step_up": 200,
+      "queue": 500
+    },
+    "RESPONSE_FLOOR_DETECTORS": [
+      "Slow Brute Force",
+      "Credential Stuffing",
+      "Invalid Account Spraying",
+      "Distributed Brute Force",
+      "Success After Failures"
+    ]
+  },
+  "alerts_saved": 61009,
+  "ml_alerts": 0,
+  "detector_alert_mismatches": {
+    "Brute Force Attack": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Slow Brute Force": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Credential Stuffing": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Invalid Account Spraying": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Distributed Brute Force": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Success After Failures": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Multiple IP Login": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    },
+    "Suspicious Login Time": {
+      "dev_train": 0,
+      "val_a": 0,
+      "val_b": 0
+    }
+  },
+  "alerted_events_compared": 53185,
+  "alerted_events_missing": 0,
+  "tier_mismatches": 0,
+  "score_mismatches": 0,
+  "tier_or_score_mismatches_by_span": {},
+  "blocked_state_mismatches": {
+    "dev_train": 0,
+    "val_a": 0,
+    "val_b": 0
+  },
+  "challenged_state_mismatches": {
+    "dev_train": 0,
+    "val_a": 0,
+    "val_b": 0
+  },
+  "email_log_mismatches": 0,
+  "incident_email_outcome_mismatches": 0,
+  "email_log_entries": 270,
+  "blocked_source_events": 0,
+  "challenged_source_events": 1130,
+  "duplicate_events": 0,
+  "state_sizes_end": {
+    "rules": {
+      "ips": 117932,
+      "accounts": 34467,
+      "account_history": 95097,
+      "cooldowns": 1315,
+      "recent_events": 1374
+    },
+    "triage": {
+      "ips_today": 14112,
+      "incidents_today": 4709,
+      "asns": 2664,
+      "days_closed": 4
+    }
+  },
+  "S5": {},
+  "replay_seconds": 37.0,
+  "replay_us_per_event": 123.5,
+  "peak_rss_mb": 5845,
+  "timings_seconds": {
+    "stream and the offline twin": 10.5,
+    "real agents, frozen defaults (300,000 events)": 37.0,
+    "comparison": 0.6,
+    "total": 48.2
+  }
+}

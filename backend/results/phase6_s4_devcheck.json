@@ -1,0 +1,244 @@
+{
+  "protocol": "eval/PROTOCOL.md amendment 9, S4 (descriptive only)",
+  "half": "val_b",
+  "earlier_attack_asns": 1097,
+  "groups": {
+    "R (returning attacking, alerted)": {
+      "ips": 2719,
+      "events": 95200,
+      "events_per_ip": {
+        "n": 2719,
+        "median": 13.0,
+        "p90": 98.0
+      },
+      "active_days": {
+        "n": 2719,
+        "median": 5.0,
+        "p90": 16.0
+      },
+      "failure_ratio": {
+        "n": 2719,
+        "median": 0.7142857142857143,
+        "p90": 1.0
+      },
+      "distinct_accounts": {
+        "n": 2719,
+        "median": 5.0,
+        "p90": 40.0
+      },
+      "placeholder_attempts": {
+        "n": 2719,
+        "median": 7.0,
+        "p90": 42.0
+      },
+      "successful_logins": {
+        "n": 2719,
+        "median": 4.0,
+        "p90": 30.0
+      },
+      "distinct_countries": {
+        "n": 2719,
+        "median": 1.0,
+        "p90": 1.0
+      },
+      "share_single_event": 0.03788157410812799,
+      "share_le_5_events": 0.2526664214784847,
+      "share_asn_hosts_earlier_attacker": 1.0
+    },
+    "N alerted (new attacking)": {
+      "ips": 806,
+      "events": 4677,
+      "events_per_ip": {
+        "n": 806,
+        "median": 4.0,
+        "p90": 12.0
+      },
+      "active_days": {
+        "n": 806,
+        "median": 1.0,
+        "p90": 3.0
+      },
+      "failure_ratio": {
+        "n": 806,
+        "median": 0.8377192982456141,
+        "p90": 1.0
+      },
+      "distinct_accounts": {
+        "n": 806,
+        "median": 1.0,
+        "p90": 3.0
+      },
+      "placeholder_attempts": {
+        "n": 806,
+        "median": 3.0,
+        "p90": 8.0
+      },
+      "successful_logins": {
+        "n": 806,
+        "median": 1.0,
+        "p90": 4.0
+      },
+      "distinct_countries": {
+        "n": 806,
+        "median": 1.0,
+        "p90": 1.0
+      },
+      "share_single_event": 0.07568238213399504,
+      "share_le_5_events": 0.6476426799007444,
+      "share_asn_hosts_earlier_attacker": 0.9553349875930521
+    },
+    "N not alerted (new attacking)": {
+      "ips": 3438,
+      "events": 5258,
+      "events_per_ip": {
+        "n": 3438,
+        "median": 1.0,
+        "p90": 3.0
+      },
+      "active_days": {
+        "n": 3438,
+        "median": 1.0,
+        "p90": 1.0
+      },
+      "failure_ratio": {
+        "n": 3438,
+        "median": 1.0,
+        "p90": 1.0
+      },
+      "distinct_accounts": {
+        "n": 3438,
+        "median": 1.0,
+        "p90": 2.0
+      },
+      "placeholder_attempts": {
+        "n": 3438,
+        "median": 1.0,
+        "p90": 2.0
+      },
+      "successful_logins": {
+        "n": 3438,
+        "median": 0.0,
+        "p90": 1.0
+      },
+      "distinct_countries": {
+        "n": 3438,
+        "median": 1.0,
+        "p90": 1.0
+      },
+      "share_single_event": 0.682955206515416,
+      "share_le_5_events": 0.9880744618964514,
+      "share_asn_hosts_earlier_attacker": 0.9677137870855148
+    },
+    "BA (benign, alerted, new-attacker stratum)": {
+      "ips": 52487,
+      "events": 548974,
+      "events_per_ip": {
+        "n": 52487,
+        "median": 4.0,
+        "p90": 14.0
+      },
+      "active_days": {
+        "n": 52487,
+        "median": 2.0,
+        "p90": 5.0
+      },
+      "failure_ratio": {
+        "n": 52487,
+        "median": 0.574468085106383,
+        "p90": 1.0
+      },
+      "distinct_accounts": {
+        "n": 52487,
+        "median": 2.0,
+        "p90": 5.0
+      },
+      "placeholder_attempts": {
+        "n": 52487,
+        "median": 2.0,
+        "p90": 7.0
+      },
+      "successful_logins": {
+        "n": 52487,
+        "median": 1.0,
+        "p90": 7.0
+      },
+      "distinct_countries": {
+        "n": 52487,
+        "median": 1.0,
+        "p90": 1.0
+      },
+      "share_single_event": 0.15830586621449122,
+      "share_le_5_events": 0.6065501933812182,
+      "share_asn_hosts_earlier_attacker": 0.872654181035304
+    },
+    "BN (benign, not alerted, new-attacker stratum)": {
+      "ips": 283532,
+      "events": 494269,
+      "events_per_ip": {
+        "n": 283532,
+        "median": 1.0,
+        "p90": 3.0
+      },
+      "active_days": {
+        "n": 283532,
+        "median": 1.0,
+        "p90": 2.0
+      },
+      "failure_ratio": {
+        "n": 283532,
+        "median": 0.2,
+        "p90": 1.0
+      },
+      "distinct_accounts": {
+        "n": 283532,
+        "median": 1.0,
+        "p90": 2.0
+      },
+      "placeholder_attempts": {
+        "n": 283532,
+        "median": 0.0,
+        "p90": 1.0
+      },
+      "successful_logins": {
+        "n": 283532,
+        "median": 1.0,
+        "p90": 2.0
+      },
+      "distinct_countries": {
+        "n": 283532,
+        "median": 1.0,
+        "p90": 1.0
+      },
+      "share_single_event": 0.6261444916270474,
+      "share_le_5_events": 0.9732940197226415,
+      "share_asn_hosts_earlier_attacker": 0.8660010157583624
+    },
+    "BA strict misuse": {
+      "definition": ">= 20 placeholder attempts and 0 successful logins over the IP's whole history up to the end of the half",
+      "ips": 285,
+      "of_BA": 52487,
+      "share": 0.005429915979194848,
+      "their_half_events": 65871,
+      "their_half_alerted_events": 16646,
+      "half_only_variant_ips": 164
+    },
+    "R strict misuse (reference)": {
+      "ips": 64,
+      "of_R": 2719
+    },
+    "alerted_events_by_group": {
+      "R (returning attacking, alerted)": 61793,
+      "N alerted (new attacking)": 1449,
+      "N not alerted (new attacking)": 0,
+      "BA (benign, alerted, new-attacker stratum)": 236952,
+      "BN (benign, not alerted, new-attacker stratum)": 0
+    }
+  },
+  "timings_seconds": {
+    "stream (dev)": 10.3,
+    "ASN ratio and per-IP daily counters": 1.3,
+    "frozen rule alerts (8 detectors)": 31.1,
+    "stream": 43.8,
+    "total": 44.7
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "protocol": "eval/PROTOCOL.md amendment 9, S1",
+  "half": "val_b",
+  "events": {
+    "all": 50000,
+    "new_attackers": 45823
+  },
+  "base_rate": {
+    "all": 0.09038,
+    "new_attackers": 0.007463500862012526
+  },
+  "variants": {
+    "a": {
+      "description": "maps and fit from non-attack dev_train rows (original, cached)",
+      "map_rows": 3672966,
+      "fit_rows": 3672966,
+      "seed_42": {
+        "all": {
+          "roc_auc": 0.7505212108177294,
+          "pr_auc": 0.15991840103090077,
+          "tpr_at_1pct_fpr": 0.006417348971011286
+        },
+        "new_attackers": {
+          "roc_auc": 0.5156420308409745,
+          "pr_auc": 0.00748598326632104,
+          "tpr_at_1pct_fpr": 0.0
+        }
+      },
+      "over_seeds": {
+        "all": {
+          "roc_auc": {
+            "mean": 0.7505212108177294,
+            "min": 0.7505212108177294,
+            "max": 0.7505212108177294
+          },
+          "pr_auc": {
+            "mean": 0.15991840103090077,
+            "min": 0.15991840103090077,
+            "max": 0.15991840103090077
+          },
+          "tpr_at_1pct_fpr": {
+            "mean": 0.006417348971011286,
+            "min": 0.006417348971011286,
+            "max": 0.006417348971011286
+          }
+        },
+        "new_attackers": {
+          "roc_auc": {
+            "mean": 0.5156420308409745,
+            "min": 0.5156420308409745,
+            "max": 0.5156420308409745
+          },
+          "pr_auc": {
+            "mean": 0.00748598326632104,
+            "min": 0.00748598326632104,
+            "max": 0.00748598326632104
+          },
+          "tpr_at_1pct_fpr": {
+            "mean": 0.0,
+            "min": 0.0,
+            "max": 0.0
+          }
+        }
+      }
+    }
+  },
+  "timings_seconds": {
+    "30-day windowed failed_rate over the stream": 2.9,
+    "S1 (a): maps, scaler, features": 33.1,
+    "S1 (a) seed 42: fit, score 50,000 events": 134.2,
+    "total": 180.6
+  }
+}
