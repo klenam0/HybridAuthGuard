@@ -20,3 +20,27 @@ Source URL:
   ReferrerUrl `https://csr.lanl.gov/data/cyber1/`; HostUrl
   `https://csr.lanl.gov/data-fence/<signed token redacted>/cyber1/redteam.txt.gz`.
 - auth.txt.gz: source URL: not recorded.
+
+## Dataset documentation (recorded in phase L1)
+
+Documentation URL: https://csr.lanl.gov/data/cyber1/ (read 14 Oct 2026).
+
+- 58 consecutive days; time starts at 1, resolution 1 second.
+- auth.txt fields, in order: time, source user@domain, destination
+  user@domain, source computer, destination computer, authentication type,
+  logon type, authentication orientation, success/failure. Missing values are
+  "?".
+- redteam.txt fields, in order: time, user@domain, source computer,
+  destination computer. Red-team events are "taken from the authentication
+  data".
+- Failed authentication events are included only for users who have a
+  successful authentication somewhere in the data.
+
+The red-team field meanings are now confirmed by the documentation. They
+were labelled "unconfirmed" in phase L0 (eval/LANL_L0_REPORT.md, left as
+written).
+
+Column names used in the converted Parquet (phase L1, eval/lanl_convert.py),
+in the documented order: time (int64), src_user, dst_user, src_computer,
+dst_computer, auth_type, logon_type, auth_orientation, success (all strings,
+kept exactly as written, including "?").
