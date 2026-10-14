@@ -1,0 +1,48 @@
+{
+  "files": {
+    "auth.txt.gz": {
+      "bytes": 7626505158,
+      "sha256": "9c6b0cc261b0edd19324f6fd1839743224938a7f644ed202ca70bd70a89bf672"
+    },
+    "redteam.txt.gz": {
+      "bytes": 4846,
+      "sha256": "606635837c684ad11e464075ecf97bc5df325ff7d7f64614d2d8c8af18051669"
+    }
+  },
+  "redteam": {
+    "gzip_full_read_ok": true,
+    "decompressed_bytes": 22986,
+    "trailing_newline": true,
+    "empty_lines": 0,
+    "rows": 749,
+    "first_5_lines": [
+      "150885,U620@DOM1,C17693,C1003",
+      "151036,U748@DOM1,C17693,C305",
+      "151648,U748@DOM1,C17693,C728",
+      "151993,U6115@DOM1,C17693,C1173",
+      "153792,U636@DOM1,C17693,C294"
+    ],
+    "fields_per_line": {
+      "4": 749
+    },
+    "integer_fields_0based": [
+      0
+    ],
+    "malformed_rows": 0,
+    "time_field_0based": 0,
+    "time_min": 150885,
+    "time_max": 2557047,
+    "times_sorted_nondecreasing": true
+  },
+  "auth_line1": {
+    "decoded_utf8_ok": true,
+    "first_field_is_int": true,
+    "t0": 1
+  },
+  "day_convention": "day = floor((time - t0) / 86400)",
+  "checks": {
+    "all_redteam_times_ge_t0": true,
+    "redteam_min_day": 1,
+    "redteam_max_day": 29
+  }
+}
