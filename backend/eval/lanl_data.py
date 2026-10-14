@@ -12,8 +12,12 @@ results/lanl_test_access.log with its time, process id and command line. An
 allowed call checks the test rows against eval/LANL_TEST_LOCK.json before
 returning them.
 
-Only red-team rows can be loaded so far; auth rows come in phase L1. Rows are
-(time, user, src_computer, dst_computer) tuples in time order.
+source="redteam" returns (time, user, src_computer, dst_computer) tuples in
+time order. source="auth" returns a pyarrow Table of the converted auth rows
+(eval/lanl_convert.py) in file order: dev splits read only the day partitions
+under <root>/auth/dev; an allowed test read first checks every file under
+<root>/auth/test against the L1 section of eval/LANL_TEST_LOCK.json. columns
+selects auth columns (None = all nine).
 """
 
 import datetime as _dt
@@ -23,11 +27,14 @@ import logging
 import os
 import sys
 
+import pyarrow as pa
+import pyarrow.parquet as pq
+
 BACKEND = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BACKEND not in sys.path:
     sys.path.insert(0, BACKEND)
 
-from eval import lanl_split, lanl_split_la2  # noqa: E402
+from eval import lanl_convert, lanl_inspect, lanl_split, lanl_split_la2  # noqa: E402
 
 ACCESS_LOG = os.path.join(BACKEND, "results", "lanl_test_access.log")
 LOCK_FILE = os.path.join(BACKEND, "eval", "LANL_TEST_LOCK.json")
@@ -61,7 +68,38 @@ def _bounds():
             "test": (c3, float("inf"))}
 
 
-def load_lanl(split, source="redteam"):
+def _auth_days(lo, hi):
+    t0 = lanl_split.load_t0()
+    return lanl_split.day(lo, t0), lanl_split.day(hi, t0)
+
+
+def _read_auth(base, days, columns):
+    paths = [os.path.join(base, f"day={d:02d}", "part-0.parquet") for d in days]
+    paths = [p for p in paths if os.path.exists(p)]
+    tables = [pq.read_table(p, columns=columns) for p in paths]
+    if not tables:
+        return pa.Table.from_batches([], schema=lanl_convert.SCHEMA if columns is None
+                                     else pa.schema([lanl_convert.SCHEMA.field(c) for c in columns]))
+    return pa.concat_tables(tables)
+
+
+def _check_test_partitions():
+    with open(LOCK_FILE, encoding="utf-8") as f:
+        l1 = json.load(f).get("l1_auth_test")
+    if l1 is None:
+        raise RuntimeError("eval/LANL_TEST_LOCK.json has no l1_auth_test section")
+    root = lanl_convert.test_dir(lanl_convert.OUT_ROOT)
+    found = {}
+    for dirpath, _, names in os.walk(root):
+        for n in names:
+            p = os.path.join(dirpath, n)
+            found[os.path.relpath(p, root).replace(os.sep, "/")] = lanl_inspect.sha256_file(p)
+    if found != l1["test_partition_sha256"]:
+        raise RuntimeError("LANL test partitions do not match eval/LANL_TEST_LOCK.json")
+    return l1
+
+
+def load_lanl(split, source="redteam", columns=None):
     if split not in SPLITS:
         raise ValueError(f"unknown split {split!r}; expected one of {SPLITS}")
     if source not in SOURCES:
@@ -75,10 +113,17 @@ def load_lanl(split, source="redteam"):
                 "the LANL test split is locked; set FINAL_EVAL=1 only for the "
                 "final, pre-declared evaluation (eval/PROTOCOL_LANL.md)")
 
-    if source == "auth":
-        raise NotImplementedError("LANL auth rows are converted in phase L1")
-
     lo, hi = _bounds()[split]
+    if source == "auth":
+        if split == "test":
+            l1 = _check_test_partitions()
+            first = _auth_days(lo, lo)[0]
+            return _read_auth(lanl_convert.test_dir(lanl_convert.OUT_ROOT),
+                              range(first, l1["test_end_day"] + 1), columns)
+        d_lo, d_hi = _auth_days(lo, hi)
+        return _read_auth(lanl_convert.dev_dir(lanl_convert.OUT_ROOT),
+                          range(d_lo, d_hi), columns)
+
     rows = [r for r in lanl_split.read_redteam() if lo <= r[0] < hi]
     if split == "test":
         h = hashlib.sha256()
