@@ -195,20 +195,19 @@ qualify, subject to the per-day cap.
 592	   `default_rng(42)`, as in amendment 3.
 ```
 
-and its role as the bar (lines 599-607):
+and its role as the bar (lines 597-607):
 
 ```
-599	   distinct attacking IPs with an attack incident among that day's top 500;
-600	   mean over the 16 days), subject to: the day-clustered bootstrap lower
-601	   bound of the *mean daily top-500 incident precision* >= T0's val_a point
-602	   value of that same mean. ...
+597	   highest *mean daily attacking IPs caught* at B = 500 on val_a (per day:
+598	   distinct attacking IPs with an attack incident among that day's top 500;
+599	   mean over the 16 days), subject to: the day-clustered bootstrap lower
+600	   bound of the *mean daily top-500 incident precision* >= T0's val_a point
+601	   value of that same mean. Bootstrap: the 16 days resampled with
+...
 605	   T0 is subject to the same bar; its lower bound is below its own point
 606	   value unless every day is equal, so it is expected to fail it. **If no
-607	   candidate qualifies, T0 is kept.**
+607	   candidate qualifies, T0 is kept.** Also reported: B = 100 and B = 2,000,
 ```
-
-(Line 599 begins "mean daily attacking IPs caught* at B = 500 on val_a (per
-day:" on line 597-598; quoted from 599 for brevity.)
 
 ### Block-tier admission criterion (`eval/PROTOCOL.md`)
 
