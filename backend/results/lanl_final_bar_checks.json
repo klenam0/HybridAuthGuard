@@ -1,0 +1,30 @@
+[
+  {
+    "run_id": "L3-20261015T034342-14240",
+    "exit": 1,
+    "checks": [
+      {
+        "process": "p1",
+        "time": "2026-10-15T03:43:42",
+        "projected_peak_bytes": 15695591500.518677,
+        "free_commit_bytes": 55342424064,
+        "total_commit_bytes": 68495142912,
+        "free_physical_bytes": 22195314688,
+        "limit_80pct_free_commit_bytes": 44273939251.200005,
+        "limit_80pct_free_physical_bytes": 17756251750.4,
+        "passes": true
+      },
+      {
+        "process": "p2_D1",
+        "time": "2026-10-15T04:53:14",
+        "projected_peak_bytes": 10790941956.070292,
+        "free_commit_bytes": 55482540032,
+        "total_commit_bytes": 68495142912,
+        "free_physical_bytes": 22476521472,
+        "limit_80pct_free_commit_bytes": 44386032025.600006,
+        "limit_80pct_free_physical_bytes": 17981217177.600002,
+        "passes": true
+      }
+    ]
+  }
+]

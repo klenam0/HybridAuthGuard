@@ -1,1 +1,5 @@
 2026-10-14T16:01:09	CONVERT	no statistics	C:\Users\Dell\HybridAuthGuard\backend\eval\lanl_convert.py
+2026-10-15T03:43:45	ALLOWED	pid=15816	run_id=L3-20261015T034342-14240	argv=C:\Users\Dell\HybridAuthGuard\backend\eval\lanl_final.py --p1 --target test --tag test --run-id L3-20261015T034342-14240
+2026-10-15T03:55:49	ALLOWED	pid=15816	run_id=L3-20261015T034342-14240	argv=C:\Users\Dell\HybridAuthGuard\backend\eval\lanl_final.py --p1 --target test --tag test --run-id L3-20261015T034342-14240
+2026-10-15T04:50:59	ALLOWED	pid=15816	run_id=L3-20261015T034342-14240	argv=C:\Users\Dell\HybridAuthGuard\backend\eval\lanl_final.py --p1 --target test --tag test --run-id L3-20261015T034342-14240
+2026-10-15T04:53:15	ALLOWED	pid=7756	run_id=L3-20261015T034342-14240	argv=C:\Users\Dell\HybridAuthGuard\backend\eval\lanl_final.py --p2 --target test --tag test --scorer D1 --run-id L3-20261015T034342-14240

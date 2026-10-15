@@ -319,3 +319,45 @@ outputs need about 11 GB.
 Gates after the measurement: freeze, test lock and LANL test lock MATCHES;
 `results/lanl_test_access.log` still holds only
 the CONVERT line.
+
+## 1. The evaluation run: stopped in process 2 (D1) on a code assertion
+
+Run ID `L3-20261015T034342-14240`, started 2026-10-15T03:43:42 from commit
+6a59742 (`FINAL_EVAL=1 python -m eval.lanl_final`). Access-log lines (all with
+this run ID):
+
+```
+2026-10-15T03:43:45	ALLOWED	pid=15816	run_id=L3-20261015T034342-14240	argv=...lanl_final.py --p1 --target test --tag test --run-id L3-20261015T034342-14240
+2026-10-15T03:55:49	ALLOWED	pid=15816	run_id=L3-20261015T034342-14240	argv=...lanl_final.py --p1 --target test --tag test --run-id L3-20261015T034342-14240
+2026-10-15T04:50:59	ALLOWED	pid=15816	run_id=L3-20261015T034342-14240	argv=...lanl_final.py --p1 --target test --tag test --run-id L3-20261015T034342-14240
+2026-10-15T04:53:15	ALLOWED	pid=7756	run_id=L3-20261015T034342-14240	argv=...lanl_final.py --p2 --target test --tag test --scorer D1 --run-id L3-20261015T034342-14240
+```
+
+The process 1 lines are the red-team read, the test-day iterator (days 14-57)
+and its reopening for the A metrics (`test_iterator_opens` = 2 in `p1.json`).
+The process 2 line is the red-team read.
+
+- **Bar checks** (`results/lanl_final_bar_checks.json`):
+  - p1 passed at 03:43:42: 15,695,591,501 against 80% of free physical,
+    17,756,251,750.
+  - p2_D1 passed at 04:53:14: 10,790,941,956 against 17,981,217,178.
+- **Process 1 completed.** It ran days 0-57 with no resume, in 4,171.1 s;
+  peak private was 13,166,358,528 B (projected 15,695,591,501). It wrote
+  `results/lanl_final_a.json` and the per-day D outputs.
+- **Process 2 for D1 failed** with exit 1, in
+  `eval/lanl_d_metrics.py:80` (`load_split`):
+  `AssertionError: a positive row is outside the filter`. At least one
+  LA3.1-positive test auth row is not in the LA3.3 filtered population. LA3.3
+  covers this case: such red-team events count as missed in the all-red-team
+  line. But the L2 loader asserts it never happens, which held on every dev
+  split. D2 and D3 were not started, and `lanl_final_d.json`, the merge and
+  the LA3.8 verdict were not produced.
+- **Why the run was not resumed.** This is a deterministic code assertion,
+  not an infrastructure failure, so resuming would fail the same way. The one
+  recovery was not used. Handling the case needs a code change after the
+  first ALLOWED line, which under the phase rules ends the phase. No code was
+  changed, nothing was rerun, and no test output was opened. That includes
+  `lanl_final_a.json` (on disk, not committed) and the label facts in
+  `p1.json`.
+
+Gates after: freeze, test lock and LANL test lock MATCHES.
