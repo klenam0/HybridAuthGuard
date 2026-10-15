@@ -126,10 +126,10 @@ Bars: `precision` of the step-up tier (attack incidents / incidents), frozen
 system with the floor. Error bars: `ci_low`, `ci_high`, 95% percentile
 interval, IPs resampled with replacement (IP-address-clustered bootstrap,
 `eval/phase5.region_metrics` via `eval/phase5b.band`). Labels rounded to 3 decimals.
-val_b is hatched and labelled "previously seen" as requested. Note: the JSON
-flag `previously_seen` is `true` for both val_a and val_b (listed below);
-only May is unseen.
-Output: `fig5_stepup_precision.tif`, 2583 x 2190 px at 900 dpi = 7.29 cm x 6.18 cm; preview `fig5_stepup_precision_preview.png`.
+val_a and val_b are both hatched (the JSON flag `previously_seen` is `true`
+for both, listed below): val_a is labelled "rate selected here" and val_b
+"previously seen". May (unseen, flag `false`) is unhatched.
+Output: `fig5_stepup_precision.tif`, 2995 x 2190 px at 900 dpi = 8.45 cm x 6.18 cm; preview `fig5_stepup_precision_preview.png`.
 
 | Plotted item | Role | Value | File | JSON path |
 |---|---|---|---|---|

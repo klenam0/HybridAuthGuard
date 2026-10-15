@@ -245,14 +245,15 @@ def figure5(L, P):
         "system with the floor. Error bars: `ci_low`, `ci_high`, 95% percentile",
         "interval, IPs resampled with replacement (IP-address-clustered bootstrap,",
         "`eval/phase5.region_metrics` via `eval/phase5b.band`). Labels rounded to 3 decimals.",
-        "val_b is hatched and labelled \"previously seen\" as requested. Note: the JSON",
-        "flag `previously_seen` is `true` for both val_a and val_b (listed below);",
-        "only May is unseen.",
+        "val_a and val_b are both hatched (the JSON flag `previously_seen` is `true`",
+        "for both, listed below): val_a is labelled \"rate selected here\" and val_b",
+        "\"previously seen\". May (unseen, flag `false`) is unhatched.",
     ])
-    fig, ax = plt.subplots(figsize=(8.0 * CM, 7.0 * CM))
-    style = {"val_a": dict(color=LIGHT), "val_b": dict(color=LIGHT, hatch="////"),
+    fig, ax = plt.subplots(figsize=(9.5 * CM, 7.0 * CM))
+    style = {"val_a": dict(color=LIGHT, hatch="////"), "val_b": dict(color=LIGHT, hatch="////"),
              "may": dict(color=DARK)}
-    ticks = {"val_a": "val_a", "val_b": "val_b\n(previously seen)", "may": "May"}
+    ticks = {"val_a": "val_a\n(rate selected here)", "val_b": "val_b\n(previously seen)",
+             "may": "May"}
     for i, h in enumerate(halves):
         p = f"results/{h}/P3/tiers/step_up"
         v = L.row(h, src, P, f"{p}/precision", "bar")
