@@ -361,3 +361,72 @@ The process 2 line is the red-team read.
   `p1.json`.
 
 Gates after: freeze, test lock and LANL test lock MATCHES.
+
+## 2. Deviation: code fix after the first ALLOWED line (in progress; process 2 not run)
+
+Approved as the only deviation, after section 1. It is not the
+infrastructure recovery.
+
+- **Assertion:** `eval/lanl_d_metrics.py:80` (before the fix), in
+  `load_split`: `assert (pr >= 0).all(), "a positive row is outside the filter"`.
+- **Cause class:** at least one LA3.1-positive test auth row is outside the
+  LA3.3 filter. Process 1 saves `y` only for filtered rows, but it saves the
+  label pairs (`pairs_row`, `pairs_event`) for every matched row. The L2
+  loader asserted every pair row was in the filter, which held on every dev
+  split.
+- **No test output was read before the fix.** Before any change, the SHA-256
+  of every process 1 output was recorded and committed:
+  `results/lanl_final_p1_hashes.txt`, 135 files (`lanl_final_a.json`,
+  44 A day files, 44 D day files, 44 D1 score arrays, the checkpoint and
+  `p1.json`), commit 2707f9a. All 135 were re-verified unchanged after the
+  dev checks.
+
+**Fix (exactly LA3.3).** In `load_split`, pairs whose row is outside the
+filter are dropped (`eval/lanl_d_metrics.py:79-85`). The row was already
+outside D's population, since `y` covers filtered rows only. An event with no
+matched row inside the filter therefore cannot be caught, but it stays in the
+split's event and user denominators, so it counts as missed in the
+all-red-team lines. No other behaviour changes.
+
+**Review of the D path** (assertions or assumptions that held on dev but that
+LA3 might permit to fail on the test):
+
+| # | where | condition | status |
+|---|---|---|---|
+| 1 | `eval/lanl_d_metrics.py:80` (old) | positive row outside the filter | LA3.3 specifies it; fixed as above |
+| 2 | `eval/lanl_d_metrics.py:274` | a pair row is not a positive | holds by construction: `y` and the pairs come from the same `label_day` merge (`eval/lanl_la3.py:125-130`, `eval/lanl_final.py` `run()`); not data-dependent |
+| 3 | `eval/lanl_d_metrics.py:277` | a positive row has no red-team event | holds by construction, as #2 |
+| 4 | `eval/lanl_d_metrics.py:131-132` | pos strictly increasing; day non-decreasing | holds by construction in `load_split` |
+| 5 | `eval/lanl_d_metrics.py:133` | NaN scores | not a test condition LA3 permits. D1 features are finite (failure-rate denominator >= 1, `eval/lanl_d.py:141`); D2 and D3 are counts. No change |
+| 6 | `eval/lanl_d_metrics.py:179`, `eval/lanl_la3.py:119` | days with no positives or no red-team events | handled: zero counts. LA3.6 daily top-k selects rows on such days with none caught. No change |
+| 7 | `eval/lanl_d_metrics.py:262-277` | unmatched test events | handled as LA3.1 specifies: in the split's events and users, with no pair, so missed. No change |
+| 8 | after the fix | users whose events are all outside the filter | handled as LA3.3 and LA3.6 specify: counted in the all-red-team user denominator, never caught; not in the in-population `users`. Covered by the fix |
+| 9 | `eval/lanl_final.py:172-174` | LA3.8 bounds need intervals | the test has 51 distinct red-team users (L0), so the all-users block uses bootstrap mode. No change |
+| 10 | `eval/lanl_d_metrics.py:176-177, 197, 204, 222, 248` | **a scope (all users, new users, returning users) with zero positives in D's filtered population** (possible on the test: all of a stratum's events unmatched or outside the filter, or a stratum with no users) | **not specified by LA3/LA4.** The code does not crash (dev check below): ROC-AUC and PR-AUC become `None`; lift = 0/0 = NaN (written as `NaN`); with >= 20 users in the scope the bootstrap is skipped and the mode is "exact counts", although LA2.6/LA3.7 call for a bootstrap interval with >= 20 users. **Stopped here.** |
+
+Zero positives cannot differ by scorer: within a scope, every scorer has the
+same positives.
+
+**Dev checks** (FINAL_EVAL unset):
+- (a) The full split val_b dry run with the fix reproduces L2 exactly:
+  `results/lanl_final_dryrun_check.json`, A, D and sklearn first differences
+  `null`, arrays for days 12-13 equal, `reproduces_L2_exactly: true` (741.5 s).
+- (b) Synthetic check (`--check-outside-filter`,
+  `results/lanl_final_outside_filter_check.json`). On a copy of val_b, one
+  positive row is moved outside the filter: day 12, day row 5,386,281,
+  event 338, the first positive whose event matches only that row. It is
+  removed from that day's filtered arrays and its pair is kept, as process 1
+  writes such a row on the test.
+  - The fixed D metrics equal, field by field, a reference copy where the
+    pair is also removed (the event unmatched for D): first difference
+    `null`.
+  - Against L2's val_b: filtered rows and positives are 1 lower; red-team
+    event and user counts, and every all-red-team denominator, are unchanged.
+  - Event 338 was caught at k = 10,000 by D1 and D2 in L2. In the copy it
+    counts as missed: D1 89 → 88, D2 108 → 107; D3 unchanged at 52.
+  - A population with zero positives evaluates without error: AUC `None`,
+    top-1000 lift `nan`, mode "exact counts" (row 10).
+
+**Status:** process 2 was not run. Row 10's handling is not specified by
+LA3/LA4, so under the deviation's condition 3 this stops and reports. No
+second run ID exists yet.

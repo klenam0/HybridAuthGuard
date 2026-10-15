@@ -1,0 +1,97 @@
+{
+  "moved_row": {
+    "day": 12,
+    "day_row": 5386281,
+    "event": 338
+  },
+  "pairs_outside_filter_in_copy": 1,
+  "fixed_vs_reference_first_difference": null,
+  "facts": {
+    "filtered_rows_minus_1": true,
+    "positive_rows_minus_1": true,
+    "redteam_events_and_users_unchanged": true,
+    "per_scorer": {
+      "D1": {
+        "population_rows_minus_1": true,
+        "positives_minus_1": true,
+        "top100_all_redteam_denominators_unchanged": true,
+        "top100_events_caught_not_above_L2": true,
+        "top100_events_caught_L2_vs_copy": [
+          0,
+          0
+        ],
+        "top1000_all_redteam_denominators_unchanged": true,
+        "top1000_events_caught_not_above_L2": true,
+        "top1000_events_caught_L2_vs_copy": [
+          0,
+          0
+        ],
+        "top10000_all_redteam_denominators_unchanged": true,
+        "top10000_events_caught_not_above_L2": true,
+        "top10000_events_caught_L2_vs_copy": [
+          89,
+          88
+        ]
+      },
+      "D2": {
+        "population_rows_minus_1": true,
+        "positives_minus_1": true,
+        "top100_all_redteam_denominators_unchanged": true,
+        "top100_events_caught_not_above_L2": true,
+        "top100_events_caught_L2_vs_copy": [
+          0,
+          0
+        ],
+        "top1000_all_redteam_denominators_unchanged": true,
+        "top1000_events_caught_not_above_L2": true,
+        "top1000_events_caught_L2_vs_copy": [
+          0,
+          0
+        ],
+        "top10000_all_redteam_denominators_unchanged": true,
+        "top10000_events_caught_not_above_L2": true,
+        "top10000_events_caught_L2_vs_copy": [
+          108,
+          107
+        ]
+      },
+      "D3": {
+        "population_rows_minus_1": true,
+        "positives_minus_1": true,
+        "top100_all_redteam_denominators_unchanged": true,
+        "top100_events_caught_not_above_L2": true,
+        "top100_events_caught_L2_vs_copy": [
+          1,
+          1
+        ],
+        "top1000_all_redteam_denominators_unchanged": true,
+        "top1000_events_caught_not_above_L2": true,
+        "top1000_events_caught_L2_vs_copy": [
+          2,
+          2
+        ],
+        "top10000_all_redteam_denominators_unchanged": true,
+        "top10000_events_caught_not_above_L2": true,
+        "top10000_events_caught_L2_vs_copy": [
+          52,
+          52
+        ]
+      }
+    }
+  },
+  "zero_positive_population": {
+    "error": null,
+    "roc_auc": null,
+    "pr_auc": null,
+    "top1000_rows_caught": 0,
+    "top1000_lift": "nan",
+    "top1000_all_redteam": {
+      "events_caught": 0,
+      "events": 3,
+      "users_caught": 0,
+      "users": 25
+    },
+    "mode": "exact counts"
+  },
+  "passes": true
+}

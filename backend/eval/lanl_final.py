@@ -927,6 +927,121 @@ def project_devall():
     return 0 if all(out["passes_at_projection"].values()) else 1
 
 
+def check_outside_filter():
+    """Deviation check (dev only): a copy of val_b's D inputs with one positive
+    row moved outside the filter (removed from the filtered population of its
+    day, its label pair kept, as process 1 writes a positive outside the filter
+    on the test). The fixed D metrics on that copy must equal, field by field,
+    the D metrics on a reference copy where the row is removed and its pair is
+    also removed (its event unmatched for D): LA3.3 treats a filter-excluded
+    event as missed, like an unmatched one. Also: population and positives one
+    lower than L2's val_b, event and user denominators unchanged, events caught
+    never above L2's; and a population with zero positives evaluates without
+    error."""
+    assert os.environ.get("FINAL_EVAL") != "1"
+    lo, hi = ORIG["split_days"]()["val_b"]
+    # the row: first positive (day order) whose event matches only it and which matches one event
+    pick = None
+    for d in range(lo, hi):
+        z = np.load(os.path.join(L2_D_DIR, f"day={d:02d}.npz"))
+        pr_, pe_ = z["pairs_row"], z["pairs_event"]
+        for r, e in zip(pr_.tolist(), pe_.tolist()):
+            if (pr_ == r).sum() == 1 and (pe_ == e).sum() == 1:
+                pick = (d, r, e)
+                break
+        if pick:
+            break
+    d0, r0, e0 = pick
+    dirs = {}
+    for name, keep_pair in (("keep", True), ("ref", False)):
+        dd = os.path.join(L.wpath(f"final_synth_{name}"), "d")
+        os.makedirs(dd, exist_ok=True)
+        for d in range(lo, hi):
+            for f in (f"day={d:02d}.npz", f"d1_day={d:02d}.npy"):
+                dst = os.path.join(dd, f)
+                if os.path.exists(dst):
+                    os.remove(dst)
+                if d != d0:
+                    os.link(os.path.join(L2_D_DIR, f), dst)
+        z = dict(np.load(os.path.join(L2_D_DIR, f"day={d0:02d}.npz")))
+        j = int(np.flatnonzero(z["rows"] == r0)[0])
+        assert z["y"][j]
+        for k in ("rows", "pos", "user", "X", "d2", "d3", "y"):
+            z[k] = np.delete(z[k], j, axis=0)
+        if not keep_pair:
+            m = z["pairs_row"] != r0
+            z["pairs_row"], z["pairs_event"] = z["pairs_row"][m], z["pairs_event"][m]
+        np.savez(os.path.join(dd, f"day={d0:02d}.npz"), **z)
+        s1 = np.load(os.path.join(L2_D_DIR, f"d1_day={d0:02d}.npy"))
+        np.save(os.path.join(dd, f"d1_day={d0:02d}.npy"), np.delete(s1, j))
+        dirs[name] = dd
+    res = {}
+    for name, dd in dirs.items():
+        out_dir = os.path.dirname(dd)
+        L.save_json = writer(out_dir, {"lanl_d_dev.json": "d.json"})
+        D.ddir = lambda dd=dd: dd
+        DM.main(splits=("val_b",))
+        with open(os.path.join(out_dir, "d.json")) as f:
+            res[name] = json.load(f)
+    L.save_json, D.ddir = ORIG["save_json"], ORIG["ddir"]
+    with open(os.path.join(L.RESULTS, "lanl_d_dev.json")) as f:
+        l2 = json.load(f)["val_b"]
+    zk = np.load(os.path.join(dirs["keep"], f"day={d0:02d}.npz"))
+    idx = np.full(int(zk["n_day"]), -1, np.int64)
+    idx[zk["rows"]] = np.arange(len(zk["rows"]))
+    chk = OrderedDict()
+    chk["moved_row"] = {"day": d0, "day_row": r0, "event": e0}
+    chk["pairs_outside_filter_in_copy"] = int((idx[zk["pairs_row"]] < 0).sum())
+    skip = {"seconds", "peak_working_set_bytes"}
+    chk["fixed_vs_reference_first_difference"] = same(
+        {k: v for k, v in res["keep"].items() if k not in skip},
+        {k: v for k, v in res["ref"].items() if k not in skip})
+    vb = res["keep"]["val_b"]
+    facts = OrderedDict()
+    facts["filtered_rows_minus_1"] = vb["filtered_rows"] == l2["filtered_rows"] - 1
+    facts["positive_rows_minus_1"] = vb["positive_rows"] == l2["positive_rows"] - 1
+    facts["redteam_events_and_users_unchanged"] = (vb["redteam_events"] == l2["redteam_events"]
+                                                   and vb["redteam_users"] == l2["redteam_users"])
+    per = OrderedDict()
+    for s in SCORERS:
+        a, b = vb["all"][s], l2["all"][s]
+        per[s] = OrderedDict([
+            ("population_rows_minus_1", a["population_rows"] == b["population_rows"] - 1),
+            ("positives_minus_1", a["positives"] == b["positives"] - 1)])
+        for k in DM.KS:
+            ta, tb = a[f"top{k}"]["all_redteam"], b[f"top{k}"]["all_redteam"]
+            per[s][f"top{k}_all_redteam_denominators_unchanged"] = (
+                ta["events"] == tb["events"] and ta["users"] == tb["users"])
+            per[s][f"top{k}_events_caught_not_above_L2"] = ta["events_caught"] <= tb["events_caught"]
+            per[s][f"top{k}_events_caught_L2_vs_copy"] = [tb["events_caught"], ta["events_caught"]]
+    facts["per_scorer"] = per
+    chk["facts"] = facts
+    # zero positives: one val_b day with every positive dropped
+    zz = np.load(os.path.join(L2_D_DIR, f"day={lo:02d}.npz"))
+    n0 = len(zz["rows"])
+    try:
+        e = DM.evaluate(zz["d2"], zz["pos"], np.full(n0, lo, np.int64), np.zeros(n0, bool),
+                        np.zeros(0, np.int64), np.zeros(0, np.int64), ["u"] * 25, np.zeros(3, np.int64),
+                        None)
+        chk["zero_positive_population"] = {"error": None, "roc_auc": e["roc_auc"], "pr_auc": e["pr_auc"],
+                                           "top1000_rows_caught": e["top1000"]["rows_caught"],
+                                           "top1000_lift": repr(e["top1000"]["lift"]),
+                                           "top1000_all_redteam": e["top1000"]["all_redteam"],
+                                           "mode": e["mode"]}
+    except Exception as ex:          # recorded, not raised
+        chk["zero_positive_population"] = {"error": repr(ex)}
+
+    def flat(x):
+        return all(flat(v) for v in x.values()) if isinstance(x, dict) else (x is True or isinstance(x, list))
+    chk["passes"] = (chk["pairs_outside_filter_in_copy"] == 1
+                     and chk["fixed_vs_reference_first_difference"] is None and flat(facts)
+                     and chk["zero_positive_population"].get("error") is None)
+    ORIG["save_json"]("lanl_final_outside_filter_check.json", chk)
+    print(json.dumps(chk, indent=1))
+    return 0 if chk["passes"] else 1
+
+
+
 def free_commit():
     import ctypes
     from eval.lanl_convert import _MemStatus
@@ -1173,7 +1288,10 @@ def main():
     ap.add_argument("--no-crosscheck", action="store_true")
     ap.add_argument("--measure-dev-all", action="store_true")
     ap.add_argument("--project-devall", action="store_true")
+    ap.add_argument("--check-outside-filter", action="store_true")
     args = ap.parse_args()
+    if args.check_outside_filter:
+        return check_outside_filter()
     if args.measure_dev_all:
         return measure_dev_all()
     if args.project_devall:

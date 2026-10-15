@@ -77,9 +77,12 @@ def load_split(split, scorers=SCORERS):
         idx = np.full(int(z["n_day"]), -1, np.int64)
         idx[z["rows"]] = base + np.arange(m)
         pr = idx[z["pairs_row"]]
-        assert (pr >= 0).all(), "a positive row is outside the filter"
-        pair_rows.append(pr)
-        pair_events.append(z["pairs_event"])
+        # LA3.3: a positive row outside the filter is not in D's population; its
+        # pair is dropped, so an event with no matched row inside the filter is
+        # never caught and counts as missed in the all-red-team line
+        inside = pr >= 0
+        pair_rows.append(pr[inside])
+        pair_events.append(z["pairs_event"][inside])
         base += m
     out["pair_rows"] = np.concatenate(pair_rows) if pair_rows else np.zeros(0, np.int64)
     out["pair_events"] = np.concatenate(pair_events) if pair_events else np.zeros(0, np.int64)
