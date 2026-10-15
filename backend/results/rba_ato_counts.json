@@ -1,0 +1,95 @@
+{
+  "description": "Rows with Is Account Takeover = True in the raw rba-dataset CSV, whole file and per calendar month of Login Timestamp (string prefix YYYY-MM, as written in the CSV). Descriptive only, outside the evaluation; counted on 2026-10-15, after the May 2020 test month was already scored. See eval/DATASET_DESCRIPTION.md.",
+  "csv_path": "C:/Users/Dell/Downloads/rbadataset/rba-dataset.csv",
+  "csv_bytes": 9052907531,
+  "csv_sha256": "001f3589595821519b53428aee656b4458e43d8f5b4b9beb6ec2bed8f2209067",
+  "read_with": "pyarrow.csv.open_csv 26.0.0, strict True/False booleans",
+  "rows_total": 31269264,
+  "ato_null_values": 0,
+  "ato_true_total": 141,
+  "ato_true_and_login_successful_total": 140,
+  "ato_true_and_attack_ip_total": 77,
+  "per_month": {
+    "2020-02": {
+      "rows": 2004450,
+      "ato_true": 22,
+      "ato_true_login_successful": 22,
+      "ato_true_attack_ip": 13
+    },
+    "2020-03": {
+      "rows": 2214823,
+      "ato_true": 11,
+      "ato_true_login_successful": 11,
+      "ato_true_attack_ip": 5
+    },
+    "2020-04": {
+      "rows": 2173311,
+      "ato_true": 11,
+      "ato_true_login_successful": 11,
+      "ato_true_attack_ip": 7
+    },
+    "2020-05": {
+      "rows": 2158083,
+      "ato_true": 15,
+      "ato_true_login_successful": 15,
+      "ato_true_attack_ip": 7
+    },
+    "2020-06": {
+      "rows": 2185601,
+      "ato_true": 17,
+      "ato_true_login_successful": 16,
+      "ato_true_attack_ip": 10
+    },
+    "2020-07": {
+      "rows": 2221046,
+      "ato_true": 10,
+      "ato_true_login_successful": 10,
+      "ato_true_attack_ip": 6
+    },
+    "2020-08": {
+      "rows": 2171500,
+      "ato_true": 17,
+      "ato_true_login_successful": 17,
+      "ato_true_attack_ip": 11
+    },
+    "2020-09": {
+      "rows": 2162510,
+      "ato_true": 16,
+      "ato_true_login_successful": 16,
+      "ato_true_attack_ip": 6
+    },
+    "2020-10": {
+      "rows": 2313404,
+      "ato_true": 14,
+      "ato_true_login_successful": 14,
+      "ato_true_attack_ip": 6
+    },
+    "2020-11": {
+      "rows": 3090246,
+      "ato_true": 8,
+      "ato_true_login_successful": 8,
+      "ato_true_attack_ip": 6
+    },
+    "2020-12": {
+      "rows": 3270165,
+      "ato_true": 0,
+      "ato_true_login_successful": 0,
+      "ato_true_attack_ip": 0
+    },
+    "2021-01": {
+      "rows": 3100885,
+      "ato_true": 0,
+      "ato_true_login_successful": 0,
+      "ato_true_attack_ip": 0
+    },
+    "2021-02": {
+      "rows": 2203240,
+      "ato_true": 0,
+      "ato_true_login_successful": 0,
+      "ato_true_attack_ip": 0
+    }
+  },
+  "ato_true_dev_months_2020_02_to_2020_04": 44,
+  "seconds": 23.3,
+  "counted_at": "2026-10-15"
+}
