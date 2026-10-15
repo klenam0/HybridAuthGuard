@@ -1,0 +1,48 @@
+{
+  "A_val_b_first_difference": null,
+  "D_val_b_first_difference": null,
+  "D_sklearn_checks_first_difference": null,
+  "arrays_equal_L2": {
+    "A_day12": true,
+    "D_day12": true,
+    "D1_day12": true,
+    "A_day13": true,
+    "D_day13": true,
+    "D1_day13": true
+  },
+  "reproduces_L2_exactly": true,
+  "run": {
+    "target": "val_b",
+    "days": [
+      12,
+      14
+    ],
+    "run_id": null,
+    "d1_model_sha256": "48bf2436ff8a4403eb140cfe1ce1d55a8118893c356d385aa91bd6a5edaccfb3",
+    "labels": {
+      "redteam_events": 290,
+      "redteam_users": 50,
+      "matched_events": 288,
+      "unmatched_events": 2,
+      "positive_rows": 282,
+      "events_passing_filter": 288,
+      "users_passing_filter": 50
+    },
+    "step_up_incidents_per_day": {
+      "12": 200,
+      "13": 200
+    },
+    "test_iterator_opens": 0,
+    "seconds": {
+      "read": 9.1,
+      "A_twin": 633.7,
+      "D_features": 94.7,
+      "D1_score": 14.6,
+      "A_metrics": 7.4,
+      "D_metrics": 27.5
+    },
+    "seconds_total": 795.5,
+    "peak_working_set_bytes_pass1": 9307398144,
+    "peak_working_set_bytes": 9307398144
+  }
+}

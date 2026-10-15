@@ -48,9 +48,10 @@ class LanlTestLocked(PermissionError):
     """Raised when the LANL test split is requested without FINAL_EVAL=1."""
 
 
-def _log_test_access(allowed):
+def _log_test_access(allowed, run_id=None):
+    rid = f"run_id={run_id}\t" if run_id is not None else ""
     line = (f"{_dt.datetime.now().isoformat(timespec='seconds')}\t"
-            f"{'ALLOWED' if allowed else 'DENIED'}\tpid={os.getpid()}\t"
+            f"{'ALLOWED' if allowed else 'DENIED'}\tpid={os.getpid()}\t{rid}"
             f"argv={' '.join(sys.argv)}\n")
     log.warning("LANL test split requested: %s", line.strip())
     os.makedirs(os.path.dirname(ACCESS_LOG), exist_ok=True)
@@ -83,6 +84,14 @@ def _read_auth(base, days, columns):
     return pa.concat_tables(tables)
 
 
+def _iter_auth(base, days, columns):
+    """(day, table) for each existing day partition under base, in day order."""
+    for d in days:
+        p = os.path.join(base, f"day={d:02d}", "part-0.parquet")
+        if os.path.exists(p):
+            yield d, pq.read_table(p, columns=columns)
+
+
 def _check_test_partitions():
     with open(LOCK_FILE, encoding="utf-8") as f:
         l1 = json.load(f).get("l1_auth_test")
@@ -99,7 +108,10 @@ def _check_test_partitions():
     return l1
 
 
-def load_lanl(split, source="redteam", columns=None):
+def load_lanl(split, source="redteam", columns=None, by_day=False, run_id=None):
+    """by_day=True (auth only) returns an iterator of (day, table) instead of
+    one table; the guard, the access-log line and the lock check happen at the
+    call, before any row is read. run_id is written to the access-log line."""
     if split not in SPLITS:
         raise ValueError(f"unknown split {split!r}; expected one of {SPLITS}")
     if source not in SOURCES:
@@ -107,7 +119,7 @@ def load_lanl(split, source="redteam", columns=None):
 
     if split == "test":
         allowed = os.environ.get("FINAL_EVAL") == "1"
-        _log_test_access(allowed)
+        _log_test_access(allowed, run_id)
         if not allowed:
             raise LanlTestLocked(
                 "the LANL test split is locked; set FINAL_EVAL=1 only for the "
@@ -118,11 +130,17 @@ def load_lanl(split, source="redteam", columns=None):
         if split == "test":
             l1 = _check_test_partitions()
             first = _auth_days(lo, lo)[0]
-            return _read_auth(lanl_convert.test_dir(lanl_convert.OUT_ROOT),
-                              range(first, l1["test_end_day"] + 1), columns)
-        d_lo, d_hi = _auth_days(lo, hi)
-        return _read_auth(lanl_convert.dev_dir(lanl_convert.OUT_ROOT),
-                          range(d_lo, d_hi), columns)
+            base = lanl_convert.test_dir(lanl_convert.OUT_ROOT)
+            days = range(first, l1["test_end_day"] + 1)
+        else:
+            d_lo, d_hi = _auth_days(lo, hi)
+            base = lanl_convert.dev_dir(lanl_convert.OUT_ROOT)
+            days = range(d_lo, d_hi)
+        if by_day:
+            return _iter_auth(base, days, columns)
+        return _read_auth(base, days, columns)
+    if by_day:
+        raise ValueError("by_day is for source='auth'")
 
     rows = [r for r in lanl_split.read_redteam() if lo <= r[0] < hi]
     if split == "test":

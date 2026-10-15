@@ -1,0 +1,24 @@
+{
+  "test_rows_from_lock": 811958831,
+  "dev_rows": 239471628,
+  "dev_max_filtered_share": 0.15692526452573013,
+  "assumed_test_filtered_rows": 127416854,
+  "twin_rows_per_s_L2": 337569.252889766,
+  "d_features_rows_per_s_L2": 1769930.7317073168,
+  "d1_score_rows_per_s_L2": 286591.03678929765,
+  "d_metrics_rows_per_s_L2": 194440.9102730819,
+  "a_metrics_rows_per_s_L2": 7825870.196078431,
+  "est_seconds": {
+    "dev_days_rerun_twin_and_features": 845,
+    "test_twin": 2405,
+    "test_d_features": 459,
+    "test_d1_scoring": 445,
+    "test_a_metrics": 104,
+    "test_d_metrics": 655
+  },
+  "d1_scoring_over_3h": false,
+  "peak_twin_L2_bytes": 7717265408,
+  "d_metrics_L2_peak_bytes_per_val_a_row": 190.32354121893246,
+  "est_d_metrics_peak_bytes_linear": 24250426929,
+  "est_seconds_total": 4913
+}

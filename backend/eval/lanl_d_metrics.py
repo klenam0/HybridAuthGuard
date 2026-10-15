@@ -192,13 +192,13 @@ def evaluate(sc, pos, day, y, row_user, row_events, users, ev_users_all, Wu):
     return out
 
 
-def main():
+def main(splits=("val_a", "val_b")):
     from sklearn.metrics import average_precision_score, roc_auc_score
     t_all = time.perf_counter()
     rt = L.redteam_dev()
     res = OrderedDict()
     checks = {}
-    for split in ("val_a", "val_b"):
+    for split in splits:
         Z = load_split(split)
         ev = rt[rt["split"] == split]
         users = sorted(ev["user"].unique())
