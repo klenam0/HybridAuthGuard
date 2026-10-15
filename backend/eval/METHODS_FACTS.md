@@ -278,3 +278,111 @@ base rate (lines 841-843, 868).
   just wrote."
 - Retention is store housekeeping only: no detector, triage or tier state
   reads the store.
+
+## 6. Phase 6 figures: S1 TPR, val_b step-up cost, S5 timing
+
+Read-only, at aa1b05f. Only saved results JSON (and the saved stdout and
+report in `C:\Users\Dell\audit_scratch\`) were read; nothing went through the
+evaluation loaders, no metric was computed, no code changed.
+
+### 6.1 S1: TPR at 1% FPR per variant and seed (May)
+
+**File.** `results/phase6_secondary.json` does not exist. S1 is written by
+`eval/phase6_secondary.py` (`stage_s1`, `save_json(_out_name("s1", ...))`,
+lines 114-117) to **`results/phase6_s1.json`**. All values below come
+from that file.
+
+JSON path: `variants/<v>/seed_<s>/<stratum>/tpr_at_1pct_fpr`, stratum `all`
+(2,158,083 May events) or `new_attackers` (1,974,163; `events/*`).
+
+| Variant | Seed | May, all | May, new attackers |
+|---|---|---|---|
+| (a) original | 42 | 0.003002 | 0.000942 |
+| (a) | 43 | 0.002717 | 0.001005 |
+| (a) | 44 | 0.002622 | 0.000879 |
+| (b) maps all rows, fit non-attack | 42 | **0.004373** | 0.000942 |
+| (b) | 43 | 0.003823 | 0.000754 |
+| (b) | 44 | **0.004343** | 0.001130 |
+| (c) label-free | 42 | 0.003127 | 0.000754 |
+| (c) | 43 | 0.002922 | 0.000691 |
+| (c) | 44 | 0.003763 | 0.000942 |
+
+Mean / min / max over seeds are under `variants/<v>/over_seeds/<stratum>/
+tpr_at_1pct_fpr` (e.g. (b) all: mean 0.004180, max 0.004373; (a) all: max
+0.003002; (c) all: max 0.003763; new attackers max over all variants
+0.001130, (b) seed 44).
+
+Metric code: `eval/phase4.py:415-423` (`event_metrics`),
+`tpr_at_1pct_fpr = max(tpr[fpr <= 0.01])` on the ROC curve of the event
+scores (`s[rows] = -P2.score_samples(model, Xs)`,
+`eval/phase6_secondary.py:95-97`).
+
+**"at most 0.004" (`PHASE6_REPORT.md:181`, "TPR at 1% FPR: at most 0.004
+for every variant").** No JSON field holds 0.004; it is prose written from
+the per-seed values (the S1 stdout, `phase6_s1_stdout.txt` lines 4-22, prints
+them rounded to 4 places). **It is not exact:** variant (b), May all events,
+is 0.0044 at seed 42 (0.004373) and 0.0043 at seed 44 (0.004343), and the
+(b) mean is 0.0042. Correct statements: "at most 0.0044 (all events) and
+at most 0.0011 (new attackers)" or "below 0.005". Every other cell is
+<= 0.0038.
+
+### 6.2 Legitimate users challenged by step-up on val_b
+
+| Source | JSON path | Total | Per day (mean of 16) | Max day |
+|---|---|---|---|---|
+| Phase 6 causal replay | `results/phase6_primary.json`: `results/val_b/P3/response_cost/all/step_up/legitimate_users_affected`, `.../legitimate_users_per_day`, `.../legitimate_users_max_day` | **1,433** | **90.3125** | 210 |
+| Phase 5b | `results/phase5b_response.json`: `response_cost/val_b/all/step_up/legitimate_users_affected`, `.../legitimate_users_per_day` | **1,443** | **90.9375** | 210 (max of `.../legitimate_users_daily`) |
+
+(`phase6_primary_devonly.json` has the same values as `phase6_primary.json`.)
+
+**They are different policies, not just different runs.**
+
+- Phase 5b (`protocol: "eval/PROTOCOL.md amendment 7"`) is T2, step-up
+  200/day capped, queue 500, **without** the amendment 8 score floor.
+- Phase 6 (`protocol: "eval/PROTOCOL.md amendment 9"`) is the frozen system,
+  which **includes the floor** (`config.RESPONSE_FLOOR_DETECTORS`; recorded
+  in `results/phase6_replay_check.json` `defaults/RESPONSE_FLOOR_DETECTORS`).
+  The stream also continues into May, but val_b ends before May and the
+  run is causal, so that does not change val_b.
+- Phase 5c (`results/phase5c_floor.json`) shows both versions:
+  - `halves/val_b/without_floor/step_up_cost/all/legitimate_users_affected`
+    = 1,443 (per day 90.9375), equal to Phase 5b;
+  - `halves/val_b/with_floor/step_up_cost/all/legitimate_users_affected`
+    = 1,433 (per day 90.3125), equal to Phase 6.
+- Phase 6 checks this itself: `consistency_with_earlier_phases/
+  P3_tiers_equal_phase5c = true` in `phase6_primary.json`.
+- Day by day (`.../legitimate_users_daily`), the floor lowers 6 of the 16
+  val_b days by 1 to 4 users and leaves the other 10 the same
+  (5b: 42, 210, 57, 54, 208, 171, 43, 44, 45, 59, 51, 41, 49, 190, 144, 47;
+  6: 41, 210, 57, 54, 208, 171, 41, 43, 44, 58, 47, 41, 49, 190, 144, 47).
+
+The report's "val_b 90.3" (`PHASE6_REPORT.md:365`) is the with-floor (Phase
+6 / 5c) value.
+
+### 6.3 S5: 87.0 µs vs 81.5 µs per event
+
+Both come from one replay, `stage_replay` in `eval/phase6.py:376-518`,
+written to `results/phase6_replay_check.json`. They measure different
+things over different event sets.
+
+| | 87.0 µs | 81.5 µs |
+|---|---|---|
+| JSON path | `S5/total_us_per_event_mean` = 87.03 (also `S5/total_us_per_event_p50` 24.2, `S5/total_us_per_event_p99` 363.2) | `replay_us_per_event` = 81.5, from `replay_seconds` = 696.9 and `events` = 8,550,667 |
+| Events averaged | **May only**, 2,158,083 (`per_event[S.n_dev:n]`) | **All**: dev (6,392,584) + May |
+| What is timed | Only `mon._process_event(e)`, per event, with `time.perf_counter()` (`eval/phase6.py:416-418`) | The whole loop, wall clock `time.time()` (`eval/phase6.py:406-420`). That includes building each event dict (`events(S)` generator), the untimed `status_untimed(e)` call, array writes, `_process_event`, and the final `responder.flush()` |
+| Formula | `1e6 * per_event[S.n_dev:n].mean()` (`eval/phase6.py:487`) | `1e6 * t_replay / n` (`eval/phase6.py:517`) |
+
+So the 81.5 µs figure includes *more* work per event than the 87.0 µs
+figure but is averaged over a different set of events. It is lower because
+dev events (75% of the replay) cost less on average in `_process_event`
+than May events. The per-event dev times are not saved (`per_event` is not
+written to disk), so the size of that gap cannot be read back from the
+results. The two numbers are not comparable, and neither is "wrong". The
+per-May-event figure for the frozen pipeline is 87.0 µs.
+
+The stage buckets (`S5/us_per_event`: rules 30.08, triage_response 29.4,
+analysis 6.43, store_record 13.65; sum 79.56) are May-only deltas of
+wrapped methods (`_Timer`, `eval/phase6.py:355-373,396-401,411-412,485`),
+divided by the May event count. The other ~7.5 µs of the 87.03 is
+`_process_event` work outside the wrapped methods. Every timer's own
+overhead is inside the bucket it measures (`S5/note`).
