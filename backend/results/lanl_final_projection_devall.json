@@ -1,0 +1,109 @@
+{
+  "method": "Memory bar per process, process 2 re-projected from three measured\n    populations per scorer (each a fresh process, sklearn cross-check off, as\n    on the test): val_b (split dry run, p2_<s>_nocheck.json), val_a\n    (lanl_final_lean_memory_scorers.json) and dev_all (days 0-13,\n    lanl_final_memory_devall.json).\n      fit: least-squares line peak private = fixed + per_row x filtered rows\n        through the three points, evaluated at the assumed test filtered rows;\n      ratio: dev_all peak private / dev_all rows x test rows;\n      projected peak = the larger of the two.\n    p1 (pass 1 + A metrics) is unchanged: taken from\n    lanl_final_projection_split.json.\n    Bar (per process, rechecked before each starts): projected peak <= 80% of\n    free commit and <= 80% of free physical RAM.",
+  "p1_from": "lanl_final_projection_split.json",
+  "p2": {
+    "D1": {
+      "points": {
+        "val_b": {
+          "filtered_rows": 6383434,
+          "peak_private": 1369133056
+        },
+        "val_a": {
+          "filtered_rows": 8569072,
+          "peak_private": 1391513600
+        },
+        "dev_all": {
+          "filtered_rows": 33578516,
+          "peak_private": 2843766784
+        }
+      },
+      "fit_fixed_bytes": 965039322.3366698,
+      "fit_bytes_per_row": 55.82605437383924,
+      "fit_residuals_bytes": [
+        47731800.08751607,
+        -51903201.742013216,
+        4171401.654499054
+      ],
+      "projection_fit_bytes": 8078219541.884206,
+      "dev_all_peak_per_row_bytes": 84.69006742287242,
+      "projection_dev_all_ratio_bytes": 10790941956.070292,
+      "assumed_test_filtered_rows": 127416854,
+      "projected_peak": 10790941956.070292
+    },
+    "D2": {
+      "points": {
+        "val_b": {
+          "filtered_rows": 6383434,
+          "peak_private": 1369407488
+        },
+        "val_a": {
+          "filtered_rows": 8569072,
+          "peak_private": 1391706112
+        },
+        "dev_all": {
+          "filtered_rows": 33578516,
+          "peak_private": 2876403712
+        }
+      },
+      "fit_fixed_bytes": 956099964.7549655,
+      "fit_bytes_per_row": 57.06076863032274,
+      "fit_residuals_bytes": [
+        49063872.7040987,
+        -53351687.523542404,
+        4287814.81944418
+      ],
+      "projection_fit_bytes": 8226603590.452579,
+      "dev_all_peak_per_row_bytes": 85.66202604069817,
+      "projection_dev_all_ratio_bytes": 10914785865.371836,
+      "assumed_test_filtered_rows": 127416854,
+      "projected_peak": 10914785865.371836
+    },
+    "D3": {
+      "points": {
+        "val_b": {
+          "filtered_rows": 6383434,
+          "peak_private": 1368838144
+        },
+        "val_a": {
+          "filtered_rows": 8569072,
+          "peak_private": 1391431680
+        },
+        "dev_all": {
+          "filtered_rows": 33578516,
+          "peak_private": 2842398720
+        }
+      },
+      "fit_fixed_bytes": 965176712.2684528,
+      "fit_bytes_per_row": 55.78160722011257,
+      "fit_residuals_bytes": [
+        47583223.62803507,
+        -51741640.8133173,
+        4158417.1852817535
+      ],
+      "projection_fit_bytes": 8072693615.318882,
+      "dev_all_peak_per_row_bytes": 84.64932518161315,
+      "projection_dev_all_ratio_bytes": 10785750707.864126,
+      "assumed_test_filtered_rows": 127416854,
+      "projected_peak": 10785750707.864126
+    }
+  },
+  "projected_peak_bytes": {
+    "p1": 15695591500.518677,
+    "p2_D1": 10790941956.070292,
+    "p2_D2": 10914785865.371836,
+    "p2_D3": 10785750707.864126
+  },
+  "at_projection": {
+    "free_commit_bytes": 55606562816,
+    "total_commit_bytes": 68495142912,
+    "free_physical_bytes": 22405267456,
+    "limit_80pct_free_commit_bytes": 44485250252.8,
+    "limit_80pct_free_physical_bytes": 17924213964.8
+  },
+  "passes_at_projection": {
+    "p1": true,
+    "p2_D1": true,
+    "p2_D2": true,
+    "p2_D3": true
+  }
+}

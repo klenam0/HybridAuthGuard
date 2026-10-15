@@ -228,3 +228,94 @@ and y), so two dev sizes cannot pin down the per-row cost.
 
 Gates after: freeze, test lock and LANL test lock MATCHES;
 `results/lanl_test_access.log` holds only the CONVERT line.
+
+### Process 2 re-measured on all dev days; bar re-checked (the test was not opened)
+
+Machine state at the start of this session (after a restart with a fixed
+pagefile): `C:\pagefile.sys` 32,768 MB allocated (initial = maximum = 32,768
+MB; not system-managed), 0 MB in use, peak 0 MB; free commit 54,937,903,104 B
+of 68,495,142,912 B; free physical 21,955,854,336 B. Gates before: freeze,
+test lock and LANL test lock MATCHES; D1 model SHA-256 `48bf2436…cfb3`
+equals L2; `results/lanl_test_access.log` holds only the CONVERT line. With
+the larger pagefile, free physical RAM, not free commit, is now the binding
+limit.
+
+**Approved method (option 1).** Process 2 is measured on all dev days 0-13 as
+one population, one fresh process per scorer, sklearn cross-check off as on
+the test. A least-squares line, peak private = fixed + per_row × rows, is fit
+through three measured points per scorer (val_b, val_a, dev_all) and
+evaluated at 127,416,854 test rows. The projected peak is the larger of that
+fit and (dev_all peak / dev_all rows) × test rows. Process 1's projection is
+unchanged (`lanl_final_projection_split.json`).
+
+**Code (before any test access; measurement only, no reported dev result
+changes).** `eval/lanl_final.py`:
+- adds the dev target `dev_all` (days 0 to c3 = 14). Its red-team frame is
+  the dev frame with `split` relabelled `dev_all` for days before c3.
+- `prep_dev_all()` builds `final_devall/d` in the work directory. It holds
+  hard links to L2's unchanged per-day D files for days 0-13 and L2's D1
+  scores for days 8-13, plus D1 scores for days 0-7 computed exactly as
+  `run()` computes them (L2 scored only val days).
+- `measure_dev_all()` runs the existing `d_process` per scorer with
+  `--no-crosscheck` and writes `results/lanl_final_memory_devall.json`. The
+  dev_all metric outputs stay in the work directory. They are not a reported
+  result and were not looked at.
+- `project_devall()` writes `results/lanl_final_projection_devall.json`.
+  `PROJ_FILE` (the file `bar_check` reads before each process) now points to
+  it.
+
+**Measured points** (peak private, fresh process, cross-check off):
+
+| scorer | val_b (6,383,434 rows) | val_a (8,569,072 rows) | dev_all (33,578,516 rows) |
+|---|---|---|---|
+| D1 | 1,369,133,056 | 1,391,513,600 | 2,843,766,784 |
+| D2 | 1,369,407,488 | 1,391,706,112 | 2,876,403,712 |
+| D3 | 1,368,838,144 | 1,391,431,680 | 2,842,398,720 |
+
+Private before the D metrics in the dev_all processes: 428.5-428.8 MB.
+
+**Fit and projections** (to 127,416,854 rows):
+
+| scorer | fixed (B) | per row (B) | fit projection | dev_all peak / row | ratio projection | **used (max)** |
+|---|---|---|---|---|---|---|
+| D1 | 965,039,322 | 55.83 | 8,078,219,542 | 84.69 | 10,790,941,956 | **10,790,941,956** |
+| D2 | 956,099,965 | 57.06 | 8,226,603,590 | 85.66 | 10,914,785,865 | **10,914,785,865** |
+| D3 | 965,176,712 | 55.78 | 8,072,693,615 | 84.65 | 10,785,750,708 | **10,785,750,708** |
+
+Fit residuals are under 54 MB at every point. The ratio projection is the
+larger for every scorer, so it is the one used.
+
+**History of the process 2 projection method:**
+1. A single process for all scorers, using val_a's 128.63 B/row: 16.82 GB.
+   It failed and led to per-scorer processes.
+2. Per scorer, the larger of val_a and the val_b dry run with the cross-check
+   on (about 206.5 B/row): about 26.7 GB. The cross-check does not run on the
+   test.
+3. After seeing figure 2 fail, and before anything was committed or opened,
+   the method switched to val_b with the cross-check off (147.2-147.4 B/row):
+   19.19-19.21 GB. This failed (commit c32e0d2).
+4. Approved after that failure: this section's three-point fit and dev_all
+   ratio, 10.79-10.91 GB. Each change came after the previous figure was seen
+   to fail. All were made before any test access.
+
+**Bar at projection** (free commit 55,606,562,816 B, 80% = 44,485,250,253;
+free physical 22,405,267,456 B, 80% = 17,924,213,965):
+
+| process | projected peak | <= 80% free commit | <= 80% free physical |
+|---|---|---|---|
+| p1 | 15,695,591,501 | yes | yes |
+| p2_D1 | 10,790,941,956 | yes | yes |
+| p2_D2 | 10,914,785,865 | yes | yes |
+| p2_D3 | 10,785,750,708 | yes | yes |
+
+**Every process passes at projection; option 3 was not needed.** The bar is
+rechecked immediately before each process starts (`bar_check`, logged to
+`results/lanl_final_bar_checks.json`). Process 1 has the least margin:
+15.70 GB against 17.92 GB.
+
+Disk: the work volume had 46 GB free. Scaled from val_b, the test's per-day
+outputs need about 11 GB.
+
+Gates after the measurement: freeze, test lock and LANL test lock MATCHES;
+`results/lanl_test_access.log` still holds only
+the CONVERT line.

@@ -124,6 +124,10 @@ class Days:
 
 def redteam_frame(target, run_id):
     rt = ORIG["redteam_dev"]()
+    if target == DEV_ALL:                 # memory measurement only: all dev days as one split
+        rt = rt.copy()
+        rt.loc[rt["day"] < c3_day(), "split"] = DEV_ALL
+        return rt
     if target != "test":
         return rt
     t0 = lanl_split.load_t0()
@@ -210,6 +214,8 @@ class ForcedStop(SystemExit):
 def target_days(target):
     if target == "test":
         return c3_day(), test_end_day() + 1
+    if target == DEV_ALL:
+        return 0, c3_day()
     return ORIG["split_days"]()[target]
 
 
@@ -310,7 +316,8 @@ def _child(args):
     return subprocess.run(cmd, cwd=BACKEND, env=os.environ.copy()).returncode
 
 
-PROJ_FILE = "lanl_final_projection_split.json"
+PROJ_FILE = "lanl_final_projection_devall.json"
+DEV_ALL = "dev_all"
 
 
 def bar_check(process):
@@ -806,6 +813,120 @@ def project_split():
     return 0 if all(out["passes_at_projection"].values()) else 1
 
 
+def prep_dev_all():
+    """Work directory final_devall/d for the dev_all memory measurement: L2's
+    per-day D files for days 0-13 (hard links, unchanged) and the D1 scores,
+    L2's for days 8-13 (hard links) and, for days 0-7 (L2 scored only val),
+    scored here exactly as run() scores them. Measurement only."""
+    from eval import phase2_baseline as P2
+    assert os.environ.get("FINAL_EVAL") != "1"
+    d_dir = os.path.join(L.wpath("final_devall"), "d")
+    os.makedirs(d_dir, exist_ok=True)
+    (model_b, sha) = load_model()
+    lo, hi = target_days(DEV_ALL)
+    for d in range(lo, hi):
+        for name in (f"day={d:02d}.npz", f"d1_day={d:02d}.npy"):
+            src, dst = os.path.join(L2_D_DIR, name), os.path.join(d_dir, name)
+            if os.path.exists(src) and not os.path.exists(dst):
+                os.link(src, dst)
+        dst = os.path.join(d_dir, f"d1_day={d:02d}.npy")
+        if not os.path.exists(dst):
+            X = np.load(os.path.join(d_dir, f"day={d:02d}.npz"))["X"]
+            np.save(dst, -P2.score_samples(model_b["model"], model_b["scaler"].transform(X)))
+            del X
+            print(f"scored D1 day {d:02d}", flush=True)
+    return sha
+
+
+def measure_dev_all():
+    """Process 2 on all dev days 0-13 as one population, one fresh process per
+    scorer, sklearn cross-check off (as on the test). Memory measurement only;
+    the metric output (d_<s>_nocheck.json in the work directory) is not a
+    reported result and is not looked at."""
+    sha = prep_dev_all()
+    work = L.wpath("final_devall")
+    res = OrderedDict([("d1_model_sha256", sha)])
+    for s in SCORERS:
+        rc = _child(["--p2", "--target", DEV_ALL, "--tag", "devall", "--scorer", s, "--no-crosscheck"])
+        if rc:
+            return rc
+        with open(os.path.join(work, f"p2_{s}_nocheck.json")) as f:
+            r = json.load(f)
+        with open(os.path.join(work, f"d_{s}_nocheck.json")) as f:
+            rows = json.load(f)[DEV_ALL]["filtered_rows"]
+        res[s] = OrderedDict([("filtered_rows", rows), ("private_before", r["memory_before_d_metrics"]["private"]),
+                              ("peak_private", r["memory_end"]["peak_private"]), ("seconds", r["seconds"])])
+    ORIG["save_json"]("lanl_final_memory_devall.json", res)
+    print(json.dumps(res, indent=1))
+    return 0
+
+
+def project_devall():
+    """Memory bar per process, process 2 re-projected from three measured
+    populations per scorer (each a fresh process, sklearn cross-check off, as
+    on the test): val_b (split dry run, p2_<s>_nocheck.json), val_a
+    (lanl_final_lean_memory_scorers.json) and dev_all (days 0-13,
+    lanl_final_memory_devall.json).
+      fit: least-squares line peak private = fixed + per_row x filtered rows
+        through the three points, evaluated at the assumed test filtered rows;
+      ratio: dev_all peak private / dev_all rows x test rows;
+      projected peak = the larger of the two.
+    p1 (pass 1 + A metrics) is unchanged: taken from
+    lanl_final_projection_split.json.
+    Bar (per process, rechecked before each starts): projected peak <= 80% of
+    free commit and <= 80% of free physical RAM."""
+    with open(os.path.join(L.RESULTS, "lanl_final_projection_split.json")) as f:
+        split = json.load(f)
+    with open(os.path.join(L.RESULTS, "lanl_final_lean_memory_scorers.json")) as f:
+        lean = json.load(f)
+    with open(os.path.join(L.RESULTS, "lanl_final_memory_devall.json")) as f:
+        dall = json.load(f)
+    with open(os.path.join(L.wpath("final_dryrun_out"), "run.json")) as f:
+        vb_rows = json.load(f)["p2_rows"]
+    with open(os.path.join(L.RESULTS, "lanl_final_estimate.json")) as f:
+        rows_test = json.load(f)["assumed_test_filtered_rows"]
+    p2 = OrderedDict()
+    for s in SCORERS:
+        with open(os.path.join(L.wpath("final_dryrun"), f"p2_{s}_nocheck.json")) as f:
+            vb = json.load(f)
+        pts = OrderedDict([
+            ("val_b", OrderedDict([("filtered_rows", vb_rows), ("peak_private", vb["memory_end"]["peak_private"])])),
+            ("val_a", OrderedDict([("filtered_rows", lean[s]["filtered_rows"]),
+                                   ("peak_private", lean[s]["peak_private"])])),
+            (DEV_ALL, OrderedDict([("filtered_rows", dall[s]["filtered_rows"]),
+                                   ("peak_private", dall[s]["peak_private"])]))])
+        x = np.array([p["filtered_rows"] for p in pts.values()], float)
+        y = np.array([p["peak_private"] for p in pts.values()], float)
+        per_row, fixed = np.polyfit(x, y, 1)
+        fit = float(fixed + per_row * rows_test)
+        ratio = float(dall[s]["peak_private"] / dall[s]["filtered_rows"] * rows_test)
+        p2[s] = OrderedDict([
+            ("points", pts),
+            ("fit_fixed_bytes", float(fixed)), ("fit_bytes_per_row", float(per_row)),
+            ("fit_residuals_bytes", (y - (fixed + per_row * x)).tolist()),
+            ("projection_fit_bytes", fit),
+            ("dev_all_peak_per_row_bytes", dall[s]["peak_private"] / dall[s]["filtered_rows"]),
+            ("projection_dev_all_ratio_bytes", ratio),
+            ("assumed_test_filtered_rows", rows_test),
+            ("projected_peak", max(fit, ratio))])
+    fc = free_commit()
+    lim_c, lim_p = 0.8 * fc["free_commit_bytes"], 0.8 * fc["free_physical_bytes"]
+    peaks = OrderedDict([("p1", split["projected_peak_bytes"]["p1"])]
+                        + [(f"p2_{s}", p2[s]["projected_peak"]) for s in SCORERS])
+    out = OrderedDict([
+        ("method", project_devall.__doc__.strip()),
+        ("p1_from", "lanl_final_projection_split.json"),
+        ("p2", p2),
+        ("projected_peak_bytes", peaks),
+        ("at_projection", OrderedDict([*fc.items(), ("limit_80pct_free_commit_bytes", lim_c),
+                                       ("limit_80pct_free_physical_bytes", lim_p)])),
+        ("passes_at_projection", OrderedDict((k, bool(v <= lim_c and v <= lim_p)) for k, v in peaks.items())),
+    ])
+    ORIG["save_json"](PROJ_FILE, out)
+    print(json.dumps(out, indent=1))
+    return 0 if all(out["passes_at_projection"].values()) else 1
+
+
 def free_commit():
     import ctypes
     from eval.lanl_convert import _MemStatus
@@ -1050,7 +1171,13 @@ def main():
     ap.add_argument("--run-id", default=None)
     ap.add_argument("--skip-p1", action="store_true")
     ap.add_argument("--no-crosscheck", action="store_true")
+    ap.add_argument("--measure-dev-all", action="store_true")
+    ap.add_argument("--project-devall", action="store_true")
     args = ap.parse_args()
+    if args.measure_dev_all:
+        return measure_dev_all()
+    if args.project_devall:
+        return project_devall()
     if args.p1:
         return p1_main(args.target, args.tag, args.run_id, args.resume, args.stop_after)
     if args.p2:

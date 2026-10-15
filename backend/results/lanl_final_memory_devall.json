@@ -1,0 +1,21 @@
+{
+  "d1_model_sha256": "48bf2436ff8a4403eb140cfe1ce1d55a8118893c356d385aa91bd6a5edaccfb3",
+  "D1": {
+    "filtered_rows": 33578516,
+    "private_before": 428765184,
+    "peak_private": 2843766784,
+    "seconds": 16.2
+  },
+  "D2": {
+    "filtered_rows": 33578516,
+    "private_before": 428785664,
+    "peak_private": 2876403712,
+    "seconds": 6.1
+  },
+  "D3": {
+    "filtered_rows": 33578516,
+    "private_before": 428527616,
+    "peak_private": 2842398720,
+    "seconds": 11.6
+  }
+}
