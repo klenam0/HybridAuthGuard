@@ -1,0 +1,181 @@
+{
+  "source": "saved L2 causal twin arrays (a_causal/day=DD.npz) + dev partitions for names",
+  "splits": {
+    "val_a": {
+      "days": {
+        "08": {
+          "step_up_incidents": 200,
+          "legit_users_challenged": 22481,
+          "challenged_source_computers": 324,
+          "top5": [
+            {
+              "src_computer": "C612",
+              "users_challenged": 13457,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C529",
+              "users_challenged": 13414,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C1065",
+              "users_challenged": 13343,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C528",
+              "users_challenged": 13142,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C467",
+              "users_challenged": 12953,
+              "is_step_up_incident": true
+            }
+          ]
+        },
+        "09": {
+          "step_up_incidents": 0,
+          "legit_users_challenged": 12287,
+          "challenged_source_computers": 159,
+          "top5": [
+            {
+              "src_computer": "C528",
+              "users_challenged": 4318,
+              "is_step_up_incident": false
+            },
+            {
+              "src_computer": "C529",
+              "users_challenged": 4193,
+              "is_step_up_incident": false
+            },
+            {
+              "src_computer": "C612",
+              "users_challenged": 4169,
+              "is_step_up_incident": false
+            },
+            {
+              "src_computer": "C1065",
+              "users_challenged": 4137,
+              "is_step_up_incident": false
+            },
+            {
+              "src_computer": "C467",
+              "users_challenged": 4061,
+              "is_step_up_incident": false
+            }
+          ]
+        },
+        "10": {
+          "step_up_incidents": 0,
+          "legit_users_challenged": 0,
+          "challenged_source_computers": 0,
+          "top5": []
+        },
+        "11": {
+          "step_up_incidents": 77,
+          "legit_users_challenged": 12835,
+          "challenged_source_computers": 77,
+          "top5": [
+            {
+              "src_computer": "C612",
+              "users_challenged": 8330,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C529",
+              "users_challenged": 8315,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C1065",
+              "users_challenged": 8209,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C528",
+              "users_challenged": 8078,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C457",
+              "users_challenged": 7808,
+              "is_step_up_incident": true
+            }
+          ]
+        }
+      },
+      "check_equals_lanl_a_dev_daily": true
+    },
+    "val_b": {
+      "days": {
+        "12": {
+          "step_up_incidents": 200,
+          "legit_users_challenged": 22848,
+          "challenged_source_computers": 218,
+          "top5": [
+            {
+              "src_computer": "C1065",
+              "users_challenged": 13579,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C529",
+              "users_challenged": 13474,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C612",
+              "users_challenged": 13446,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C528",
+              "users_challenged": 13150,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C467",
+              "users_challenged": 13139,
+              "is_step_up_incident": true
+            }
+          ]
+        },
+        "13": {
+          "step_up_incidents": 200,
+          "legit_users_challenged": 20719,
+          "challenged_source_computers": 339,
+          "top5": [
+            {
+              "src_computer": "C612",
+              "users_challenged": 11994,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C529",
+              "users_challenged": 11885,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C467",
+              "users_challenged": 11852,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C528",
+              "users_challenged": 11811,
+              "is_step_up_incident": true
+            },
+            {
+              "src_computer": "C1065",
+              "users_challenged": 11766,
+              "is_step_up_incident": true
+            }
+          ]
+        }
+      },
+      "check_equals_lanl_a_dev_daily": true
+    }
+  }
+}
