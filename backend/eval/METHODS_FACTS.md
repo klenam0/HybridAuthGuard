@@ -138,3 +138,144 @@ method and file hash in `eval/DATASET_DESCRIPTION.md`, raw numbers in
 - `CITATION.cff` exists at the repository root (`../CITATION.cff`). It states
   `version: "2.0.0"` (line 8) and `date-released: "2026-10-09"` (line 7), last
   changed in 734a390. It is the same at `v3.0.0-frozen`. It does not state 3.0.0.
+
+## 5. Triage baseline T0, tier bars, alert retention
+
+Read-only, at 1799315. No code changed, no test output read, no metric
+computed.
+
+### T0 as implemented
+
+**Score.** A 2-tuple, higher = more urgent, compared lexicographically:
+(highest val_a alert precision among the incident's rule detectors, number
+of distinct rule detectors in the incident).
+
+- Live agent: `agents/triage.py:212-220`; the T0 branch is line 220,
+  `return (top, n_det) if name == "T0" else (top, d.asn_max)`, with
+  `top = max(p for j, p in enumerate(self.prec) if inc.mask >> j & 1)`
+  (line 219) and `n_det = bin(inc.mask).count("1")` (line 213).
+  `self.prec` comes from `config.TRIAGE_DETECTOR_PRECISION`
+  (`agents/triage.py:126-127`).
+- Detector precisions (val_a point estimates at the amendment 3 setting,
+  `config.py:268-279`): Brute Force 0.296875, Credential Stuffing 0.27344,
+  Slow Brute Force 0.26303, Distributed Brute Force 0.25163, Success After
+  Failures 0.24569, Invalid Account Spraying 0.23123, Multiple IP Login
+  0.14554, Suspicious Login Time 0.13086.
+- Offline twin used for the evaluation: `eval/phase5.py:173-176`
+  (`running("T0")` returns `[self.top, self.n_det]`), with `self.top` from
+  the same config table (`eval/phase5.py:155-156`). Final score = running
+  value at the incident's last alerted event (`eval/phase5.py:183-184`).
+
+**Order and tie-break (end-of-day ranking, the only place T0 is used).**
+`eval/phase5.py:212-222` (`day_rank`): `np.lexsort((tie, -n_det, -top,
+day))`, i.e. within each calendar day, by `top` descending, then `n_det`
+descending, then a uniform random draw `np.random.default_rng(TIE_SEED)
+.random(n)` with `TIE_SEED = 42` (`eval/phase5.py:67`) ascending. The top B
+per day are taken in `budget_metrics` (`eval/phase5.py:225-248`,
+`take = rank < B`). Phase 6 P2 calls the same functions for T2 and T0
+(`eval/phase6_primary.py:26,65`; the T2-vs-T0 test at lines 66-69).
+
+T0 is not deployed: `config.TRIAGE_SCORE = "T2"` (`config.py:266`). In the
+live tiers (any score), there is no random tie-break: the cutoff is the
+k-th of the previous day's final scores sorted descending
+(`agents/triage.py:236-241`) and an incident qualifies when
+`score >= cutoff` (`agents/triage.py:224-226`), so ties at the cutoff all
+qualify, subject to the per-day cap.
+
+**Amendment 6 text declaring T0** (`eval/PROTOCOL.md`):
+
+```
+573	   **Triage candidates**, in tie order (simplest first). Scores are
+574	   compared lexicographically, higher = more urgent:
+575	   - T0: amendment 3's budget score: (highest val_a alert precision, point
+576	     estimate at the chosen setting, among the incident's detectors;
+577	     number of distinct detectors). Baseline.
+...
+591	   Remaining ties in an end-of-day ranking are broken uniformly at random,
+592	   `default_rng(42)`, as in amendment 3.
+```
+
+and its role as the bar (lines 599-607):
+
+```
+599	   distinct attacking IPs with an attack incident among that day's top 500;
+600	   mean over the 16 days), subject to: the day-clustered bootstrap lower
+601	   bound of the *mean daily top-500 incident precision* >= T0's val_a point
+602	   value of that same mean. ...
+605	   T0 is subject to the same bar; its lower bound is below its own point
+606	   value unless every day is equal, so it is expected to fail it. **If no
+607	   candidate qualifies, T0 is kept.**
+```
+
+(Line 599 begins "mean daily attacking IPs caught* at B = 500 on val_a (per
+day:" on line 597-598; quoted from 599 for brevity.)
+
+### Block-tier admission criterion (`eval/PROTOCOL.md`)
+
+Amendment 6:
+
+```
+623	   - **Block, TTL 3600 s:** k_block = the largest k in K whose region on
+624	     val_a has >= 30 incidents and an incident-precision lower bound >=
+625	     0.80 (IP-clustered bootstrap of amendment 3: the IPs with an incident
+626	     in the region, 1,000 resamples, `default_rng(42)` per call). **If no
+627	     k qualifies there is no block tier**, and nothing is ever blocked.
+```
+
+Restated under capped admission, amendment 7:
+
+```
+712	   **Block.** Unchanged criterion: k_block = the largest k in amendment
+713	   6's grid K whose capped block region on val_a has >= 30 incidents and
+714	   an IP-clustered lower bound >= 0.80. None is expected; if none, there
+715	   is no block tier.
+```
+
+So: incident minimum **30**, lower-bound bar **0.80**. Deployed:
+`RESPONSE_TIER_RATES["block"] = 0` (no block tier; `config.py:262,267`).
+
+### Step-up band bar (`eval/PROTOCOL.md`)
+
+The bar is **0.2149** (a lower bound, on val_a). Amendment 6:
+
+```
+628	   - **Step-up challenge** (simulated MFA, recorded, not enforced, TTL
+629	     3600 s): k_step = the largest k in K, k > k_block, whose band (rate-k
+630	     region minus the rate-k_block region) has >= 30 incidents on val_a and
+631	     a lower bound >= 0.2149. None qualifies: no step-up tier.
+```
+
+Amendment 7 (replaces "largest k" with a volume-capped choice, same bar):
+
+```
+731	   k_step = the k in K_step that maximises attacking IPs challenged,
+732	   subject to (i) >= 30 band incidents on val_a (carried over from
+733	   amendment 6), (ii) band lower bound >= 0.2149, and (iii) mean
+734	   legitimate users challenged per day <= **U = 200**. Ties: the smaller
+735	   k. **If no k qualifies there is no step-up tier.**
+```
+
+Amendment 9 (test plan) reports tiers against both 0.2149 and 2 x the May
+base rate (lines 841-843, 868).
+
+### 30-day alert retention: by save time (wall clock), not event time
+
+- Setting: `config.ALERT_RETENTION_DAYS = int(os.environ.get(
+  "ALERT_RETENTION_DAYS", "30"))` (`config.py:236`; comment lines 234-235:
+  "saved more than this many days ago (wall clock)").
+- `saved_at` is set at insert to the wall clock,
+  `alert.setdefault("saved_at", datetime.now().strftime(...))`
+  (`utils/alert_store_sqlite.py:125`).
+- Prune: `cutoff = datetime.fromtimestamp(time.time()) - timedelta(days=
+  retention_days)` (`utils/alert_store_sqlite.py:175-177`), then
+  `DELETE FROM alerts WHERE saved_at < ?` (line 182), then incidents left
+  with no alert are deleted (lines 184-187). `retention_days <= 0` disables
+  it (line 173).
+- When: on store open (`utils/alert_store_sqlite.py:105`) and then at most
+  once per 86,400 s of the monotonic clock, checked on writes
+  (`_maybe_prune`, lines 197-204; called from `save_alerts`, line 152).
+- The module docstring states the reason (`utils/alert_store_sqlite.py:16-20`):
+  "Wall clock, not event time, so replaying old data does not prune what it
+  just wrote."
+- Retention is store housekeeping only: no detector, triage or tier state
+  reads the store.
