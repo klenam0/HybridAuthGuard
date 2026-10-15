@@ -26,5 +26,44 @@
         "passes": true
       }
     ]
+  },
+  {
+    "run_id": "L3C-20261015T064518-cont-of-L3-20261015T034342-14240-deviation",
+    "exit": 0,
+    "checks": [
+      {
+        "process": "p2_D1",
+        "time": "2026-10-15T06:45:19",
+        "projected_peak_bytes": 10790941956.070292,
+        "free_commit_bytes": 54456946688,
+        "total_commit_bytes": 68495142912,
+        "free_physical_bytes": 22558453760,
+        "limit_80pct_free_commit_bytes": 43565557350.4,
+        "limit_80pct_free_physical_bytes": 18046763008.0,
+        "passes": true
+      },
+      {
+        "process": "p2_D2",
+        "time": "2026-10-15T06:45:41",
+        "projected_peak_bytes": 10914785865.371836,
+        "free_commit_bytes": 54443368448,
+        "total_commit_bytes": 68495142912,
+        "free_physical_bytes": 22577258496,
+        "limit_80pct_free_commit_bytes": 43554694758.4,
+        "limit_80pct_free_physical_bytes": 18061806796.8,
+        "passes": true
+      },
+      {
+        "process": "p2_D3",
+        "time": "2026-10-15T06:45:58",
+        "projected_peak_bytes": 10785750707.864126,
+        "free_commit_bytes": 54490136576,
+        "total_commit_bytes": 68495142912,
+        "free_physical_bytes": 22609559552,
+        "limit_80pct_free_commit_bytes": 43592109260.8,
+        "limit_80pct_free_physical_bytes": 18087647641.600002,
+        "passes": true
+      }
+    ]
   }
 ]

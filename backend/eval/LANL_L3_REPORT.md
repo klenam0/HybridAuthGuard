@@ -362,7 +362,7 @@ The process 2 line is the red-team read.
 
 Gates after: freeze, test lock and LANL test lock MATCHES.
 
-## 2. Deviation: code fix after the first ALLOWED line (in progress; process 2 not run)
+## 2. Deviation: code fix after the first ALLOWED line
 
 Approved as the only deviation, after section 1. It is not the
 infrastructure recovery.
@@ -427,6 +427,269 @@ same positives.
   - A population with zero positives evaluates without error: AUC `None`,
     top-1000 lift `nan`, mode "exact counts" (row 10).
 
-**Status:** process 2 was not run. Row 10's handling is not specified by
-LA3/LA4, so under the deviation's condition 3 this stops and reports. No
-second run ID exists yet.
+**Row 10 resolved by LA5 (no code change).** Row 10's handling was not
+specified, so the work stopped before process 2 and reported. The approved
+resolution was a reporting rule, not code:
+- **LA5** (`eval/PROTOCOL_LANL.md`), committed alone as **1623ecd**. It was
+  written before any D test output existed: the work directory then held
+  only process 1's files.
+- **The rule:** a zero-positive scope is reported as "undefined (0 positives
+  in the filtered population)", with exact counts and no interval. If the
+  all-users scope has zero positives, every LA3.8 verdict is "not
+  evaluable". The saved JSON stays as produced.
+- **On the test it does not apply.** Every scope has positives: all users
+  103, new users 30, returning users 73.
+
+**Continuation run.**
+- **Hashes:** all 135 process 1 output hashes were re-verified unchanged
+  immediately before the continuation.
+- **Run:** process 2 ran for D1, D2 and D3, one fresh process each, with the
+  bar re-checked before each, under the new run ID `L3C-20261015T064518-cont-of-L3-20261015T034342-14240-deviation`. It was recorded
+  as a continuation of `L3-20261015T034342-14240`.
+- **Command:** `FINAL_EVAL=1 python -m eval.lanl_final --skip-p1 --resume
+  --run-id <ID>`. With `--skip-p1`, process 1 is not run, so `--resume` has
+  exactly one effect: it skips the assert in `orchestrate` that the run ID
+  equals process 1's. That assert would otherwise block any new run ID
+  without a code change.
+- **Recorded as:** deviation, code fix after first ALLOWED line. It is not
+  the infrastructure recovery, which remains unused.
+- **What process 1 contributed:** process 2 read only process 1's saved D
+  arrays, plus the red-team file through the guarded loader. No test output
+  was read before the fix.
+
+## 3. Run IDs and access-log lines
+
+| run ID | role |
+|---|---|
+| `L3-20261015T034342-14240` | the evaluation run: process 1 (pass 1 days 0-57 + A metrics) completed; process 2 D1 stopped on the assertion (section 1) |
+| `L3C-20261015T064518-cont-of-L3-20261015T034342-14240-deviation` | continuation after the deviation (section 2): process 2 D1, D2, D3 |
+
+`results/lanl_test_access.log` after the run (8 lines; the CONVERT line, then
+7 ALLOWED lines, every one carrying one of the two run IDs above):
+
+```
+2026-10-14T16:01:09	CONVERT	no statistics	...lanl_convert.py
+2026-10-15T03:43:45	ALLOWED	pid=15816	run_id=L3-20261015T034342-14240	--p1 (red-team read)
+2026-10-15T03:55:49	ALLOWED	pid=15816	run_id=L3-20261015T034342-14240	--p1 (test days 14-57)
+2026-10-15T04:50:59	ALLOWED	pid=15816	run_id=L3-20261015T034342-14240	--p1 (test days, reopened for the A metrics)
+2026-10-15T04:53:15	ALLOWED	pid=7756	run_id=L3-20261015T034342-14240	--p2 D1 (red-team read; failed on the assertion)
+2026-10-15T06:45:20	ALLOWED	pid=22432	run_id=L3C-20261015T064518-cont-of-L3-20261015T034342-14240-deviation	--p2 D1
+2026-10-15T06:45:42	ALLOWED	pid=17144	run_id=L3C-20261015T064518-cont-of-L3-20261015T034342-14240-deviation	--p2 D2
+2026-10-15T06:45:58	ALLOWED	pid=20124	run_id=L3C-20261015T064518-cont-of-L3-20261015T034342-14240-deviation	--p2 D3
+```
+
+(Full argv in the log file.)
+
+Bar checks (`results/lanl_final_bar_checks.json`): every check passed. Each
+check's limit is 80% of free physical RAM, which was below 80% of free commit
+every time.
+
+| process | run ID | projected peak | 80% free physical at check | measured peak private |
+|---|---|---|---|---|
+| p1 | first | 15,695,591,501 | 17,756,251,750 | 13,166,358,528 |
+| p2_D1 (failed) | first | 10,790,941,956 | 17,981,217,178 | n/a |
+| p2_D1 | continuation | 10,790,941,956 | 18,046,763,008 | 7,360,348,160 |
+| p2_D2 | continuation | 10,914,785,865 | 18,061,806,797 | 7,470,915,584 |
+| p2_D3 | continuation | 10,785,750,708 | 18,087,647,642 | 7,441,154,048 |
+
+Process 1 took 4,171.1 s: A twin 3,126.0, D features 418.2, D1 scoring 246.0,
+A metrics 134.8, checkpoints 97.3 and reads 52.7. Process 2 took 21.7 s,
+15.5 s and 17.0 s. LA4.7 applies: these runtimes are not for the paper.
+
+## 4. Gates after the run
+
+| check | after |
+|---|---|
+| `python -m eval.freeze --verify` | freeze MATCHES |
+| `python -m eval.lock_test --verify` | test lock MATCHES |
+| `python -m eval.lanl_lock --verify` | LANL test lock MATCHES |
+| D1 model SHA-256 (`lanl_final_run.json`) | `48bf2436…cfb3`, equals L2 |
+| process 1 outputs vs `results/lanl_final_p1_hashes.txt` | 135 / 135 unchanged before the continuation |
+
+## 5. Test label facts (`lanl_final_run.json` `labels`; `lanl_final_d.json`)
+
+| fact | value |
+|---|---|
+| red-team events (test) | 121 |
+| distinct red-team users | 51 |
+| matched events (LA3.1) | 121 |
+| unmatched events | 0 |
+| positive auth rows (all rows) | 104 |
+| positive rows in D's filtered population | 103 |
+| **positive rows outside the LA3.3 filter** | **1** |
+| events passing LA3.3 (at least one matched row in the filter) | 121 |
+| **red-team events outside the filter** | **0** |
+| users passing LA3.3 | 51 |
+| D filtered population (rows) | 110,018,263 |
+| step-up incidents (source computer, day) over 44 test days | 6,506 (at the 200/day cap on 30 days, 0 on 9 days) |
+
+Positive rows are fewer than events (LA4.4): a duplicated red-team line
+matches the same auth row. The one positive row outside the filter belongs to
+an event that also matches a row inside the filter. So the deviation's fix
+dropped one positive row and changed no event's status: no event counts as
+missed because of the filter.
+
+## 6. A on test (LA3.4, LA3.6, LA3.7; `results/lanl_final_a.json`)
+
+51 users, so bootstrap intervals (95%, 1,000 resamples over red-team users,
+seed 42). Events and users caught are out of all 121 test red-team events and
+51 users. Precision counts alerted auth rows (LA4.4).
+
+A detectors (test; all 121 events / 51 users):
+
+| detector | alerts | positive alerts | precision | events caught | users caught |
+|---|---|---|---|---|---|
+| Brute Force Attack | 64535 | 0 | 0.0 [0.0, 0.0] | 0 / 121 [0.0, 0.0] | 0 / 51 [0.0, 0.0] |
+| Slow Brute Force | 401458 | 1 | 2.49e-06 [0.0, 7.47e-06] | 4 / 121 [0.0, 0.113] | 1 / 51 [0.0, 0.059] |
+| Credential Stuffing | 238749 | 1 | 4.19e-06 [0.0, 1.26e-05] | 4 / 121 [0.0, 0.113] | 1 / 51 [0.0, 0.059] |
+| Invalid Account Spraying | 0 | 0 | n/a | 0 / 121 [0.0, 0.0] | 0 / 51 [0.0, 0.0] |
+| Distributed Brute Force | 482824 | 0 | 0.0 [0.0, 0.0] | 0 / 121 [0.0, 0.0] | 0 / 51 [0.0, 0.0] |
+| Success After Failures | 56728702 | 58 | 1.02e-06 [9.17e-07, 1.15e-06] | 76 / 121 [0.504, 0.771] | 50 / 51 [0.941, 1.000] |
+| Multiple IP Login | 126358 | 5 | 3.96e-05 [7.91e-06, 7.12e-05] | 5 / 121 [0.010, 0.083] | 5 / 51 [0.020, 0.176] |
+| Suspicious Login Time | 9757684 | 0 | 0.0 [0.0, 0.0] | 0 / 121 [0.0, 0.0] | 0 / 51 [0.0, 0.0] |
+| any rule alert | 66620795 | 59 | 8.86e-07 [7.81e-07, 9.91e-07] | 76 / 121 [0.504, 0.771] | 50 / 51 [0.941, 1.000] |
+
+A tiers:
+
+| tier | alerted events at tier | positive alerts at tier | precision | red-team events caught | users caught | incidents (final tier) | incidents with a positive |
+|---|---|---|---|---|---|---|---|
+| block | 0 | 0 | n/a | 0 / 121 | 0 / 51 | 0 | 0 |
+| step_up | 21445396 | 0 | 0.0 [0.0, 0.0] | 0 / 121 | 0 / 51 | 6506 | 0 |
+| queue | 12921468 | 0 | 0.0 [0.0, 0.0] | 0 / 121 | 0 / 51 | 15646 | 0 |
+| log | 32253931 | 59 | 1.83e-06 [1.61e-06, 2.05e-06] | 76 / 121 | 50 / 51 | 409960 | 9 |
+
+Red-team events from a challenged source: 0 / 121 (users 0 / 51). Legitimate users challenged per day (mean over 44 test days): 16475.55; daily: 20656, 20677, 11664, 0, 12551, 12510, 21996, 21486, 21161, 12043, 0, 12716, 21930, 12811, 0, 20332, 19064, 13557, 13666, 22871, 13204, 0, 20973, 19070, 12886, 12885, 23474, 23294, 23367, 23336, 18419, 13529, 13357, 13708, 23233, 23117, 23063, 18937, 10513, 12025, 22540, 22901, 22789, 22613.
+
+A LA1.5 user strata (events caught / users caught):
+
+| stratum | users / events | mode | any rule | Success After Failures | Multiple IP Login | Slow Brute Force | Credential Stuffing | step_up | queue | challenged |
+|---|---|---|---|---|---|---|---|---|---|---|
+| new_users | 18 / 32 | exact counts | 21 / 18 | 21 / 18 | 5 / 5 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 | 0 / 0 |
+| returning_users | 33 / 89 | bootstrap | 55 / 32 | 55 / 32 | 0 / 0 | 4 / 1 | 4 / 1 | 0 / 0 | 0 / 0 | 0 / 0 |
+
+The strata use LA1.5: a user is "returning" if the user appears in a
+red-team event before the test starts. The new-user stratum has 18 users, so
+its counts are exact (LA2.6).
+
+## 7. D on test (LA3.5-LA3.7; `results/lanl_final_d.json`)
+
+- **Intervals:** 95% bootstrap over red-team users (1,000 resamples, seed
+  42) where a scope has 20 or more users; exact counts and point AUCs
+  otherwise (LA2.6, LA4.5).
+- **Daily top-k:** ranked within each of the 44 test days. Precision is
+  caught rows / selected rows over the test days; lift is precision / the
+  scope's filtered base rate.
+- **"In population" columns:** only positives inside D's filtered
+  population. The all-red-team columns count every test red-team event and
+  user, with unmatched and filter-excluded events as missed (here there are
+  none of either).
+- **LA5:** every scope has positives, so LA5 does not apply and no value
+  needed translating.
+
+D population (test): 110018263 filtered rows, 103 positive rows; 121 red-team events, 51 users.
+
+
+D, scope all (51 users, 121 events; mode bootstrap):
+
+| scorer | positives / population | base rate | ROC-AUC | PR-AUC |
+|---|---|---|---|---|
+| D1 | 103 / 110018263 | 9.36e-07 | 0.9232 [0.8227, 0.9836] | 1.8e-05 [1.17e-05, 3.4e-05] |
+| D2 | 103 / 110018263 | 9.36e-07 | 0.8695 [0.8275, 0.9144] | 0.00042 [0.000127, 0.00112] |
+| D3 | 103 / 110018263 | 9.36e-07 | 0.8630 [0.8270, 0.8912] | 5.45e-06 [3.42e-06, 8.23e-06] |
+
+| scorer | k | rows caught / positives | precision | lift | events caught (in population) | users caught (in population) | all-red-team events | all-red-team users |
+|---|---|---|---|---|---|---|---|---|
+| D1 | 100 | 0 / 103 | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] | 0 / 121 | 0 / 51 [0.0, 0.0] | 0 / 121 [0.0, 0.0] | 0 / 51 [0.0, 0.0] |
+| D1 | 1,000 | 1 / 103 | 2.27e-05 [0.0, 6.82e-05] | 24.3 [0.0, 75.1] | 1 / 121 | 1 / 51 [0.0, 0.059] | 1 / 121 [0.0, 0.026] | 1 / 51 [0.0, 0.059] |
+| D1 | 10,000 | 10 / 103 | 2.27e-05 [0.0, 6.14e-05] | 24.3 [0.0, 64.7] | 10 / 121 | 3 / 51 [0.0, 0.137] | 10 / 121 [0.0, 0.230] | 3 / 51 [0.0, 0.137] |
+| D2 | 100 | 0 / 103 | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] | 0 / 121 | 0 / 51 [0.0, 0.0] | 0 / 121 [0.0, 0.0] | 0 / 51 [0.0, 0.0] |
+| D2 | 1,000 | 2 / 103 | 4.55e-05 [0.0, 0.000114] | 48.6 [0.0, 135.9] | 12 / 121 | 2 / 51 [0.0, 0.098] | 12 / 121 [0.0, 0.254] | 2 / 51 [0.0, 0.098] |
+| D2 | 10,000 | 24 / 103 | 5.45e-05 [3.18e-05, 8.18e-05] | 58.3 [34.9, 89.1] | 38 / 121 | 18 / 51 [0.235, 0.490] | 38 / 121 [0.172, 0.466] | 18 / 51 [0.235, 0.490] |
+| D3 | 100 | 0 / 103 | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] | 0 / 121 | 0 / 51 [0.0, 0.0] | 0 / 121 [0.0, 0.0] | 0 / 51 [0.0, 0.0] |
+| D3 | 1,000 | 0 / 103 | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] | 0 / 121 | 0 / 51 [0.0, 0.0] | 0 / 121 [0.0, 0.0] | 0 / 51 [0.0, 0.0] |
+| D3 | 10,000 | 1 / 103 | 2.27e-06 [0.0, 6.82e-06] | 2.4 [0.0, 6.8] | 1 / 121 | 1 / 51 [0.0, 0.059] | 1 / 121 [0.0, 0.024] | 1 / 51 [0.0, 0.059] |
+
+D, scope new_users (18 users, 32 events; mode exact counts):
+
+| scorer | positives / population | base rate | ROC-AUC | PR-AUC |
+|---|---|---|---|---|
+| D1 | 30 / 110018190 | 2.73e-07 | 0.9771 | 5.58e-06 |
+| D2 | 30 / 110018190 | 2.73e-07 | 0.9909 | 0.000982 |
+| D3 | 30 / 110018190 | 2.73e-07 | 0.9472 | 3.08e-06 |
+
+| scorer | k | rows caught / positives | precision | lift | events caught (in population) | users caught (in population) | all-red-team events | all-red-team users |
+|---|---|---|---|---|---|---|---|---|
+| D1 | 100 | 0 / 30 | 0.0 | 0.0 | 0 / 32 | 0 / 18 | 0 / 32 | 0 / 18 |
+| D1 | 1,000 | 0 / 30 | 0.0 | 0.0 | 0 / 32 | 0 / 18 | 0 / 32 | 0 / 18 |
+| D1 | 10,000 | 0 / 30 | 0.0 | 0.0 | 0 / 32 | 0 / 18 | 0 / 32 | 0 / 18 |
+| D2 | 100 | 0 / 30 | 0.0 | 0.0 | 0 / 32 | 0 / 18 | 0 / 32 | 0 / 18 |
+| D2 | 1,000 | 1 / 30 | 2.27e-05 | 83.3 | 3 / 32 | 1 / 18 | 3 / 32 | 1 / 18 |
+| D2 | 10,000 | 18 / 30 | 4.09e-05 | 150.0 | 20 / 32 | 12 / 18 | 20 / 32 | 12 / 18 |
+| D3 | 100 | 0 / 30 | 0.0 | 0.0 | 0 / 32 | 0 / 18 | 0 / 32 | 0 / 18 |
+| D3 | 1,000 | 0 / 30 | 0.0 | 0.0 | 0 / 32 | 0 / 18 | 0 / 32 | 0 / 18 |
+| D3 | 10,000 | 0 / 30 | 0.0 | 0.0 | 0 / 32 | 0 / 18 | 0 / 32 | 0 / 18 |
+
+D, scope returning_users (33 users, 89 events; mode bootstrap):
+
+| scorer | positives / population | base rate | ROC-AUC | PR-AUC |
+|---|---|---|---|---|
+| D1 | 73 / 110018233 | 6.64e-07 | 0.9011 [0.7751, 0.9857] | 1.33e-05 [6.98e-06, 3.23e-05] |
+| D2 | 73 / 110018233 | 6.64e-07 | 0.8196 [0.7768, 0.8726] | 4.59e-05 [4.44e-06, 0.000276] |
+| D3 | 73 / 110018233 | 6.64e-07 | 0.8284 [0.7743, 0.8656] | 2.96e-06 [1.32e-06, 5.48e-06] |
+
+| scorer | k | rows caught / positives | precision | lift | events caught (in population) | users caught (in population) | all-red-team events | all-red-team users |
+|---|---|---|---|---|---|---|---|---|
+| D1 | 100 | 0 / 73 | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] | 0 / 89 | 0 / 33 [0.0, 0.0] | 0 / 89 [0.0, 0.0] | 0 / 33 [0.0, 0.0] |
+| D1 | 1,000 | 1 / 73 | 2.27e-05 [0.0, 6.82e-05] | 34.3 [0.0, 98.7] | 1 / 89 | 1 / 33 [0.0, 0.091] | 1 / 89 [0.0, 0.034] | 1 / 33 [0.0, 0.091] |
+| D1 | 10,000 | 10 / 73 | 2.27e-05 [0.0, 6.14e-05] | 34.3 [0.0, 89.3] | 10 / 89 | 3 / 33 [0.0, 0.212] | 10 / 89 [0.0, 0.300] | 3 / 33 [0.0, 0.212] |
+| D2 | 100 | 0 / 73 | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] | 0 / 89 | 0 / 33 [0.0, 0.0] | 0 / 89 [0.0, 0.0] | 0 / 33 [0.0, 0.0] |
+| D2 | 1,000 | 1 / 73 | 2.27e-05 [0.0, 6.82e-05] | 34.3 [0.0, 134.0] | 9 / 89 | 1 / 33 [0.0, 0.091] | 9 / 89 [0.0, 0.300] | 1 / 33 [0.0, 0.091] |
+| D2 | 10,000 | 6 / 73 | 1.36e-05 [4.55e-06, 2.5e-05] | 20.6 [8.9, 32.4] | 18 / 89 | 6 / 33 [0.061, 0.333] | 18 / 89 [0.042, 0.386] | 6 / 33 [0.061, 0.333] |
+| D3 | 100 | 0 / 73 | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] | 0 / 89 | 0 / 33 [0.0, 0.0] | 0 / 89 [0.0, 0.0] | 0 / 33 [0.0, 0.0] |
+| D3 | 1,000 | 0 / 73 | 0.0 [0.0, 0.0] | 0.0 [0.0, 0.0] | 0 / 89 | 0 / 33 [0.0, 0.0] | 0 / 89 [0.0, 0.0] | 0 / 33 [0.0, 0.0] |
+| D3 | 10,000 | 1 / 73 | 2.27e-06 [0.0, 6.82e-06] | 3.4 [0.0, 8.8] | 1 / 89 | 1 / 33 [0.0, 0.091] | 1 / 89 [0.0, 0.031] | 1 / 33 [0.0, 0.091] |
+
+**sklearn cross-check.** The cross-check
+(`check_strict_ranking_vs_sklearn`) was skipped on the test for all three
+scorers. The population of 110,018,263 rows is above the 20,000,000-row
+limit, and the check needs full-length arrays. The dev equality checks stand
+in for it:
+- lean D metrics vs L2 on val_a and val_b, field by field, sklearn checks
+  included (`lanl_final_lean_check.json`);
+- lean positive ranks equal to full ranks (same file);
+- the split val_b dry run, rerun after the fix (`lanl_final_dryrun_check.json`);
+- the synthetic outside-filter check (`lanl_final_outside_filter_check.json`).
+
+## 8. LA3.8 verdict (test; all-users scope)
+
+A scorer works if all three hold: (1) the ROC-AUC 95% lower bound is above
+0.50; (2) at k = 1,000, the lift lower bound is at least 10; (3) at
+k = 1,000, it catches at least 20% of the test's 51 red-team users.
+
+| scorer | (1) ROC-AUC lower bound | (2) k = 1,000 lift lower bound | (3) k = 1,000 users caught | verdict |
+|---|---|---|---|---|
+| D1 | 0.8227 > 0.50: met | 0.0 < 10: not met | 1 / 51 = 1.96% < 20%: not met | **does not work** |
+| D2 | 0.8275 > 0.50: met | 0.0 < 10: not met | 2 / 51 = 3.92% < 20%: not met | **does not work** |
+| D3 | 0.8270 > 0.50: met | 0.0 < 10: not met | 0 / 51 = 0.0% < 20%: not met | **does not work** |
+
+**D1 does not work. D2 does not work. D3 does not work.** All three are
+reported; none is selected over another.
+
+## 9. Anything unexpected
+
+- **Process 2 failed on its assertion** (section 1). One positive test row
+  lies outside the LA3.3 filter, a case that never occurred on dev and that
+  the L2 loader asserted against. It was fixed as LA3.3 specifies, under the
+  one approved deviation (section 2). It changed no event's status: 0 events
+  outside the filter.
+- **The review found an unspecified case.** A zero-positive scope had no
+  specified handling; LA5 now specifies it. It did not occur on the test.
+- **Continuation flag.** The continuation needed `--resume` alongside
+  `--skip-p1` to use a new run ID without a code change (section 2).
+- **Memory came in under projection.** Process 2's measured peaks
+  (7.36-7.47 GB) were about 31-32% under the ratio projection (10.79-10.91
+  GB), and process 1's peak (13.17 GB) was 16% under its projection
+  (15.70 GB).
+- **Step-up cap.** The cap of 200 incidents per day was reached on 30 of the
+  44 test days, and legitimate users challenged averaged 16,475.5 per day
+  (LA4.9).

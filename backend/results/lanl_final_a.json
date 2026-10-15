@@ -1,0 +1,698 @@
+{
+  "test": {
+    "redteam_events": 121,
+    "redteam_users": 51,
+    "mode": "bootstrap",
+    "detectors": {
+      "Brute Force Attack": {
+        "alerts": 64535,
+        "positive_alerts": 0,
+        "precision": 0.0,
+        "precision_ci95": [
+          0.0,
+          0.0
+        ],
+        "events_caught": 0,
+        "events": 121,
+        "users_caught": 0,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.0,
+        "events_caught_share_ci95": [
+          0.0,
+          0.0
+        ],
+        "users_caught_share": 0.0,
+        "users_caught_share_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "Slow Brute Force": {
+        "alerts": 401458,
+        "positive_alerts": 1,
+        "precision": 2.4909205944332905e-06,
+        "precision_ci95": [
+          0.0,
+          7.472724555372889e-06
+        ],
+        "events_caught": 4,
+        "events": 121,
+        "users_caught": 1,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.03305785123966942,
+        "events_caught_share_ci95": [
+          0.0,
+          0.11323450134770888
+        ],
+        "users_caught_share": 0.0196078431372549,
+        "users_caught_share_ci95": [
+          0.0,
+          0.058823529411764705
+        ]
+      },
+      "Credential Stuffing": {
+        "alerts": 238749,
+        "positive_alerts": 1,
+        "precision": 4.188499218844896e-06,
+        "precision_ci95": [
+          0.0,
+          1.2565392396262214e-05
+        ],
+        "events_caught": 4,
+        "events": 121,
+        "users_caught": 1,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.03305785123966942,
+        "events_caught_share_ci95": [
+          0.0,
+          0.11323450134770888
+        ],
+        "users_caught_share": 0.0196078431372549,
+        "users_caught_share_ci95": [
+          0.0,
+          0.058823529411764705
+        ]
+      },
+      "Invalid Account Spraying": {
+        "alerts": 0,
+        "positive_alerts": 0,
+        "precision": null,
+        "events_caught": 0,
+        "events": 121,
+        "users_caught": 0,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.0,
+        "events_caught_share_ci95": [
+          0.0,
+          0.0
+        ],
+        "users_caught_share": 0.0,
+        "users_caught_share_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "Distributed Brute Force": {
+        "alerts": 482824,
+        "positive_alerts": 0,
+        "precision": 0.0,
+        "precision_ci95": [
+          0.0,
+          0.0
+        ],
+        "events_caught": 0,
+        "events": 121,
+        "users_caught": 0,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.0,
+        "events_caught_share_ci95": [
+          0.0,
+          0.0
+        ],
+        "users_caught_share": 0.0,
+        "users_caught_share_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "Success After Failures": {
+        "alerts": 56728702,
+        "positive_alerts": 58,
+        "precision": 1.0224101372881756e-06,
+        "precision_ci95": [
+          9.166436683120655e-07,
+          1.1458043228165126e-06
+        ],
+        "events_caught": 76,
+        "events": 121,
+        "users_caught": 50,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.628099173553719,
+        "events_caught_share_ci95": [
+          0.5037037037037037,
+          0.771461038961039
+        ],
+        "users_caught_share": 0.9803921568627451,
+        "users_caught_share_ci95": [
+          0.9411764705882353,
+          1.0
+        ]
+      },
+      "Multiple IP Login": {
+        "alerts": 126358,
+        "positive_alerts": 5,
+        "precision": 3.9570110321467574e-05,
+        "precision_ci95": [
+          7.914272599205406e-06,
+          7.122394390718728e-05
+        ],
+        "events_caught": 5,
+        "events": 121,
+        "users_caught": 5,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.04132231404958678,
+        "events_caught_share_ci95": [
+          0.01009848484848485,
+          0.08333333333333333
+        ],
+        "users_caught_share": 0.09803921568627451,
+        "users_caught_share_ci95": [
+          0.0196078431372549,
+          0.17647058823529413
+        ]
+      },
+      "Suspicious Login Time": {
+        "alerts": 9757684,
+        "positive_alerts": 0,
+        "precision": 0.0,
+        "precision_ci95": [
+          0.0,
+          0.0
+        ],
+        "events_caught": 0,
+        "events": 121,
+        "users_caught": 0,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.0,
+        "events_caught_share_ci95": [
+          0.0,
+          0.0
+        ],
+        "users_caught_share": 0.0,
+        "users_caught_share_ci95": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "any_rule_alert": {
+      "alerts": 66620795,
+      "positive_alerts": 59,
+      "precision": 8.856093656642795e-07,
+      "precision_ci95": [
+        7.805371500559255e-07,
+        9.910568169812438e-07
+      ],
+      "events_caught": 76,
+      "events": 121,
+      "users_caught": 50,
+      "users": 51,
+      "mode": "bootstrap",
+      "events_caught_share": 0.628099173553719,
+      "events_caught_share_ci95": [
+        0.5037037037037037,
+        0.771461038961039
+      ],
+      "users_caught_share": 0.9803921568627451,
+      "users_caught_share_ci95": [
+        0.9411764705882353,
+        1.0
+      ]
+    },
+    "tiers": {
+      "block": {
+        "alerted_events_at_tier": {
+          "alerts": 0,
+          "positive_alerts": 0,
+          "precision": null
+        },
+        "events_caught": 0,
+        "events": 121,
+        "users_caught": 0,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.0,
+        "events_caught_share_ci95": [
+          0.0,
+          0.0
+        ],
+        "users_caught_share": 0.0,
+        "users_caught_share_ci95": [
+          0.0,
+          0.0
+        ],
+        "incidents_final_tier": 0,
+        "incidents_final_tier_with_positive": 0
+      },
+      "step_up": {
+        "alerted_events_at_tier": {
+          "alerts": 21445396,
+          "positive_alerts": 0,
+          "precision": 0.0,
+          "precision_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "events_caught": 0,
+        "events": 121,
+        "users_caught": 0,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.0,
+        "events_caught_share_ci95": [
+          0.0,
+          0.0
+        ],
+        "users_caught_share": 0.0,
+        "users_caught_share_ci95": [
+          0.0,
+          0.0
+        ],
+        "incidents_final_tier": 6506,
+        "incidents_final_tier_with_positive": 0,
+        "challenged_source": {
+          "events_caught": 0,
+          "events": 121,
+          "users_caught": 0,
+          "users": 51,
+          "mode": "bootstrap",
+          "events_caught_share": 0.0,
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share": 0.0,
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "legitimate_users_challenged_per_day": 16475.545454545456,
+        "legitimate_users_challenged_daily": [
+          20656,
+          20677,
+          11664,
+          0,
+          12551,
+          12510,
+          21996,
+          21486,
+          21161,
+          12043,
+          0,
+          12716,
+          21930,
+          12811,
+          0,
+          20332,
+          19064,
+          13557,
+          13666,
+          22871,
+          13204,
+          0,
+          20973,
+          19070,
+          12886,
+          12885,
+          23474,
+          23294,
+          23367,
+          23336,
+          18419,
+          13529,
+          13357,
+          13708,
+          23233,
+          23117,
+          23063,
+          18937,
+          10513,
+          12025,
+          22540,
+          22901,
+          22789,
+          22613
+        ]
+      },
+      "queue": {
+        "alerted_events_at_tier": {
+          "alerts": 12921468,
+          "positive_alerts": 0,
+          "precision": 0.0,
+          "precision_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "events_caught": 0,
+        "events": 121,
+        "users_caught": 0,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.0,
+        "events_caught_share_ci95": [
+          0.0,
+          0.0
+        ],
+        "users_caught_share": 0.0,
+        "users_caught_share_ci95": [
+          0.0,
+          0.0
+        ],
+        "incidents_final_tier": 15646,
+        "incidents_final_tier_with_positive": 0
+      },
+      "log": {
+        "alerted_events_at_tier": {
+          "alerts": 32253931,
+          "positive_alerts": 59,
+          "precision": 1.8292343962663032e-06,
+          "precision_ci95": [
+            1.6122069364335328e-06,
+            2.047036859439252e-06
+          ]
+        },
+        "events_caught": 76,
+        "events": 121,
+        "users_caught": 50,
+        "users": 51,
+        "mode": "bootstrap",
+        "events_caught_share": 0.628099173553719,
+        "events_caught_share_ci95": [
+          0.5037037037037037,
+          0.771461038961039
+        ],
+        "users_caught_share": 0.9803921568627451,
+        "users_caught_share_ci95": [
+          0.9411764705882353,
+          1.0
+        ],
+        "incidents_final_tier": 409960,
+        "incidents_final_tier_with_positive": 9
+      }
+    },
+    "strata_la1_5_users": {
+      "new_users": {
+        "redteam_events": 32,
+        "redteam_users": 18,
+        "mode": "exact counts",
+        "Brute Force Attack": {
+          "events_caught": 0,
+          "events": 32,
+          "users_caught": 0,
+          "users": 18,
+          "mode": "exact counts"
+        },
+        "Slow Brute Force": {
+          "events_caught": 0,
+          "events": 32,
+          "users_caught": 0,
+          "users": 18,
+          "mode": "exact counts"
+        },
+        "Credential Stuffing": {
+          "events_caught": 0,
+          "events": 32,
+          "users_caught": 0,
+          "users": 18,
+          "mode": "exact counts"
+        },
+        "Invalid Account Spraying": {
+          "events_caught": 0,
+          "events": 32,
+          "users_caught": 0,
+          "users": 18,
+          "mode": "exact counts"
+        },
+        "Distributed Brute Force": {
+          "events_caught": 0,
+          "events": 32,
+          "users_caught": 0,
+          "users": 18,
+          "mode": "exact counts"
+        },
+        "Success After Failures": {
+          "events_caught": 21,
+          "events": 32,
+          "users_caught": 18,
+          "users": 18,
+          "mode": "exact counts"
+        },
+        "Multiple IP Login": {
+          "events_caught": 5,
+          "events": 32,
+          "users_caught": 5,
+          "users": 18,
+          "mode": "exact counts"
+        },
+        "Suspicious Login Time": {
+          "events_caught": 0,
+          "events": 32,
+          "users_caught": 0,
+          "users": 18,
+          "mode": "exact counts"
+        },
+        "any": {
+          "events_caught": 21,
+          "events": 32,
+          "users_caught": 18,
+          "users": 18,
+          "mode": "exact counts"
+        },
+        "step_up": {
+          "events_caught": 0,
+          "events": 32,
+          "users_caught": 0,
+          "users": 18,
+          "mode": "exact counts"
+        },
+        "queue": {
+          "events_caught": 0,
+          "events": 32,
+          "users_caught": 0,
+          "users": 18,
+          "mode": "exact counts"
+        },
+        "challenged": {
+          "events_caught": 0,
+          "events": 32,
+          "users_caught": 0,
+          "users": 18,
+          "mode": "exact counts"
+        }
+      },
+      "returning_users": {
+        "redteam_events": 89,
+        "redteam_users": 33,
+        "mode": "bootstrap",
+        "Brute Force Attack": {
+          "events_caught": 0,
+          "events": 89,
+          "users_caught": 0,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.0,
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share": 0.0,
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "Slow Brute Force": {
+          "events_caught": 4,
+          "events": 89,
+          "users_caught": 1,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.0449438202247191,
+          "events_caught_share_ci95": [
+            0.0,
+            0.13793103448275862
+          ],
+          "users_caught_share": 0.030303030303030304,
+          "users_caught_share_ci95": [
+            0.0,
+            0.09090909090909091
+          ]
+        },
+        "Credential Stuffing": {
+          "events_caught": 4,
+          "events": 89,
+          "users_caught": 1,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.0449438202247191,
+          "events_caught_share_ci95": [
+            0.0,
+            0.13793103448275862
+          ],
+          "users_caught_share": 0.030303030303030304,
+          "users_caught_share_ci95": [
+            0.0,
+            0.09090909090909091
+          ]
+        },
+        "Invalid Account Spraying": {
+          "events_caught": 0,
+          "events": 89,
+          "users_caught": 0,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.0,
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share": 0.0,
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "Distributed Brute Force": {
+          "events_caught": 0,
+          "events": 89,
+          "users_caught": 0,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.0,
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share": 0.0,
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "Success After Failures": {
+          "events_caught": 55,
+          "events": 89,
+          "users_caught": 32,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.6179775280898876,
+          "events_caught_share_ci95": [
+            0.46875,
+            0.8043610816542948
+          ],
+          "users_caught_share": 0.9696969696969697,
+          "users_caught_share_ci95": [
+            0.9090909090909091,
+            1.0
+          ]
+        },
+        "Multiple IP Login": {
+          "events_caught": 0,
+          "events": 89,
+          "users_caught": 0,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.0,
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share": 0.0,
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "Suspicious Login Time": {
+          "events_caught": 0,
+          "events": 89,
+          "users_caught": 0,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.0,
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share": 0.0,
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "any": {
+          "events_caught": 55,
+          "events": 89,
+          "users_caught": 32,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.6179775280898876,
+          "events_caught_share_ci95": [
+            0.46875,
+            0.8043610816542948
+          ],
+          "users_caught_share": 0.9696969696969697,
+          "users_caught_share_ci95": [
+            0.9090909090909091,
+            1.0
+          ]
+        },
+        "step_up": {
+          "events_caught": 0,
+          "events": 89,
+          "users_caught": 0,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.0,
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share": 0.0,
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "queue": {
+          "events_caught": 0,
+          "events": 89,
+          "users_caught": 0,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.0,
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share": 0.0,
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "challenged": {
+          "events_caught": 0,
+          "events": 89,
+          "users_caught": 0,
+          "users": 33,
+          "mode": "bootstrap",
+          "events_caught_share": 0.0,
+          "events_caught_share_ci95": [
+            0.0,
+            0.0
+          ],
+          "users_caught_share": 0.0,
+          "users_caught_share_ci95": [
+            0.0,
+            0.0
+          ]
+        }
+      }
+    }
+  },
+  "definitions": "\nLA3.6 metrics for A (eval/lanl_a.py, causal twin run from day 0) on the dev\nsplits: dev_train (warm-up context), val_a, val_b.\n\nDefinitions used (LA3.6 names the measures; these are their operational forms):\n  red-team events     every red-team event of the split, matched or not (LA3.1)\n  caught (detector)   the event's matched auth row raised that detector's alert\n  caught (tier)       the matched row is an alerted event whose running tier at\n                      that event is the tier; \"challenged source\" counts\n                      matched rows whose IP was under a step-up challenge\n                      before the event\n  precision           share of the counted alerted rows that are LA3.1 positives\n  legit users / day   distinct source accounts with a non-positive event from a\n                      challenged IP that day, mean over the split's days\n  incidents           (source computer, day); final tier = the incident's tier\n                      at its last alerted event\nIntervals (LA3.7 / LA2.6): with >= 20 distinct red-team users, 95% percentile\nbootstrap over red-team users (1,000 resamples, seed 42), positive rows and\nevents weighted by their user's multiplicity, negatives fixed; otherwise\nexact counts. Strata: LA1.5 new vs returning users (caught counts and shares).\n\nWrites results/lanl_a_dev.json.\n",
+  "seconds": 134.7,
+  "peak_working_set_bytes": 11296780288
+}
