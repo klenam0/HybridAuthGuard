@@ -181,7 +181,36 @@ def verdict(dres):
     return out
 
 
-def run(target, run_id, tag, results_names, out_dir):
+def _strip(s):
+    """Same as lanl_a's / lanl_d's lambda s: str(s).strip(), but picklable."""
+    return str(s).strip()
+
+
+def mem():
+    """Process memory now: private commit, its peak, working set, its peak."""
+    import ctypes
+    import ctypes.wintypes as wt
+    from eval.lanl_convert import _PMC
+    k32 = ctypes.windll.kernel32
+    k32.GetCurrentProcess.restype = wt.HANDLE
+    k32.K32GetProcessMemoryInfo.argtypes = [wt.HANDLE, ctypes.POINTER(_PMC), wt.DWORD]
+    k32.K32GetProcessMemoryInfo.restype = wt.BOOL
+    pmc = _PMC()
+    pmc.cb = ctypes.sizeof(pmc)
+    if not k32.K32GetProcessMemoryInfo(k32.GetCurrentProcess(), ctypes.byref(pmc), pmc.cb):
+        raise OSError("K32GetProcessMemoryInfo failed")
+    return {"private": pmc.PagefileUsage, "peak_private": pmc.PeakPagefileUsage,
+            "ws": pmc.WorkingSetSize, "peak_ws": pmc.PeakWorkingSetSize}
+
+
+class ForcedStop(SystemExit):
+    pass
+
+
+def run(target, run_id, tag, results_names, out_dir, resume=False, stop_after=None):
+    """Pass 1 over days 0 .. last target day (state carried from day 0), with a
+    checkpoint of the whole state after every day; then the A and D metrics.
+    resume=True continues from the checkpoint's next day."""
     from eval import phase2_baseline as P2
     t_all = time.perf_counter()
     if target == "test":
@@ -192,6 +221,7 @@ def run(target, run_id, tag, results_names, out_dir):
     a_dir, d_dir = os.path.join(work, "a"), os.path.join(work, "d")
     os.makedirs(a_dir, exist_ok=True)
     os.makedirs(d_dir, exist_ok=True)
+    ckpt = os.path.join(work, "checkpoint.pkl")
     (model_b, sha) = load_model()
     with open(os.path.join(L2_D_DIR, "maps.pkl"), "rb") as fh:
         maps = pickle.load(fh)["maps"]
@@ -205,14 +235,24 @@ def run(target, run_id, tag, results_names, out_dir):
     A.adir = lambda tag_: a_dir
     D.ddir = lambda: d_dir
 
-    tw = A.Twin()
-    S = D.State(maps)
+    resumed = None
+    if resume:
+        with open(ckpt, "rb") as fh:
+            st = pickle.load(fh)
+        assert st["target"] == target
+        tw, S, offset, facts, stepup = st["tw"], st["S"], st["offset"], st["facts"], st["stepup"]
+        timing, curve, start = st["timing"], st["curve"], st["next_day"]
+        resumed = {"from_day": start, "previous_run_id": st["run_id"]}
+    else:
+        tw = A.Twin()
+        S = D.State(maps)
+        tw.ipc.norm = S.uc.norm = S.cc.norm = _strip
+        offset, start = 0, 0
+        facts = {"positive_rows": 0, "matched_events": set(), "events_passing_filter": set()}
+        stepup = OrderedDict()
+        timing, curve = Counter(), []
     clk = Counter()
-    offset = 0
-    facts = {"positive_rows": 0, "matched_events": set(), "events_passing_filter": set()}
-    stepup = OrderedDict()
-    timing = Counter()
-    for d in range(0, hi):
+    for d in range(start, hi):
         t = time.perf_counter()
         tbl = days.get(d)
         timing["read"] += time.perf_counter() - t
@@ -247,8 +287,24 @@ def run(target, run_id, tag, results_names, out_dir):
             stepup[f"{d:02d}"] = int((last_tier.to_numpy() == 1).sum())
         offset += tbl.num_rows
         del tbl, r, fz
-        print(f"day {d:02d} done ({time.perf_counter() - t_all:.0f} s)", flush=True)
+        days.cur = (None, None)
+        gc.collect()
+        curve.append({"day": d, **mem()})
+        t = time.perf_counter()
+        with open(ckpt + ".tmp", "wb") as fh:
+            pickle.dump({"target": target, "run_id": run_id, "next_day": d + 1, "tw": tw, "S": S,
+                         "offset": offset, "facts": facts, "stepup": stepup, "timing": timing,
+                         "curve": curve}, fh, protocol=5)
+        os.replace(ckpt + ".tmp", ckpt)
+        timing["checkpoint"] += time.perf_counter() - t
+        print(f"day {d:02d} done ({time.perf_counter() - t_all:.0f} s; "
+              f"private {curve[-1]['private'] / 2**30:.2f} GiB; checkpoint "
+              f"{os.path.getsize(ckpt) / 2**30:.2f} GiB)", flush=True)
+        if stop_after is not None and d == stop_after:
+            print(f"forced stop after day {d:02d}", flush=True)
+            raise ForcedStop(3)
     tw.notifier.flush()
+    ckpt_bytes = os.path.getsize(ckpt)
     del tw, S
     days.reset()
     gc.collect()
@@ -270,6 +326,8 @@ def run(target, run_id, tag, results_names, out_dir):
     DM.main(splits=(target,))
     timing["D_metrics"] += time.perf_counter() - t
     return {"target": target, "days": [lo, hi], "run_id": run_id, "d1_model_sha256": sha,
+            "resumed": resumed, "memory_curve_pass1": curve, "checkpoint_bytes": ckpt_bytes,
+            "memory_end": mem(),
             "labels": labels, "step_up_incidents_per_day": stepup,
             "test_iterator_opens": days.test_opens,
             "seconds": {k: round(v, 1) for k, v in timing.items()},
@@ -301,12 +359,20 @@ def same(a, b, path=""):
     return None if a == b else path
 
 
-def dry_run():
+DRY_NAMES = {"lanl_a_dev.json": "a.json", "lanl_d_dev.json": "d.json"}
+
+
+def dry_run(tag="dryrun", stop_after=None, resume=False):
+    """val_b with FINAL_EVAL unset. tag "dryrun" (uninterrupted) is checked
+    against L2; other tags are checked against the "dryrun" outputs."""
     assert os.environ.get("FINAL_EVAL") != "1", "the dry run must not open the test"
-    out_dir = L.wpath("final_dryrun_out")
+    out_dir = L.wpath(f"final_{tag}_out")
     os.makedirs(out_dir, exist_ok=True)
-    names = {"lanl_a_dev.json": "a.json", "lanl_d_dev.json": "d.json"}
-    info = run("val_b", None, "dryrun", names, out_dir)
+    info = run("val_b", None, tag, DRY_NAMES, out_dir, resume=resume, stop_after=stop_after)
+    with open(os.path.join(out_dir, "run.json"), "w") as f:
+        json.dump(info, f, indent=2, default=L._jsonable)
+    if tag != "dryrun":
+        return compare_resume(tag)
     with open(os.path.join(out_dir, "a.json")) as f:
         a_new = json.load(f)
     with open(os.path.join(out_dir, "d.json")) as f:
@@ -344,18 +410,169 @@ def dry_run():
     return 0 if chk["reproduces_L2_exactly"] else 1
 
 
-def final():
+def compare_resume(tag):
+    """Outputs of a stopped-and-resumed val_b run (tag) against the
+    uninterrupted dry run: per-day arrays and files, metric JSON, labels,
+    step-up incidents."""
+    base, other = L.wpath("final_dryrun"), L.wpath(f"final_{tag}")
+    bo, oo = L.wpath("final_dryrun_out"), L.wpath(f"final_{tag}_out")
+    chk = OrderedDict()
+    files = {}
+    for sub in ("a", "d"):
+        for name in sorted(os.listdir(os.path.join(base, sub))):
+            pa_, pb_ = os.path.join(base, sub, name), os.path.join(other, sub, name)
+            if name.endswith(".npz"):
+                x, y = np.load(pa_), np.load(pb_)
+                eq = set(x.files) == set(y.files) and all(np.array_equal(x[k], y[k]) for k in x.files)
+            else:
+                eq = bool(np.array_equal(np.load(pa_), np.load(pb_)))
+            with open(pa_, "rb") as f1, open(pb_, "rb") as f2:
+                files[f"{sub}/{name}"] = {"arrays_equal": bool(eq), "bytes_equal": f1.read() == f2.read()}
+    chk["per_day_files"] = files
+    skip = {"seconds", "peak_working_set_bytes"}
+    for name in ("a.json", "d.json"):
+        with open(os.path.join(bo, name)) as f1, open(os.path.join(oo, name)) as f2:
+            x, y = json.load(f1), json.load(f2)
+        chk[f"{name}_first_difference"] = same({k: v for k, v in x.items() if k not in skip},
+                                               {k: v for k, v in y.items() if k not in skip})
+    with open(os.path.join(bo, "run.json")) as f1, open(os.path.join(oo, "run.json")) as f2:
+        x, y = json.load(f1), json.load(f2)
+    for k in ("labels", "step_up_incidents_per_day"):
+        chk[f"run_{k}_first_difference"] = same(x[k], y[k])
+    chk["resumed"] = y["resumed"]
+    chk["identical"] = (all(v["arrays_equal"] and v["bytes_equal"] for v in files.values())
+                        and chk["a.json_first_difference"] is None
+                        and chk["d.json_first_difference"] is None
+                        and chk["run_labels_first_difference"] is None
+                        and chk["run_step_up_incidents_per_day_first_difference"] is None)
+    ORIG["save_json"]("lanl_final_resume_check.json", chk)
+    print(json.dumps({k: v for k, v in chk.items() if k != "per_day_files"}, indent=1))
+    print("per-day files identical:", all(v["arrays_equal"] and v["bytes_equal"] for v in files.values()))
+    return 0 if chk["identical"] else 1
+
+
+def final(resume=False):
     assert os.environ.get("FINAL_EVAL") == "1", "set FINAL_EVAL=1 for the evaluation run"
     run_id = f"L3-{_dt.datetime.now().strftime('%Y%m%dT%H%M%S')}-{os.getpid()}"
     print("run_id", run_id, flush=True)
     names = {"lanl_a_dev.json": "lanl_final_a.json", "lanl_d_dev.json": "lanl_final_d.json"}
-    info = run("test", run_id, "test", names, L.RESULTS)
+    info = run("test", run_id, "test", names, L.RESULTS, resume=resume)
     with open(os.path.join(L.RESULTS, "lanl_final_d.json")) as f:
         dres = json.load(f)
     info["verdict_la3_8"] = verdict(dres)
     ORIG["save_json"]("lanl_final_run.json", info)
     print(json.dumps(info["verdict_la3_8"], indent=1))
     return 0
+
+
+def measure_lean():
+    """Peak private commit of the lean D metrics on val_a with the sklearn
+    cross-check off (as it will be on the test); measurement only."""
+    assert os.environ.get("FINAL_EVAL") != "1"
+    out_dir = L.wpath("final_leanmem_out")
+    os.makedirs(out_dir, exist_ok=True)
+    L.save_json = writer(out_dir, {"lanl_d_dev.json": "d.json"})
+    DM.CHECK_MAX_ROWS = 0
+    before = mem()
+    DM.main(splits=("val_a",))
+    after = mem()
+    with open(os.path.join(out_dir, "d.json")) as f:
+        rows = json.load(f)["val_a"]["filtered_rows"]
+    out = {"split": "val_a", "filtered_rows": rows, "private_before": before["private"],
+           "peak_private": after["peak_private"],
+           "bytes_per_row": (after["peak_private"] - before["private"]) / rows}
+    ORIG["save_json"]("lanl_final_lean_memory.json", out)
+    print(out)
+    return 0
+
+
+def free_commit():
+    import ctypes
+    from eval.lanl_convert import _MemStatus
+    ms = _MemStatus()
+    ms.dwLength = ctypes.sizeof(ms)
+    ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(ms))
+    return {"free_commit_bytes": ms.ullAvailPageFile, "total_commit_bytes": ms.ullTotalPageFile,
+            "free_physical_bytes": ms.ullAvailPhys}
+
+
+def project():
+    """Pass 1 peak over the test days from the dry run's per-day memory
+    curve (linear trend of end-of-day private commit, extrapolated, plus the
+    largest within-day rise) and the lean D metrics peak at the assumed test
+    size, against 80% of the free commit now."""
+    with open(os.path.join(L.wpath("final_dryrun_out"), "run.json")) as f:
+        curve = json.load(f)["memory_curve_pass1"]
+    with open(os.path.join(L.RESULTS, "lanl_final_lean_memory.json")) as f:
+        lean = json.load(f)
+    with open(os.path.join(L.RESULTS, "lanl_final_estimate.json")) as f:
+        est = json.load(f)
+    dd = np.array([c["day"] for c in curve], float)
+    priv = np.array([c["private"] for c in curve], float)
+    peak = np.array([c["peak_private"] for c in curve], float)
+    slope, icpt = np.polyfit(dd, priv, 1)
+    rise = float(max(np.max(peak[1:] - priv[:-1]), peak[0]))
+    last = test_end_day()
+    pass1 = float(icpt + slope * last + rise)
+    dmet = lean["private_before"] + lean["bytes_per_row"] * est["assumed_test_filtered_rows"]
+    fc = free_commit()
+    out = OrderedDict([
+        ("method", "pass 1: linear fit of end-of-day private commit over dev days 0-13, "
+                   "extrapolated to the last test day, plus the largest within-day rise "
+                   "(peak private minus the previous end-of-day private); D metrics: "
+                   "private before + lean bytes per row x assumed test filtered rows"),
+        ("end_of_day_private_slope_bytes_per_day", float(slope)),
+        ("largest_within_day_rise_bytes", rise),
+        ("projected_pass1_peak_bytes", pass1),
+        ("projected_d_metrics_peak_bytes", dmet),
+        ("projected_sum_bytes", pass1 + dmet),
+        *fc.items(),
+        ("limit_80pct_free_commit_bytes", 0.8 * fc["free_commit_bytes"]),
+        ("within_limit", bool(pass1 + dmet <= 0.8 * fc["free_commit_bytes"])),
+    ])
+    ORIG["save_json"]("lanl_final_projection.json", out)
+    print(json.dumps(out, indent=1))
+    return 0 if out["within_limit"] else 1
+
+
+def check_lean():
+    """The memory-lean D metrics against L2's saved val_a / val_b D results,
+    field by field, plus the lean positive ranks against the full ranks."""
+    assert os.environ.get("FINAL_EVAL") != "1"
+    out_dir = L.wpath("final_leancheck_out")
+    os.makedirs(out_dir, exist_ok=True)
+    L.save_json = writer(out_dir, {"lanl_d_dev.json": "d.json"})
+    t = time.perf_counter()
+    DM.main(splits=("val_a", "val_b"))
+    secs = time.perf_counter() - t
+    peak = peak_working_set()
+    L.save_json = ORIG["save_json"]
+    with open(os.path.join(out_dir, "d.json")) as f:
+        new = json.load(f)
+    with open(os.path.join(L.RESULTS, "lanl_d_dev.json")) as f:
+        old = json.load(f)
+    skip = {"seconds", "peak_working_set_bytes"}
+    chk = OrderedDict()
+    chk["fields_compared"] = sorted(k for k in old if k not in skip)
+    chk["first_difference"] = same({k: v for k, v in new.items() if k not in skip},
+                                   {k: v for k, v in old.items() if k not in skip})
+    ranks_eq = {}
+    for split in ("val_a", "val_b"):
+        Z = DM.load_split(split)
+        pi = np.flatnonzero(Z["y"])
+        for sc in SCORERS:
+            rg, rd = DM.positive_ranks(Z[sc], Z["pos"], Z["day"], pi)
+            ranks_eq[f"{split}:{sc}"] = bool(np.array_equal(rg, DM.ranks(Z[sc], Z["pos"])[pi])
+                                             and np.array_equal(rd, DM.ranks(Z[sc], Z["pos"], Z["day"])[pi]))
+        del Z
+    chk["positive_ranks_equal_full_ranks"] = ranks_eq
+    chk["reproduces_L2_exactly"] = chk["first_difference"] is None and all(ranks_eq.values())
+    chk["lean_d_metrics_seconds"] = round(secs, 1)
+    chk["lean_d_metrics_peak_working_set_bytes"] = peak
+    chk["val_a_filtered_rows"] = new["val_a"]["filtered_rows"]
+    ORIG["save_json"]("lanl_final_lean_check.json", chk)
+    print(json.dumps(chk, indent=1))
+    return 0 if chk["reproduces_L2_exactly"] else 1
 
 
 def estimate():
@@ -406,13 +623,26 @@ def estimate():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--tag", default="dryrun")
+    ap.add_argument("--stop-after", type=int, default=None)
+    ap.add_argument("--resume", action="store_true")
     ap.add_argument("--estimate", action="store_true")
+    ap.add_argument("--check-lean", action="store_true")
+    ap.add_argument("--measure-lean", action="store_true")
+    ap.add_argument("--project", action="store_true")
     args = ap.parse_args()
+    if args.check_lean:
+        return check_lean()
+    if args.measure_lean:
+        return measure_lean()
+    if args.project:
+        return project()
     if args.estimate:
         return estimate()
     if args.dry_run:
-        return dry_run()
-    return final()
+        return dry_run(args.tag, args.stop_after, args.resume)
+    assert args.stop_after is None, "--stop-after is for dry runs"
+    return final(resume=args.resume)
 
 
 if __name__ == "__main__":

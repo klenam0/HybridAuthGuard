@@ -1,0 +1,37 @@
+{
+  "per_day_files": {
+    "a/day=12.npz": {
+      "arrays_equal": true,
+      "bytes_equal": true
+    },
+    "a/day=13.npz": {
+      "arrays_equal": true,
+      "bytes_equal": true
+    },
+    "d/d1_day=12.npy": {
+      "arrays_equal": true,
+      "bytes_equal": true
+    },
+    "d/d1_day=13.npy": {
+      "arrays_equal": true,
+      "bytes_equal": true
+    },
+    "d/day=12.npz": {
+      "arrays_equal": true,
+      "bytes_equal": true
+    },
+    "d/day=13.npz": {
+      "arrays_equal": true,
+      "bytes_equal": true
+    }
+  },
+  "a.json_first_difference": null,
+  "d.json_first_difference": null,
+  "run_labels_first_difference": null,
+  "run_step_up_incidents_per_day_first_difference": null,
+  "resumed": {
+    "from_day": 13,
+    "previous_run_id": null
+  },
+  "identical": true
+}

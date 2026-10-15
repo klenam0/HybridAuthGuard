@@ -1,0 +1,21 @@
+{
+  "fields_compared": [
+    "check_strict_ranking_vs_sklearn",
+    "definitions",
+    "val_a",
+    "val_b"
+  ],
+  "first_difference": null,
+  "positive_ranks_equal_full_ranks": {
+    "val_a:D1": true,
+    "val_a:D2": true,
+    "val_a:D3": true,
+    "val_b:D1": true,
+    "val_b:D2": true,
+    "val_b:D3": true
+  },
+  "reproduces_L2_exactly": true,
+  "lean_d_metrics_seconds": 34.4,
+  "lean_d_metrics_peak_working_set_bytes": 1486356480,
+  "val_a_filtered_rows": 8569072
+}

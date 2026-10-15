@@ -45,23 +45,28 @@ from eval.lanl_a_metrics import B, MIN_USERS, boot_weights, ci  # noqa: E402
 from eval.lanl_convert import peak_working_set  # noqa: E402
 
 KS = (100, 1000, 10000)
+CHECK_MAX_ROWS = 20_000_000      # the sklearn cross-check builds full-length arrays
 SCORERS = ("D1", "D2", "D3")
 
 
 def load_split(split):
+    """The split's filtered rows, concatenated in day order. The arrays are
+    preallocated and filled day by day (no list-then-concatenate copy)."""
     lo, hi = L.split_days()[split]
-    parts = {k: [] for k in ("pos", "day", "y", "D1", "D2", "D3")}
+    sizes = [len(np.load(D.dpath(f"day={d:02d}.npz"))["rows"]) for d in range(lo, hi)]
+    n = int(sum(sizes))
+    out = None
     pair_rows, pair_events = [], []
     base = 0
-    for d in range(lo, hi):
+    for d, m in zip(range(lo, hi), sizes):
         z = np.load(D.dpath(f"day={d:02d}.npz"))
-        m = len(z["rows"])
-        parts["pos"].append(z["pos"])
-        parts["day"].append(np.full(m, d, np.int64))
-        parts["y"].append(z["y"])
-        parts["D1"].append(np.load(D.dpath(f"d1_day={d:02d}.npy")))
-        parts["D2"].append(z["d2"])
-        parts["D3"].append(z["d3"])
+        cols = {"pos": z["pos"], "day": np.full(m, d, np.int64), "y": z["y"],
+                "D1": np.load(D.dpath(f"d1_day={d:02d}.npy")), "D2": z["d2"], "D3": z["d3"]}
+        if out is None:
+            out = {k: np.empty(n, v.dtype) for k, v in cols.items()}
+        for k, v in cols.items():
+            out[k][base:base + m] = v
+        del cols
         # pairs refer to day-local rows; map to the filtered index of the split
         idx = np.full(int(z["n_day"]), -1, np.int64)
         idx[z["rows"]] = base + np.arange(m)
@@ -70,7 +75,6 @@ def load_split(split):
         pair_rows.append(pr)
         pair_events.append(z["pairs_event"])
         base += m
-    out = {k: np.concatenate(v) for k, v in parts.items()}
     out["pair_rows"] = np.concatenate(pair_rows) if pair_rows else np.zeros(0, np.int64)
     out["pair_events"] = np.concatenate(pair_events) if pair_events else np.zeros(0, np.int64)
     return out
@@ -91,6 +95,51 @@ def ranks(score, pos, groups=None):
     return r
 
 
+def _ranks_at(score, idx):
+    """For rows idx (sorted ascending) of score: the rank under (score desc,
+    array index asc), i.e. rows with a higher score plus earlier rows with an
+    equal score. Equal to ranks(score, pos)[idx] when pos increases with the
+    array index; no full-length rank array is built."""
+    s = score[idx]
+    ss = np.sort(score)
+    hi = np.searchsorted(ss, s, "right")
+    ties = hi - np.searchsorted(ss, s, "left")
+    out = (len(score) - hi).astype(np.int64)
+    del ss
+    for v in np.unique(s[ties > 1]):
+        eq = np.flatnonzero(score == v)
+        sel = s == v
+        out[sel] += np.searchsorted(eq, idx[sel], "left")
+    return out
+
+
+def positive_ranks(score, pos, day, pi):
+    """ranks(score, pos)[pi] and ranks(score, pos, day)[pi] (L2's strict
+    ranking: score descending, stream position ascending, overall and within
+    each day), computed for the positives only to bound memory. Requires pos
+    strictly increasing and day non-decreasing along the arrays (as
+    load_split builds them); asserted."""
+    assert bool((pos[1:] > pos[:-1]).all()), "pos must increase with the array index"
+    assert bool((day[1:] >= day[:-1]).all()), "day must be non-decreasing"
+    assert not np.isnan(score).any(), "NaN scores"
+    rg = _ranks_at(score, pi)
+    rd = np.empty(len(pi), np.int64)
+    dp = day[pi]
+    for dv in np.unique(dp):
+        lo, hi = np.searchsorted(day, dv, "left"), np.searchsorted(day, dv, "right")
+        sel = dp == dv
+        rd[sel] = _ranks_at(score[lo:hi], pi[sel] - lo)
+    return rg, rd
+
+
+def day_counts(day):
+    """np.unique(day, return_counts=True) for a non-decreasing day array."""
+    if len(day) == 0:
+        return day[:0], np.zeros(0, np.int64)
+    starts = np.r_[0, np.flatnonzero(day[1:] != day[:-1]) + 1]
+    return day[starts], np.diff(np.r_[starts, len(day)])
+
+
 def evaluate(sc, pos, day, y, row_user, row_events, users, ev_users_all, Wu):
     """Metrics of one scorer on one population. y marks the population's
     positives; row_user / row_events give each positive row's user index and
@@ -99,18 +148,17 @@ def evaluate(sc, pos, day, y, row_user, row_events, users, ev_users_all, Wu):
     P = int(y.sum())
     N = n - P
     pi = np.flatnonzero(y)
-    rg = ranks(sc, pos)
-    rd = ranks(sc, pos, day)
+    rg_pi, rd_pi = positive_ranks(sc, pos, day, pi)
     # negatives above each positive (overall and within its day)
-    og = np.argsort(rg[pi])
+    og = np.argsort(rg_pi)
     order_g = pi[og]
-    neg_above_g = rg[order_g] - np.arange(P)
+    neg_above_g = rg_pi[og] - np.arange(P)
     dd = day[pi]
-    o_d = np.lexsort((rd[pi], dd))
+    o_d = np.lexsort((rd_pi, dd))
     pd_ = pi[o_d]
     dsort = day[pd_]
     first = np.searchsorted(dsort, dsort, side="left")
-    neg_above_d = rd[pd_] - (np.arange(P) - first)
+    neg_above_d = rd_pi[o_d] - (np.arange(P) - first)
     U = len(users)
     out = OrderedDict()
     # point estimates (all weights 1)
@@ -118,7 +166,7 @@ def evaluate(sc, pos, day, y, row_user, row_events, users, ev_users_all, Wu):
     out["base_rate"] = P / n
     out["roc_auc"] = float(np.mean((N - neg_above_g) / N)) if P and N else None
     out["pr_auc"] = float(np.mean((np.arange(P) + 1) / (neg_above_g + np.arange(P) + 1))) if P else None
-    days_u, n_day = np.unique(day, return_counts=True)
+    days_u, n_day = day_counts(day)
     pos_day = np.bincount(np.searchsorted(days_u, dd), minlength=len(days_u))
     uidx_g = row_user[og]          # row_user / row_events are aligned with pi
     uidx_d = row_user[o_d]
@@ -205,12 +253,17 @@ def main(splits=("val_a", "val_b")):
         uix = {u: j for j, u in enumerate(users)}
         ev_user = dict(zip(ev["event"].tolist(), ev["user"].map(uix).tolist()))
         n = len(Z["y"])
-        row_user = np.full(n, -1, np.int64)
-        row_events = np.zeros(n, np.int64)
+        # user and event count of each positive row (aligned with pi_all; no
+        # full-length arrays)
+        pi_all = np.flatnonzero(Z["y"])
+        pu = np.full(len(pi_all), -1, np.int64)
+        pe = np.zeros(len(pi_all), np.int64)
         for r, e in zip(Z["pair_rows"].tolist(), Z["pair_events"].tolist()):
-            row_user[r] = ev_user[e]
-            row_events[r] += 1
-        assert np.array_equal(row_user >= 0, Z["y"])
+            j = int(np.searchsorted(pi_all, r))
+            assert j < len(pi_all) and pi_all[j] == r, "a pair row is not a positive"
+            pu[j] = ev_user[e]
+            pe[j] += 1
+        assert (pu >= 0).all(), "a positive row has no red-team event"
         ret = dict(zip(ev["user"].map(uix).tolist(), ev["returning_user"].tolist()))
         split_out = OrderedDict([("redteam_events", int(len(ev))), ("redteam_users", len(users)),
                                  ("filtered_rows", int(n)), ("positive_rows", int(Z["y"].sum()))])
@@ -223,22 +276,29 @@ def main(splits=("val_a", "val_b")):
             su = [users[j] for j in keep_users]
             remap = np.full(len(users), -1, np.int64)
             remap[keep_users] = np.arange(len(keep_users))
-            y = Z["y"].copy()
-            drop = y & (remap[np.maximum(row_user, 0)] < 0)
-            pop = ~drop
-            y = y[pop]
-            ru = remap[np.maximum(row_user[pop], 0)][y]
-            re = row_events[pop][y]
+            kept = remap[pu] >= 0                  # positives of the scope's users
+            pop = np.ones(n, bool)
+            pop[pi_all[~kept]] = False
+            y = Z["y"][pop]
+            ru = remap[pu[kept]]
+            re = pe[kept]
             ev_scope = np.array([remap[ev_user[e]] for e in ev["event"].tolist()
                                  if remap[ev_user[e]] >= 0], np.int64)
             Wu = boot_weights(su) if len(su) >= MIN_USERS else None
             blk = OrderedDict([("redteam_users", len(su)), ("redteam_events", int(len(ev_scope)))])
             for s in SCORERS:
-                blk[s] = evaluate(Z[s][pop], Z["pos"][pop], Z["day"][pop], y, ru, re, su, ev_scope, Wu)
+                if pop.all():          # no copies of the full-length arrays
+                    blk[s] = evaluate(Z[s], Z["pos"], Z["day"], y, ru, re, su, ev_scope, Wu)
+                else:
+                    blk[s] = evaluate(Z[s][pop], Z["pos"][pop], Z["day"][pop], y, ru, re, su, ev_scope, Wu)
             split_out[scope] = blk
             print(split, scope, {s: (blk[s]["roc_auc"], blk[s]["pr_auc"]) for s in SCORERS}, flush=True)
         # check the strict-ranking AUC / AP against sklearn on the all-users population
         for s in SCORERS:
+            if len(Z["y"]) > CHECK_MAX_ROWS:
+                checks[f"{split}:{s}"] = {"skipped": f"population above {CHECK_MAX_ROWS:,} rows "
+                                                      "(memory; the check needs full-length arrays)"}
+                continue
             r = ranks(Z[s], Z["pos"])
             surrogate = -r.astype(np.float64)
             checks[f"{split}:{s}"] = {

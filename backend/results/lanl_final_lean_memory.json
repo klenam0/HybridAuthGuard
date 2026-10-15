@@ -1,0 +1,7 @@
+{
+  "split": "val_a",
+  "filtered_rows": 8569072,
+  "private_before": 427524096,
+  "peak_private": 1529737216,
+  "bytes_per_row": 128.62689448752442
+}
