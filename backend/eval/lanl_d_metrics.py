@@ -49,9 +49,10 @@ CHECK_MAX_ROWS = 20_000_000      # the sklearn cross-check builds full-length ar
 SCORERS = ("D1", "D2", "D3")
 
 
-def load_split(split):
+def load_split(split, scorers=SCORERS):
     """The split's filtered rows, concatenated in day order. The arrays are
-    preallocated and filled day by day (no list-then-concatenate copy)."""
+    preallocated and filled day by day (no list-then-concatenate copy). Only
+    the score columns of `scorers` are loaded."""
     lo, hi = L.split_days()[split]
     sizes = [len(np.load(D.dpath(f"day={d:02d}.npz"))["rows"]) for d in range(lo, hi)]
     n = int(sum(sizes))
@@ -60,8 +61,13 @@ def load_split(split):
     base = 0
     for d, m in zip(range(lo, hi), sizes):
         z = np.load(D.dpath(f"day={d:02d}.npz"))
-        cols = {"pos": z["pos"], "day": np.full(m, d, np.int64), "y": z["y"],
-                "D1": np.load(D.dpath(f"d1_day={d:02d}.npy")), "D2": z["d2"], "D3": z["d3"]}
+        cols = {"pos": z["pos"], "day": np.full(m, d, np.int64), "y": z["y"]}
+        if "D1" in scorers:
+            cols["D1"] = np.load(D.dpath(f"d1_day={d:02d}.npy"))
+        if "D2" in scorers:
+            cols["D2"] = z["d2"]
+        if "D3" in scorers:
+            cols["D3"] = z["d3"]
         if out is None:
             out = {k: np.empty(n, v.dtype) for k, v in cols.items()}
         for k, v in cols.items():
@@ -240,14 +246,16 @@ def evaluate(sc, pos, day, y, row_user, row_events, users, ev_users_all, Wu):
     return out
 
 
-def main(splits=("val_a", "val_b")):
+def main(splits=("val_a", "val_b"), scorers=SCORERS):
+    """scorers: evaluate only these (one process per scorer bounds memory);
+    each scorer's blocks do not depend on the others."""
     from sklearn.metrics import average_precision_score, roc_auc_score
     t_all = time.perf_counter()
     rt = L.redteam_dev()
     res = OrderedDict()
     checks = {}
     for split in splits:
-        Z = load_split(split)
+        Z = load_split(split, scorers)
         ev = rt[rt["split"] == split]
         users = sorted(ev["user"].unique())
         uix = {u: j for j, u in enumerate(users)}
@@ -286,15 +294,15 @@ def main(splits=("val_a", "val_b")):
                                  if remap[ev_user[e]] >= 0], np.int64)
             Wu = boot_weights(su) if len(su) >= MIN_USERS else None
             blk = OrderedDict([("redteam_users", len(su)), ("redteam_events", int(len(ev_scope)))])
-            for s in SCORERS:
+            for s in scorers:
                 if pop.all():          # no copies of the full-length arrays
                     blk[s] = evaluate(Z[s], Z["pos"], Z["day"], y, ru, re, su, ev_scope, Wu)
                 else:
                     blk[s] = evaluate(Z[s][pop], Z["pos"][pop], Z["day"][pop], y, ru, re, su, ev_scope, Wu)
             split_out[scope] = blk
-            print(split, scope, {s: (blk[s]["roc_auc"], blk[s]["pr_auc"]) for s in SCORERS}, flush=True)
+            print(split, scope, {s: (blk[s]["roc_auc"], blk[s]["pr_auc"]) for s in scorers}, flush=True)
         # check the strict-ranking AUC / AP against sklearn on the all-users population
-        for s in SCORERS:
+        for s in scorers:
             if len(Z["y"]) > CHECK_MAX_ROWS:
                 checks[f"{split}:{s}"] = {"skipped": f"population above {CHECK_MAX_ROWS:,} rows "
                                                       "(memory; the check needs full-length arrays)"}

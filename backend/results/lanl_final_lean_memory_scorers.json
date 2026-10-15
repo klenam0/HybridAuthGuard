@@ -1,0 +1,26 @@
+{
+  "D1": {
+    "split": "val_a",
+    "scorer": "D1",
+    "filtered_rows": 8569072,
+    "private_before": 427413504,
+    "peak_private": 1391513600,
+    "bytes_per_row": 112.50927708391293
+  },
+  "D2": {
+    "split": "val_a",
+    "scorer": "D2",
+    "filtered_rows": 8569072,
+    "private_before": 427368448,
+    "peak_private": 1391706112,
+    "bytes_per_row": 112.53700097280078
+  },
+  "D3": {
+    "split": "val_a",
+    "scorer": "D3",
+    "filtered_rows": 8569072,
+    "private_before": 427454464,
+    "peak_private": 1391431680,
+    "bytes_per_row": 112.49493714138474
+  }
+}

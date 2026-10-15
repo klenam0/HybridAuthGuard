@@ -1,0 +1,100 @@
+{
+  "method": "Memory bar per process (approved process split). Each process is\n    projected from the val_b dry run of that same process (final_dryrun_out/\n    run.json, written by the split dry run).\n    p1 (pass 1 + A metrics): max of\n      pass 1: linear fit of end-of-day private over dev days 0-13 extrapolated\n        to the last test day, plus the largest within-day rise (as before);\n      A metrics: the private right after pass 1's release, scaled by the\n        projected end-of-pass private at the last test day over the dry run's,\n        plus the dry run's largest rise above that release level up to the\n        end of the A metrics (process lifetime peak minus released private).\n    p2_<scorer>: the process's private before the D metrics, plus bytes per\n      filtered row x the assumed test filtered rows; bytes per row is the\n      larger of the val_a measurement and the val_b dry-run process, both with\n      the sklearn cross-check off, as on the test (127M rows > CHECK_MAX_ROWS).\n      The val_b dry-run process with the cross-check on (used for the equality\n      check) is recorded but not used: that step does not run on the test.\n    Bar (per process, rechecked before each starts): projected peak <= 80% of\n    free commit and <= 80% of free physical RAM.",
+  "p1": {
+    "dryrun_memory_start": {
+      "private": 430534656,
+      "peak_private": 430534656,
+      "ws": 86315008,
+      "peak_ws": 86315008
+    },
+    "dryrun_end_of_day_private": [
+      3320721408,
+      4108525568,
+      3991314432,
+      3802468352,
+      3813601280,
+      4521312256,
+      4724588544,
+      4795068416,
+      4798894080,
+      4711485440,
+      4334313472,
+      4353298432,
+      5154107392,
+      5285236736
+    ],
+    "dryrun_peak_private_pass1": 10595840000,
+    "dryrun_private_after_pass1_release": 4459659264,
+    "dryrun_after_a_metrics": {
+      "private": 5668687872,
+      "peak_private": 10595840000,
+      "ws": 4162113536,
+      "peak_ws": 9091362816
+    },
+    "end_of_day_private_slope_bytes_per_day": 108601136.94945045,
+    "projected_end_of_pass1_private_last_test_day": 9892567116.518677,
+    "largest_within_day_rise": 5803024384.0,
+    "projected_pass1_peak": 15695591500.518677,
+    "residual_scale": 1.9343646109365322,
+    "dryrun_rise_above_release_through_a_metrics": 6136180736,
+    "projected_a_metrics_peak": 14762787793.116861,
+    "projected_peak": 15695591500.518677
+  },
+  "p2": {
+    "D1": {
+      "dryrun_private_before_d_metrics": 429236224,
+      "dryrun_peak_private": 1369133056,
+      "val_b_filtered_rows": 6383434,
+      "val_b_bytes_per_row_crosscheck_on_not_used": 206.43065284296821,
+      "val_b_bytes_per_row_crosscheck_off": 147.24000154149005,
+      "val_a_bytes_per_row_crosscheck_off": 112.50927708391293,
+      "val_a_private_before": 427413504,
+      "bytes_per_row_used": 147.24000154149005,
+      "assumed_test_filtered_rows": 127416854,
+      "projected_peak": 19190094003.37181
+    },
+    "D2": {
+      "dryrun_private_before_d_metrics": 428392448,
+      "dryrun_peak_private": 1369407488,
+      "val_b_filtered_rows": 6383434,
+      "val_b_bytes_per_row_crosscheck_on_not_used": 206.49417727198244,
+      "val_b_bytes_per_row_crosscheck_off": 147.41517496695351,
+      "val_a_bytes_per_row_crosscheck_off": 112.53700097280078,
+      "val_a_private_before": 427368448,
+      "bytes_per_row_used": 147.41517496695351,
+      "assumed_test_filtered_rows": 127416854,
+      "projected_peak": 19211570274.14877
+    },
+    "D3": {
+      "dryrun_private_before_d_metrics": 428302336,
+      "dryrun_peak_private": 1368838144,
+      "val_b_filtered_rows": 6383434,
+      "val_b_bytes_per_row_crosscheck_on_not_used": 206.5788765106681,
+      "val_b_bytes_per_row_crosscheck_off": 147.3401006417549,
+      "val_a_bytes_per_row_crosscheck_off": 112.49493714138474,
+      "val_a_private_before": 427454464,
+      "bytes_per_row_used": 147.3401006417549,
+      "assumed_test_filtered_rows": 127416854,
+      "projected_peak": 19201914427.815792
+    }
+  },
+  "projected_peak_bytes": {
+    "p1": 15695591500.518677,
+    "p2_D1": 19190094003.37181,
+    "p2_D2": 19211570274.14877,
+    "p2_D3": 19201914427.815792
+  },
+  "at_projection": {
+    "free_commit_bytes": 20296404992,
+    "total_commit_bytes": 36282888192,
+    "free_physical_bytes": 20733345792,
+    "limit_80pct_free_commit_bytes": 16237123993.6,
+    "limit_80pct_free_physical_bytes": 16586676633.6
+  },
+  "passes_at_projection": {
+    "p1": true,
+    "p2_D1": false,
+    "p2_D2": false,
+    "p2_D3": false
+  }
+}

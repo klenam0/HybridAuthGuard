@@ -120,3 +120,111 @@ D metrics peak (5.65 + 16.39 = 22.04 GB) exceeds it. Pass 1 alone,
 
 Gates after: freeze, test lock and LANL test lock MATCHES;
 `results/lanl_test_access.log` still holds only the CONVERT line.
+
+### Approved process split: equality and per-process memory bar (the test was not opened)
+
+Approved after the condition 4 failure: one evaluation run = process 1 (pass 1
++ A metrics; writes the D score arrays and per-day outputs) followed by
+process 2 (D metrics only, fresh Python processes reading those arrays), same
+run ID throughout; if process 2 still fails the bar, one fresh process per
+scorer. Bar per process: projected peak <= 80% of free commit and <= 80% of
+free physical RAM, rechecked just before each process starts.
+
+At the start of this step: `C:\pagefile.sys` 2,048 MB allocated
+(system-managed, 51 MB in use); free commit 20,592,295,936 B; free physical
+20,611,391,488 B. Gates MATCHES; access log only the CONVERT line.
+
+**Code (before any test access).**
+- `eval/lanl_d_metrics.py`: `load_split(split, scorers=...)` and
+  `main(splits, scorers=...)` load and evaluate only the given scorers.
+  Defaults are unchanged. A scorer's blocks do not depend on the other
+  scorers: the bootstrap weights come from a fresh `default_rng(42)` per call
+  (`lanl_a_metrics.boot_weights`).
+- `eval/lanl_final.py`:
+  - `run()` is now process 1. It no longer calls the D metrics, and it records
+    memory after the A metrics.
+  - `d_process()` is process 2 for one scorer. On the test it reads the
+    red-team frame through `load_lanl("test", "redteam")` with the run ID, and
+    no auth day.
+  - `orchestrate()` runs process 1 and then process 2 for D1, D2, D3 in
+    sequence, each as a child process. On the test it checks the bar
+    immediately before each one and stops with exit 4 if it fails. Process-1
+    outputs stay on disk, and `--skip-p1 --run-id <ID>` continues the run
+    under the same ID.
+  - `merge_d()` merges the per-scorer JSON into the single-process layout and
+    asserts that the scorer-independent fields agree.
+  - `project_split()` writes the bar projection;
+    `--measure-lean-scorers` runs the per-scorer val_a measurement.
+
+**Process 2 as one process fails.** From `results/lanl_final_lean_memory.json`
+(val_a, fresh process): 427,524,096 + 128.63 B/row × 127,416,854 =
+16,816,758,331 B > 80% of free commit (16.47 GB at the time). So per-scorer
+processes (item 2).
+
+**Per-scorer bytes per row on val_a** (fresh process each, cross-check off;
+`results/lanl_final_lean_memory_scorers.json`): D1 112.51, D2 112.54,
+D3 112.49 B/row (private before about 427.4 MB; peak about 1,391.5 MB).
+
+**Equality (item 3).** The split val_b dry run reproduces L2 exactly:
+`results/lanl_final_dryrun_check.json`, A, D and sklearn-check first
+differences `null`, arrays for days 12-13 equal, `reproduces_L2_exactly: true`
+(822.1 s). The first attempt of this dry run ran all four processes but
+stopped in `merge_d` on its own consistency assert (`('D2', 'all')`). This
+was a bug in the merge: it compared each scorer's shared fields against a
+dict that already held D1. The merge was fixed and the whole dry run rerun;
+the result above is from the rerun.
+
+**Projection** (`results/lanl_final_projection_split.json`). Process 1, from
+the split dry run's process 1:
+
+| figure | bytes |
+|---|---|
+| private at start | 430,534,656 |
+| end-of-day private, days 0-13: slope per day | 108,601,137 |
+| projected end-of-pass private at day 57 | 9,892,567,117 |
+| largest within-day rise | 5,803,024,384 |
+| projected pass 1 peak | 15,695,591,501 |
+| private right after release / after A metrics | 4,459,659,264 / 5,668,687,872 |
+| projected A metrics peak (release × 1.9344 + 6,136,180,736 rise through A metrics) | 14,762,787,793 |
+| **process 1 projected peak** | **15,695,591,501** |
+
+Process 2, per scorer:
+- My first projection used the larger of val_a (cross-check off) and the
+  val_b dry-run process (cross-check on, about 206.5 B/row): about 26.7 GB.
+  The cross-check builds full-length arrays and is skipped on the test (127M
+  rows > 20,000,000), so that figure measures a step the test does not run.
+- Before anything was committed or opened, the method was changed to use the
+  val_b dry-run process re-run with the cross-check off (memory only; outputs
+  `p2_<s>_nocheck.json` in the work directory, not compared to anything).
+  This is a choice made after seeing a failing figure, recorded here. It
+  does not change the outcome.
+
+| scorer | val_b private before | val_b peak | val_b B/row (check off) | val_a B/row (check off) | B/row used | projected peak (× 127,416,854 rows) |
+|---|---|---|---|---|---|---|
+| D1 | 429,236,224 | 1,369,133,056 | 147.24 | 112.51 | 147.24 | 19,190,094,003 |
+| D2 | 428,392,448 | 1,369,407,488 | 147.42 | 112.54 | 147.42 | 19,211,570,274 |
+| D3 | 428,302,336 | 1,368,838,144 | 147.34 | 112.49 | 147.34 | 19,201,914,428 |
+
+At projection: free commit 20,296,404,992 B (80%: 16,237,123,994); free
+physical 20,733,345,792 B (80%: 16,586,676,634).
+
+| process | projected peak | <= 80% free commit | <= 80% free physical |
+|---|---|---|---|
+| p1 | 15,695,591,501 | yes | yes |
+| p2_D1 | 19,190,094,003 | no | no |
+| p2_D2 | 19,211,570,274 | no | no |
+| p2_D3 | 19,201,914,428 | no | no |
+
+**The bar fails for every process 2. The evaluation was not started; the
+test was not opened.**
+
+Note on the per-row figures: the dev peak rise above the starting private
+barely changes with population size (val_a 964,100,096 B at 8,569,072 rows;
+val_b 939,896,832 B at 6,383,434 rows). Most of the dev peak is therefore not
+proportional to rows, and the linear per-row projection probably overstates
+the test peak. This was not used to change the bar: a two-point fit gives
+11 B/row, below the 25 B/row the stored arrays alone need (pos, day, score
+and y), so two dev sizes cannot pin down the per-row cost.
+
+Gates after: freeze, test lock and LANL test lock MATCHES;
+`results/lanl_test_access.log` holds only the CONVERT line.

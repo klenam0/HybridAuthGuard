@@ -207,17 +207,192 @@ class ForcedStop(SystemExit):
     pass
 
 
+def target_days(target):
+    if target == "test":
+        return c3_day(), test_end_day() + 1
+    return ORIG["split_days"]()[target]
+
+
+def out_of(target, tag):
+    """(directory, file names) for a run's A and D metric JSON."""
+    if target == "test":
+        return L.RESULTS, {"lanl_a_dev.json": "lanl_final_a.json", "lanl_d_dev.json": "lanl_final_d.json"}
+    return L.wpath(f"final_{tag}_out"), DRY_NAMES
+
+
+def p1_main(target, tag, run_id, resume=False, stop_after=None):
+    """Process 1 entry point: run() and its info to <work>/p1.json."""
+    if target == "test":
+        assert os.environ.get("FINAL_EVAL") == "1"
+    else:
+        assert os.environ.get("FINAL_EVAL") != "1", "the dry run must not open the test"
+    out_dir, names = out_of(target, tag)
+    os.makedirs(out_dir, exist_ok=True)
+    info = run(target, run_id, tag, names, out_dir, resume=resume, stop_after=stop_after)
+    with open(os.path.join(info["work_dir"], "p1.json"), "w", encoding="utf-8") as f:
+        json.dump(info, f, indent=2, default=L._jsonable)
+    return 0
+
+
+def d_process(target, tag, run_id, scorer, crosscheck=True):
+    """Process 2 (one scorer): the D metrics in a fresh process, reading the
+    arrays process 1 left in <work>/d. Output <work>/d_<scorer>.json and its
+    memory to <work>/p2_<scorer>.json. On the test the red-team frame is read
+    through load_lanl("test", "redteam") with the run's ID. crosscheck=False
+    (dev memory measurement only): the sklearn cross-check is off, as it is on
+    the test, and the outputs go to d_<scorer>_nocheck.json / p2_<scorer>_nocheck.json."""
+    sfx = "" if crosscheck else "_nocheck"
+    if not crosscheck:
+        assert target != "test"
+        DM.CHECK_MAX_ROWS = 0
+    if target == "test":
+        assert os.environ.get("FINAL_EVAL") == "1"
+    else:
+        assert os.environ.get("FINAL_EVAL") != "1", "the dry run must not open the test"
+    t = time.perf_counter()
+    m0 = mem()
+    work = L.wpath(f"final_{tag}")
+    lo, hi = target_days(target)
+    rt = redteam_frame(target, run_id)
+    L.split_days = lambda: {target: (lo, hi)}
+    L.redteam_dev = lambda: rt
+    L.day_table = None                     # process 2 reads no auth day
+    L.save_json = writer(work, {"lanl_d_dev.json": f"d_{scorer}{sfx}.json"})
+    D.ddir = lambda: os.path.join(work, "d")
+    m1 = mem()
+    DM.main(splits=(target,), scorers=(scorer,))
+    info = {"target": target, "scorer": scorer, "run_id": run_id, "memory_start": m0,
+            "memory_before_d_metrics": m1, "memory_end": mem(),
+            "seconds": round(time.perf_counter() - t, 1)}
+    with open(os.path.join(work, f"p2_{scorer}{sfx}.json"), "w", encoding="utf-8") as f:
+        json.dump(info, f, indent=2)
+    return 0
+
+
+def merge_d(work, target):
+    """The per-scorer D JSON merged into the single-process layout of
+    lanl_d_metrics.main (same keys, same order); the scorer-independent fields
+    must agree across the three."""
+    parts = {}
+    for s in SCORERS:
+        with open(os.path.join(work, f"d_{s}.json"), encoding="utf-8") as f:
+            parts[s] = json.load(f, object_pairs_hook=OrderedDict)
+    first = parts[SCORERS[0]]
+    sp = OrderedDict()
+    for k, v in first[target].items():
+        if isinstance(v, dict):
+            shared = OrderedDict((kk, vv) for kk, vv in v.items() if kk not in SCORERS)
+            blk = OrderedDict(shared)
+            for s in SCORERS:
+                assert same(OrderedDict((kk, vv) for kk, vv in parts[s][target][k].items()
+                                        if kk not in SCORERS), shared) is None, (s, k)
+                blk[s] = parts[s][target][k][s]
+            sp[k] = blk
+        else:
+            for s in SCORERS:
+                assert parts[s][target][k] == v, (s, k)
+            sp[k] = v
+    res = OrderedDict([(target, sp)])
+    res["check_strict_ranking_vs_sklearn"] = OrderedDict(
+        (f"{target}:{s}", parts[s]["check_strict_ranking_vs_sklearn"][f"{target}:{s}"]) for s in SCORERS)
+    for s in SCORERS:
+        assert parts[s]["definitions"] == first["definitions"]
+    res["definitions"] = first["definitions"]
+    res["seconds"] = round(sum(parts[s]["seconds"] for s in SCORERS), 1)
+    res["peak_working_set_bytes"] = max(parts[s]["peak_working_set_bytes"] for s in SCORERS)
+    return res
+
+
+def _child(args):
+    import subprocess
+    cmd = [sys.executable, "-m", "eval.lanl_final", *args]
+    print(">>", " ".join(args), flush=True)
+    return subprocess.run(cmd, cwd=BACKEND, env=os.environ.copy()).returncode
+
+
+PROJ_FILE = "lanl_final_projection_split.json"
+
+
+def bar_check(process):
+    """The memory bar for one process, now: its committed projected peak
+    against 80% of free commit and 80% of free physical RAM."""
+    with open(os.path.join(L.RESULTS, PROJ_FILE), encoding="utf-8") as f:
+        proj = json.load(f)["projected_peak_bytes"][process]
+    fc = free_commit()
+    out = OrderedDict([("process", process), ("time", _dt.datetime.now().isoformat(timespec="seconds")),
+                       ("projected_peak_bytes", proj), *fc.items(),
+                       ("limit_80pct_free_commit_bytes", 0.8 * fc["free_commit_bytes"]),
+                       ("limit_80pct_free_physical_bytes", 0.8 * fc["free_physical_bytes"])])
+    out["passes"] = bool(proj <= out["limit_80pct_free_commit_bytes"]
+                         and proj <= out["limit_80pct_free_physical_bytes"])
+    print("bar", json.dumps(out), flush=True)
+    return out
+
+
+def orchestrate(target, tag, run_id, resume=False, stop_after=None, skip_p1=False, gate=False):
+    """One run: process 1, then one process 2 per scorer, sequentially, each a
+    fresh Python process with the same run ID. gate=True checks the memory bar
+    immediately before each process and stops (exit 4) without starting it if
+    the bar fails. Scorers whose output already exists for this run ID are not
+    rerun. Returns (exit code, record)."""
+    work = L.wpath(f"final_{tag}")
+    rec = OrderedDict([("run_id", run_id), ("bar_checks", [])])
+    rid = [] if run_id is None else ["--run-id", run_id]
+    if not skip_p1:
+        if gate:
+            b = bar_check("p1")
+            rec["bar_checks"].append(b)
+            if not b["passes"]:
+                return 4, rec
+        args = ["--p1", "--target", target, "--tag", tag, *rid]
+        if resume:
+            args.append("--resume")
+        if stop_after is not None:
+            args += ["--stop-after", str(stop_after)]
+        rc = _child(args)
+        if rc:
+            return rc, rec
+    with open(os.path.join(work, "p1.json"), encoding="utf-8") as f:
+        p1 = json.load(f)
+    if target == "test" and not resume:
+        assert p1["run_id"] == run_id, "process 1 ran under another run ID"
+    rec["p1"] = p1
+    rec["p2"] = OrderedDict()
+    for s in SCORERS:
+        done = os.path.join(work, f"p2_{s}.json")
+        if os.path.exists(done):
+            with open(done, encoding="utf-8") as f:
+                prev = json.load(f)
+            if prev["run_id"] == run_id and run_id is not None:
+                rec["p2"][s] = prev
+                continue
+        if gate:
+            b = bar_check(f"p2_{s}")
+            rec["bar_checks"].append(b)
+            if not b["passes"]:
+                return 4, rec
+        rc = _child(["--p2", "--target", target, "--tag", tag, "--scorer", s, *rid])
+        if rc:
+            return rc, rec
+        with open(done, encoding="utf-8") as f:
+            rec["p2"][s] = json.load(f)
+    out_dir, names = out_of(target, tag)
+    d = merge_d(work, target)
+    with open(os.path.join(out_dir, names["lanl_d_dev.json"]), "w", encoding="utf-8", newline="\n") as f:
+        json.dump(d, f, indent=2, default=L._jsonable)
+        f.write("\n")
+    return 0, rec
+
+
 def run(target, run_id, tag, results_names, out_dir, resume=False, stop_after=None):
-    """Pass 1 over days 0 .. last target day (state carried from day 0), with a
-    checkpoint of the whole state after every day; then the A and D metrics.
-    resume=True continues from the checkpoint's next day."""
+    """Process 1: pass 1 over days 0 .. last target day (state carried from
+    day 0), with a checkpoint of the whole state after every day; then the A
+    metrics. The D score arrays and per-day outputs stay on disk for process 2
+    (d_process). resume=True continues from the checkpoint's next day."""
     from eval import phase2_baseline as P2
     t_all = time.perf_counter()
     mem_start = mem()
-    if target == "test":
-        lo, hi = c3_day(), test_end_day() + 1
-    else:
-        lo, hi = ORIG["split_days"]()[target]
+    lo, hi = target_days(target)
     work = L.wpath(f"final_{tag}")
     a_dir, d_dir = os.path.join(work, "a"), os.path.join(work, "d")
     os.makedirs(a_dir, exist_ok=True)
@@ -324,14 +499,11 @@ def run(target, run_id, tag, results_names, out_dir, resume=False, stop_after=No
     t = time.perf_counter()
     AM.main()
     timing["A_metrics"] += time.perf_counter() - t
-    mem_before_dm = mem()         # right before the D metrics start
-    t = time.perf_counter()
-    DM.main(splits=(target,))
-    timing["D_metrics"] += time.perf_counter() - t
+    mem_after_a = mem()           # after the A metrics; process 1 ends here
     return {"target": target, "days": [lo, hi], "run_id": run_id, "d1_model_sha256": sha,
             "resumed": resumed, "memory_start": mem_start, "memory_curve_pass1": curve,
             "checkpoint_bytes": ckpt_bytes, "memory_after_pass1_release": mem_released,
-            "memory_before_d_metrics": mem_before_dm, "memory_end": mem(),
+            "memory_after_a_metrics": mem_after_a, "memory_end": mem(),
             "labels": labels, "step_up_incidents_per_day": stepup,
             "test_iterator_opens": days.test_opens,
             "seconds": {k: round(v, 1) for k, v in timing.items()},
@@ -372,7 +544,18 @@ def dry_run(tag="dryrun", stop_after=None, resume=False):
     assert os.environ.get("FINAL_EVAL") != "1", "the dry run must not open the test"
     out_dir = L.wpath(f"final_{tag}_out")
     os.makedirs(out_dir, exist_ok=True)
-    info = run("val_b", None, tag, DRY_NAMES, out_dir, resume=resume, stop_after=stop_after)
+    work = L.wpath(f"final_{tag}")
+    for s in SCORERS:                       # no stale per-scorer outputs
+        for name in (f"p2_{s}.json", f"d_{s}.json"):
+            if os.path.exists(os.path.join(work, name)):
+                os.remove(os.path.join(work, name))
+    rc, rec = orchestrate("val_b", tag, None, resume=resume, stop_after=stop_after)
+    if rc:
+        return rc
+    info = rec["p1"]
+    info["p2"] = rec["p2"]
+    with open(os.path.join(out_dir, "d.json")) as f:
+        info["p2_rows"] = json.load(f)["val_b"]["filtered_rows"]
     with open(os.path.join(out_dir, "run.json"), "w") as f:
         json.dump(info, f, indent=2, default=L._jsonable)
     if tag != "dryrun":
@@ -455,12 +638,33 @@ def compare_resume(tag):
     return 0 if chk["identical"] else 1
 
 
-def final(resume=False):
+def final(resume=False, run_id=None, skip_p1=False):
+    """The one evaluation run: process 1 then one process 2 per scorer, each
+    gated by the memory bar measured just before it starts. resume=True is the
+    one infrastructure recovery (process 1 resumes from its checkpoint under a
+    new run ID). skip_p1 with run_id continues a run stopped at a bar check,
+    under the same run ID, from the process-1 outputs on disk."""
     assert os.environ.get("FINAL_EVAL") == "1", "set FINAL_EVAL=1 for the evaluation run"
-    run_id = f"L3-{_dt.datetime.now().strftime('%Y%m%dT%H%M%S')}-{os.getpid()}"
+    if skip_p1:
+        assert run_id, "continuing needs the run's ID"
+    else:
+        run_id = f"L3-{_dt.datetime.now().strftime('%Y%m%dT%H%M%S')}-{os.getpid()}"
     print("run_id", run_id, flush=True)
-    names = {"lanl_a_dev.json": "lanl_final_a.json", "lanl_d_dev.json": "lanl_final_d.json"}
-    info = run("test", run_id, "test", names, L.RESULTS, resume=resume)
+    rc, rec = orchestrate("test", "test", run_id, resume=resume, skip_p1=skip_p1, gate=True)
+    log = os.path.join(L.RESULTS, "lanl_final_bar_checks.json")
+    prev = []
+    if os.path.exists(log):
+        with open(log, encoding="utf-8") as f:
+            prev = json.load(f)
+    with open(log, "w", encoding="utf-8", newline="\n") as f:
+        json.dump(prev + [{"run_id": run_id, "exit": rc, "checks": rec["bar_checks"]}], f, indent=2)
+        f.write("\n")
+    if rc:
+        print(f"stopped (exit {rc}); process-1 outputs stay on disk", flush=True)
+        return rc
+    info = {k: v for k, v in rec["p1"].items() if k != "work_dir"}
+    info["p2"] = rec["p2"]
+    info["bar_checks"] = rec["bar_checks"]
     with open(os.path.join(L.RESULTS, "lanl_final_d.json")) as f:
         dres = json.load(f)
     info["verdict_la3_8"] = verdict(dres)
@@ -469,25 +673,137 @@ def final(resume=False):
     return 0
 
 
-def measure_lean():
+def measure_lean(scorer=None):
     """Peak private commit of the lean D metrics on val_a with the sklearn
-    cross-check off (as it will be on the test); measurement only."""
+    cross-check off (as it will be on the test); measurement only. scorer:
+    one scorer only, output to <work>/final_leanmem_out/mem_<scorer>.json."""
     assert os.environ.get("FINAL_EVAL") != "1"
     out_dir = L.wpath("final_leanmem_out")
     os.makedirs(out_dir, exist_ok=True)
-    L.save_json = writer(out_dir, {"lanl_d_dev.json": "d.json"})
+    dname = "d.json" if scorer is None else f"d_{scorer}.json"
+    L.save_json = writer(out_dir, {"lanl_d_dev.json": dname})
     DM.CHECK_MAX_ROWS = 0
     before = mem()
-    DM.main(splits=("val_a",))
+    DM.main(splits=("val_a",), scorers=SCORERS if scorer is None else (scorer,))
     after = mem()
-    with open(os.path.join(out_dir, "d.json")) as f:
+    with open(os.path.join(out_dir, dname)) as f:
         rows = json.load(f)["val_a"]["filtered_rows"]
-    out = {"split": "val_a", "filtered_rows": rows, "private_before": before["private"],
+    out = {"split": "val_a", "scorer": scorer, "filtered_rows": rows, "private_before": before["private"],
            "peak_private": after["peak_private"],
            "bytes_per_row": (after["peak_private"] - before["private"]) / rows}
-    ORIG["save_json"]("lanl_final_lean_memory.json", out)
+    if scorer is None:
+        ORIG["save_json"]("lanl_final_lean_memory.json", out)
+    else:
+        with open(os.path.join(out_dir, f"mem_{scorer}.json"), "w") as f:
+            json.dump(out, f, indent=2)
     print(out)
     return 0
+
+
+def measure_lean_scorers():
+    """measure_lean per scorer, each in a fresh process; saved together."""
+    out_dir = L.wpath("final_leanmem_out")
+    res = OrderedDict()
+    for s in SCORERS:
+        rc = _child(["--measure-lean", "--scorer", s])
+        if rc:
+            return rc
+        with open(os.path.join(out_dir, f"mem_{s}.json")) as f:
+            res[s] = json.load(f)
+    ORIG["save_json"]("lanl_final_lean_memory_scorers.json", res)
+    print(json.dumps(res, indent=1))
+    return 0
+
+
+def project_split():
+    """Memory bar per process (approved process split). Each process is
+    projected from the val_b dry run of that same process (final_dryrun_out/
+    run.json, written by the split dry run).
+    p1 (pass 1 + A metrics): max of
+      pass 1: linear fit of end-of-day private over dev days 0-13 extrapolated
+        to the last test day, plus the largest within-day rise (as before);
+      A metrics: the private right after pass 1's release, scaled by the
+        projected end-of-pass private at the last test day over the dry run's,
+        plus the dry run's largest rise above that release level up to the
+        end of the A metrics (process lifetime peak minus released private).
+    p2_<scorer>: the process's private before the D metrics, plus bytes per
+      filtered row x the assumed test filtered rows; bytes per row is the
+      larger of the val_a measurement and the val_b dry-run process, both with
+      the sklearn cross-check off, as on the test (127M rows > CHECK_MAX_ROWS).
+      The val_b dry-run process with the cross-check on (used for the equality
+      check) is recorded but not used: that step does not run on the test.
+    Bar (per process, rechecked before each starts): projected peak <= 80% of
+    free commit and <= 80% of free physical RAM."""
+    with open(os.path.join(L.wpath("final_dryrun_out"), "run.json")) as f:
+        run_ = json.load(f)
+    with open(os.path.join(L.RESULTS, "lanl_final_lean_memory_scorers.json")) as f:
+        lean = json.load(f)
+    with open(os.path.join(L.RESULTS, "lanl_final_estimate.json")) as f:
+        est = json.load(f)
+    rows_test = est["assumed_test_filtered_rows"]
+    curve = run_["memory_curve_pass1"]
+    dd = np.array([c["day"] for c in curve], float)
+    priv = np.array([c["private"] for c in curve], float)
+    peak = np.array([c["peak_private"] for c in curve], float)
+    slope, icpt = np.polyfit(dd, priv, 1)
+    rise = float(max(np.max(peak[1:] - priv[:-1]), peak[0]))
+    last = test_end_day()
+    end_test = float(icpt + slope * last)
+    pass1 = end_test + rise
+    scale = end_test / float(icpt + slope * dd[-1])
+    rel = run_["memory_after_pass1_release"]["private"]
+    a_rise = run_["memory_after_a_metrics"]["peak_private"] - rel
+    a_proj = rel * scale + a_rise
+    p1 = OrderedDict([
+        ("dryrun_memory_start", run_["memory_start"]),
+        ("dryrun_end_of_day_private", [c["private"] for c in curve]),
+        ("dryrun_peak_private_pass1", curve[-1]["peak_private"]),
+        ("dryrun_private_after_pass1_release", rel),
+        ("dryrun_after_a_metrics", run_["memory_after_a_metrics"]),
+        ("end_of_day_private_slope_bytes_per_day", float(slope)),
+        ("projected_end_of_pass1_private_last_test_day", end_test),
+        ("largest_within_day_rise", rise),
+        ("projected_pass1_peak", pass1),
+        ("residual_scale", scale),
+        ("dryrun_rise_above_release_through_a_metrics", a_rise),
+        ("projected_a_metrics_peak", a_proj),
+        ("projected_peak", max(pass1, a_proj))])
+    p2 = OrderedDict()
+    for s in SCORERS:
+        r = run_["p2"][s]
+        vb_rows = run_["p2_rows"]
+        on_bpr = (r["memory_end"]["peak_private"] - r["memory_before_d_metrics"]["private"]) / vb_rows
+        with open(os.path.join(L.wpath("final_dryrun"), f"p2_{s}_nocheck.json")) as f:
+            r = json.load(f)
+        start = r["memory_before_d_metrics"]["private"]
+        vb_bpr = (r["memory_end"]["peak_private"] - start) / vb_rows
+        va_bpr = lean[s]["bytes_per_row"]
+        bpr = max(vb_bpr, va_bpr)
+        p2[s] = OrderedDict([
+            ("dryrun_private_before_d_metrics", start),
+            ("dryrun_peak_private", r["memory_end"]["peak_private"]),
+            ("val_b_filtered_rows", vb_rows),
+            ("val_b_bytes_per_row_crosscheck_on_not_used", on_bpr),
+            ("val_b_bytes_per_row_crosscheck_off", vb_bpr),
+            ("val_a_bytes_per_row_crosscheck_off", va_bpr),
+            ("val_a_private_before", lean[s]["private_before"]),
+            ("bytes_per_row_used", bpr),
+            ("assumed_test_filtered_rows", rows_test),
+            ("projected_peak", max(start, lean[s]["private_before"]) + bpr * rows_test)])
+    fc = free_commit()
+    lim_c, lim_p = 0.8 * fc["free_commit_bytes"], 0.8 * fc["free_physical_bytes"]
+    peaks = OrderedDict([("p1", p1["projected_peak"])] + [(f"p2_{s}", p2[s]["projected_peak"]) for s in SCORERS])
+    out = OrderedDict([
+        ("method", project_split.__doc__.strip()),
+        ("p1", p1), ("p2", p2),
+        ("projected_peak_bytes", peaks),
+        ("at_projection", OrderedDict([*fc.items(), ("limit_80pct_free_commit_bytes", lim_c),
+                                       ("limit_80pct_free_physical_bytes", lim_p)])),
+        ("passes_at_projection", OrderedDict((k, bool(v <= lim_c and v <= lim_p)) for k, v in peaks.items())),
+    ])
+    ORIG["save_json"](PROJ_FILE, out)
+    print(json.dumps(out, indent=1))
+    return 0 if all(out["passes_at_projection"].values()) else 1
 
 
 def free_commit():
@@ -540,7 +856,9 @@ def project():
 
 
 def project_cond4():
-    """Revised condition 4, from the instrumented val_b dry run.
+    """(Historical: produced lanl_final_projection_cond4.json from the
+    single-process dry run's run.json; the split dry run's run.json has no
+    memory_before_d_metrics.) Revised condition 4, from the instrumented val_b dry run.
     4a: private commit right after pass 1's state is released (and right before
     the D metrics start) against pass 1's within-run rise. The rise is taken
     two ways, end-of-pass level minus start and peak minus start; the drop must
@@ -723,13 +1041,30 @@ def main():
     ap.add_argument("--measure-lean", action="store_true")
     ap.add_argument("--project", action="store_true")
     ap.add_argument("--project-cond4", action="store_true")
+    ap.add_argument("--project-split", action="store_true")
+    ap.add_argument("--measure-lean-scorers", action="store_true")
+    ap.add_argument("--p1", action="store_true")
+    ap.add_argument("--p2", action="store_true")
+    ap.add_argument("--target", default=None)
+    ap.add_argument("--scorer", default=None, choices=SCORERS)
+    ap.add_argument("--run-id", default=None)
+    ap.add_argument("--skip-p1", action="store_true")
+    ap.add_argument("--no-crosscheck", action="store_true")
     args = ap.parse_args()
+    if args.p1:
+        return p1_main(args.target, args.tag, args.run_id, args.resume, args.stop_after)
+    if args.p2:
+        return d_process(args.target, args.tag, args.run_id, args.scorer, not args.no_crosscheck)
+    if args.project_split:
+        return project_split()
+    if args.measure_lean_scorers:
+        return measure_lean_scorers()
     if args.project_cond4:
         return project_cond4()
     if args.check_lean:
         return check_lean()
     if args.measure_lean:
-        return measure_lean()
+        return measure_lean(args.scorer)
     if args.project:
         return project()
     if args.estimate:
@@ -737,7 +1072,7 @@ def main():
     if args.dry_run:
         return dry_run(args.tag, args.stop_after, args.resume)
     assert args.stop_after is None, "--stop-after is for dry runs"
-    return final(resume=args.resume)
+    return final(resume=args.resume, run_id=args.run_id, skip_p1=args.skip_p1)
 
 
 if __name__ == "__main__":
