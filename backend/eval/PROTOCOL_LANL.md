@@ -63,3 +63,27 @@ LA3.7 Intervals. LA2.6 applies: fewer than 20 distinct red-team users in a split
 LA3.8 Verdict for D (evaluated on test only; dev is reported, not judged). A scorer "works" if, on test: ROC-AUC 95% lower bound > 0.50; at k = 1,000, lift lower bound >= 10; and at k = 1,000 it catches >= 20% of the test's red-team users. All three scorers are reported whatever the verdict; none is selected over another.
 
 LA3.9 Test plan. The test is read once in a later phase, through load_lanl("test") with FINAL_EVAL=1, and runs exactly LA3.4 to LA3.8 with state carried from val_b. Nothing else is computed on test.
+
+## LA4 (erratum; no procedure change; written after dev results)
+
+LA4 corrects LA3's description. It changes no LA3 procedure, and every L2 result stands as computed.
+
+LA4.1 Constant ASN. LA3.4 says a constant ASN makes the triage tie-break constant. That is wrong for the frozen code. agents/triage.py:77-82 (AsnReputation.observe) keeps one record per ASN value, so with one constant ASN it returns the failure share of all earlier events (failures before / events before, 0.0 for the first event). IncidentTriage.observe keeps that value's running maximum per source computer per day (agents/triage.py:160-161, reset at the day roll, :243). T2 is (top detector precision, that maximum) (agents/triage.py:220). The tie-break is therefore a slowly varying global failure share, not a constant. LA3.4's commitment, the frozen code unchanged, is what ran.
+
+LA4.2 Event identity. Every A event carries event_id = its global stream position (eval/lanl_a.py:495), as the RBA replay used its row index (eval/phase6.py:139, :352). The frozen duplicate check (agents/rules_v3.py:425-431) keys on event_id when present. Without it, the check would drop distinct LANL rows that share the second, source computer, account and status: 22,241,494 + 10,687,968 + 6,589,392 = 39,519,854 dev rows (results/lanl_l2_checks.json).
+
+LA4.3 D1 feature. is_new_source_computer is 0 on every fit row by construction, because the map and the fit use the same dev_train filtered rows (scaler mean 0.0, results/lanl_d_fit.json). D1 is in effect a 6-feature model. It is kept as declared.
+
+LA4.4 Counting units. A red-team event means one line of redteam.txt. A positive row means one LA3.1-positive auth row. Users are distinct red-team users (the red-team user field, which equals the source user on every matched row). A duplicated red-team line counts as one event per line, while the auth row it matches counts once.
+  A: alerts, positive alerts and precision count auth rows (alerted rows). Events caught and events count red-team events, including unmatched ones as missed. Users caught counts users. Incidents count (source computer, day). Legitimate users challenged per day counts distinct normalised source accounts with a non-positive event from a challenged source computer.
+  D: ROC-AUC, PR-AUC, base rate, precision and lift count positive rows within the filtered population. Top-k rows caught and positives count rows. Top-k events caught and the all-red-team line count red-team events. Users caught counts users. In the bootstrap, a user drawn w times contributes w copies of each of its positive rows and red-team events.
+
+LA4.5 Small strata. With fewer than 20 distinct red-team users in a split or stratum, AUC (ROC and PR) is reported as a point value with no interval. Counts are reported exactly.
+
+LA4.6 Scope of A. A holds for replay through MonitoringAgent._process_event only. The frozen live path (agents/monitoring_agent.py:148, :227) calls utils/event_schema.normalize_event, which rejects a non-IP ip (utils/event_schema.py:138), so LANL computer names would be rejected at ingest.
+
+LA4.7 Runtimes. LANL runtimes are not reported in the paper: passes overlapped, and the D1 fit ran without a prior estimate.
+
+LA4.8 Q1 (twin bug provenance). The Multiple IP Login bug fixed in L2 was in eval/lanl_a.py (Twin._multi, now :300-302). That code was written new for LANL and shares no code with the RBA twin, which uses eval/phase3_rules.multi_ip_stats (:273; called at eval/phase6.py:213). The RBA Phase 6 check is unaffected.
+
+LA4.9 Q2 (step-up versus U). U = 200 was a selection constraint on the val_a mean of legitimate users challenged per day (eval/phase5b.py:171-176; eval/PROTOCOL.md:727-739). It is not a runtime cap. At run time the frozen code caps step-up incidents (source computer, day) at 200 per day (agents/triage.py:193-195; config.py:267), and a challenge covers every login from the computer for 3,600 s (agents/response_agent.py:113, :86-91; config.py:295). Single LANL source computers carry up to 13,579 legitimate users in a day (results/lanl_l2b_stepup.json), so 200 incidents reach about 12,000-22,000 users.
