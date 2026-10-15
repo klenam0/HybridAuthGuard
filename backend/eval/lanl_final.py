@@ -213,6 +213,7 @@ def run(target, run_id, tag, results_names, out_dir, resume=False, stop_after=No
     resume=True continues from the checkpoint's next day."""
     from eval import phase2_baseline as P2
     t_all = time.perf_counter()
+    mem_start = mem()
     if target == "test":
         lo, hi = c3_day(), test_end_day() + 1
     else:
@@ -309,6 +310,7 @@ def run(target, run_id, tag, results_names, out_dir, resume=False, stop_after=No
     days.reset()
     gc.collect()
     peak_pass1 = peak_working_set()
+    mem_released = mem()          # right after pass 1's state is released
 
     ev = rt[rt["split"] == target]
     labels = OrderedDict([
@@ -322,12 +324,14 @@ def run(target, run_id, tag, results_names, out_dir, resume=False, stop_after=No
     t = time.perf_counter()
     AM.main()
     timing["A_metrics"] += time.perf_counter() - t
+    mem_before_dm = mem()         # right before the D metrics start
     t = time.perf_counter()
     DM.main(splits=(target,))
     timing["D_metrics"] += time.perf_counter() - t
     return {"target": target, "days": [lo, hi], "run_id": run_id, "d1_model_sha256": sha,
-            "resumed": resumed, "memory_curve_pass1": curve, "checkpoint_bytes": ckpt_bytes,
-            "memory_end": mem(),
+            "resumed": resumed, "memory_start": mem_start, "memory_curve_pass1": curve,
+            "checkpoint_bytes": ckpt_bytes, "memory_after_pass1_release": mem_released,
+            "memory_before_d_metrics": mem_before_dm, "memory_end": mem(),
             "labels": labels, "step_up_incidents_per_day": stepup,
             "test_iterator_opens": days.test_opens,
             "seconds": {k: round(v, 1) for k, v in timing.items()},
@@ -535,6 +539,94 @@ def project():
     return 0 if out["within_limit"] else 1
 
 
+def project_cond4():
+    """Revised condition 4, from the instrumented val_b dry run.
+    4a: private commit right after pass 1's state is released (and right before
+    the D metrics start) against pass 1's within-run rise. The rise is taken
+    two ways, end-of-pass level minus start and peak minus start; the drop must
+    reach 80% of both (the end-of-pass one is the stricter). If it does not, the
+    sum rule stands; otherwise 4b: max(pass 1, D metrics) <= 80% of free commit
+    and pass 1 <= 80% of free physical RAM. The pass 1 projection is project()'s
+    method. The D metrics projection starts from the residual after release,
+    scaled by the projected end-of-pass private at the last test day over the
+    dry run's (assumes none of the extra state is released), plus the lean
+    bytes per row x assumed test filtered rows."""
+    with open(os.path.join(L.wpath("final_dryrun_out"), "run.json")) as f:
+        run_ = json.load(f)
+    with open(os.path.join(L.RESULTS, "lanl_final_lean_memory.json")) as f:
+        lean = json.load(f)
+    with open(os.path.join(L.RESULTS, "lanl_final_estimate.json")) as f:
+        est = json.load(f)
+    curve = run_["memory_curve_pass1"]
+    start = run_["memory_start"]["private"]
+    end_pass1 = curve[-1]["private"]
+    peak_pass1 = curve[-1]["peak_private"]
+    rel = run_["memory_after_pass1_release"]["private"]
+    bdm = run_["memory_before_d_metrics"]["private"]
+    resid = max(rel, bdm)
+    rise_end, rise_peak = end_pass1 - start, peak_pass1 - start
+    drop_end, drop_peak = end_pass1 - resid, peak_pass1 - resid
+    fr_end, fr_peak = drop_end / rise_end, drop_peak / rise_peak
+    use_4b = fr_end >= 0.8 and fr_peak >= 0.8
+
+    dd = np.array([c["day"] for c in curve], float)
+    priv = np.array([c["private"] for c in curve], float)
+    peak = np.array([c["peak_private"] for c in curve], float)
+    slope, icpt = np.polyfit(dd, priv, 1)
+    rise = float(max(np.max(peak[1:] - priv[:-1]), peak[0]))
+    last = test_end_day()
+    end_test = float(icpt + slope * last)
+    pass1 = end_test + rise
+    scale = end_test / float(icpt + slope * dd[-1])
+    resid_test = resid * scale
+    dmet_rows = lean["bytes_per_row"] * est["assumed_test_filtered_rows"]
+    dmet = resid_test + dmet_rows
+    fc = free_commit()
+    lim_c, lim_p = 0.8 * fc["free_commit_bytes"], 0.8 * fc["free_physical_bytes"]
+    out = OrderedDict([
+        ("method", project_cond4.__doc__.strip()),
+        ("4a", OrderedDict([
+            ("dryrun_private_start_bytes", start),
+            ("dryrun_private_end_of_pass1_bytes", end_pass1),
+            ("dryrun_peak_private_pass1_bytes", peak_pass1),
+            ("dryrun_private_after_pass1_release_bytes", rel),
+            ("dryrun_private_before_d_metrics_bytes", bdm),
+            ("residual_used_bytes", resid),
+            ("rise_end_of_pass_bytes", rise_end), ("drop_from_end_of_pass_bytes", drop_end),
+            ("drop_share_of_rise_end_of_pass", fr_end),
+            ("rise_peak_bytes", rise_peak), ("drop_from_peak_bytes", drop_peak),
+            ("drop_share_of_rise_peak", fr_peak),
+            ("drop_ge_80pct", bool(use_4b)),
+            ("rule", "4b" if use_4b else "sum rule")])),
+        ("end_of_day_private_slope_bytes_per_day", float(slope)),
+        ("projected_end_of_pass1_private_last_test_day_bytes", end_test),
+        ("largest_within_day_rise_bytes", rise),
+        ("projected_pass1_peak_bytes", pass1),
+        ("residual_scale", scale),
+        ("projected_residual_before_d_metrics_bytes", resid_test),
+        ("lean_bytes_per_row", lean["bytes_per_row"]),
+        ("assumed_test_filtered_rows", est["assumed_test_filtered_rows"]),
+        ("projected_d_metrics_rows_bytes", dmet_rows),
+        ("projected_d_metrics_peak_bytes", dmet),
+        ("projected_sum_bytes", pass1 + dmet),
+        ("projected_max_bytes", max(pass1, dmet)),
+        *fc.items(),
+        ("limit_80pct_free_commit_bytes", lim_c),
+        ("limit_80pct_free_physical_bytes", lim_p),
+    ])
+    if use_4b:
+        c1, c2 = max(pass1, dmet) <= lim_c, pass1 <= lim_p
+        out["4b_max_le_80pct_free_commit"] = bool(c1)
+        out["4b_pass1_le_80pct_free_physical"] = bool(c2)
+        out["passes"] = bool(c1 and c2)
+    else:
+        out["sum_le_80pct_free_commit"] = bool(pass1 + dmet <= lim_c)
+        out["passes"] = out["sum_le_80pct_free_commit"]
+    ORIG["save_json"]("lanl_final_projection_cond4.json", out)
+    print(json.dumps(out, indent=1))
+    return 0 if out["passes"] else 1
+
+
 def check_lean():
     """The memory-lean D metrics against L2's saved val_a / val_b D results,
     field by field, plus the lean positive ranks against the full ranks."""
@@ -630,7 +722,10 @@ def main():
     ap.add_argument("--check-lean", action="store_true")
     ap.add_argument("--measure-lean", action="store_true")
     ap.add_argument("--project", action="store_true")
+    ap.add_argument("--project-cond4", action="store_true")
     args = ap.parse_args()
+    if args.project_cond4:
+        return project_cond4()
     if args.check_lean:
         return check_lean()
     if args.measure_lean:

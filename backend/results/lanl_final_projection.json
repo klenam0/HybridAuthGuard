@@ -1,0 +1,13 @@
+{
+  "method": "pass 1: linear fit of end-of-day private commit over dev days 0-13, extrapolated to the last test day, plus the largest within-day rise (peak private minus the previous end-of-day private); D metrics: private before + lean bytes per row x assumed test filtered rows",
+  "end_of_day_private_slope_bytes_per_day": 110637965.22197787,
+  "largest_within_day_rise_bytes": 5796212736.0,
+  "projected_pass1_peak_bytes": 15799023890.567026,
+  "projected_d_metrics_peak_bytes": 16816758331.390305,
+  "projected_sum_bytes": 32615782221.95733,
+  "free_commit_bytes": 11480932352,
+  "total_commit_bytes": 39468154880,
+  "free_physical_bytes": 17070645248,
+  "limit_80pct_free_commit_bytes": 9184745881.6,
+  "within_limit": false
+}

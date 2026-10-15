@@ -20,112 +20,130 @@
     "run_id": null,
     "d1_model_sha256": "48bf2436ff8a4403eb140cfe1ce1d55a8118893c356d385aa91bd6a5edaccfb3",
     "resumed": null,
+    "memory_start": {
+      "private": 431308800,
+      "peak_private": 431308800,
+      "ws": 86736896,
+      "peak_ws": 86736896
+    },
     "memory_curve_pass1": [
       {
         "day": 0,
-        "private": 3341852672,
-        "peak_private": 5796212736,
-        "ws": 2204385280,
-        "peak_ws": 4681101312
+        "private": 3332198400,
+        "peak_private": 5846470656,
+        "ws": 2209148928,
+        "peak_ws": 4730241024
       },
       {
         "day": 1,
-        "private": 4086157312,
-        "peak_private": 6935494656,
-        "ws": 3129757696,
-        "peak_ws": 5990514688
+        "private": 4095508480,
+        "peak_private": 7023284224,
+        "ws": 3120762880,
+        "peak_ws": 6043586560
       },
       {
         "day": 2,
-        "private": 3961982976,
-        "peak_private": 7019454464,
-        "ws": 3076853760,
-        "peak_ws": 6145499136
+        "private": 3976384512,
+        "peak_private": 7093547008,
+        "ws": 2963763200,
+        "peak_ws": 6080098304
       },
       {
         "day": 3,
-        "private": 3790274560,
-        "peak_private": 7019454464,
-        "ws": 2948468736,
-        "peak_ws": 6145499136
+        "private": 3798593536,
+        "peak_private": 7093547008,
+        "ws": 2800451584,
+        "peak_ws": 6080098304
       },
       {
         "day": 4,
-        "private": 3795279872,
-        "peak_private": 7019454464,
-        "ws": 2941390848,
-        "peak_ws": 6145499136
+        "private": 3825852416,
+        "peak_private": 7093547008,
+        "ws": 2823659520,
+        "peak_ws": 6080098304
       },
       {
         "day": 5,
-        "private": 4542287872,
-        "peak_private": 8001277952,
-        "ws": 3586310144,
-        "peak_ws": 7049396224
+        "private": 4516868096,
+        "peak_private": 7853047808,
+        "ws": 3403907072,
+        "peak_ws": 6764249088
       },
       {
         "day": 6,
-        "private": 4761518080,
-        "peak_private": 8515096576,
-        "ws": 3811442688,
-        "peak_ws": 7562887168
+        "private": 4738043904,
+        "peak_private": 8493318144,
+        "ws": 3570503680,
+        "peak_ws": 7316430848
       },
       {
         "day": 7,
-        "private": 4845056000,
-        "peak_private": 8518283264,
-        "ws": 3855949824,
-        "peak_ws": 7562887168
+        "private": 4834799616,
+        "peak_private": 8645332992,
+        "ws": 3650846720,
+        "peak_ws": 7473750016
       },
       {
         "day": 8,
-        "private": 4794650624,
-        "peak_private": 8576229376,
-        "ws": 3786665984,
-        "peak_ws": 7584772096
+        "private": 4799434752,
+        "peak_private": 8665444352,
+        "ws": 3672817664,
+        "peak_ws": 7548043264
       },
       {
         "day": 9,
-        "private": 4684087296,
-        "peak_private": 8576229376,
-        "ws": 3660578816,
-        "peak_ws": 7584772096
+        "private": 4667232256,
+        "peak_private": 8665444352,
+        "ws": 3552845824,
+        "peak_ws": 7548043264
       },
       {
         "day": 10,
-        "private": 4369506304,
-        "peak_private": 8576229376,
-        "ws": 3377328128,
-        "peak_ws": 7584772096
+        "private": 4365701120,
+        "peak_private": 8665444352,
+        "ws": 3332530176,
+        "peak_ws": 7548043264
       },
       {
         "day": 11,
-        "private": 4409098240,
-        "peak_private": 8576229376,
-        "ws": 3384684544,
-        "peak_ws": 7584772096
+        "private": 4382474240,
+        "peak_private": 8665444352,
+        "ws": 3264024576,
+        "peak_ws": 7548043264
       },
       {
         "day": 12,
-        "private": 5153275904,
-        "peak_private": 8797327360,
-        "ws": 4031660032,
-        "peak_ws": 7686295552
+        "private": 5165600768,
+        "peak_private": 8881651712,
+        "ws": 3947241472,
+        "peak_ws": 7664582656
       },
       {
         "day": 13,
-        "private": 5283287040,
-        "peak_private": 10574073856,
-        "ws": 4071161856,
-        "peak_ws": 9135546368
+        "private": 5293613056,
+        "peak_private": 10548961280,
+        "ws": 4024659968,
+        "peak_ws": 9031204864
       }
     ],
     "checkpoint_bytes": 82955975,
+    "memory_after_pass1_release": {
+      "private": 4460826624,
+      "peak_private": 10548961280,
+      "ws": 3184877568,
+      "peak_ws": 9031204864
+    },
+    "memory_before_d_metrics": {
+      "private": 5653790720,
+      "peak_private": 10548961280,
+      "ws": 4090519552,
+      "peak_ws": 9031204864
+    },
     "memory_end": {
-      "private": 5622583296,
-      "peak_private": 10574073856,
-      "ws": 4196339712,
-      "peak_ws": 9135546368
+      "private": 5654765568,
+      "peak_private": 10548961280,
+      "ws": 4092710912,
+      "peak_ws": 9031204864
     },
     "labels": {
       "redteam_events": 290,
@@ -142,16 +160,16 @@
     },
     "test_iterator_opens": 0,
     "seconds": {
-      "read": 7.4,
-      "A_twin": 637.3,
-      "D_features": 97.1,
-      "checkpoint": 7.2,
-      "D1_score": 14.1,
-      "A_metrics": 6.8,
-      "D_metrics": 14.8
+      "read": 19.6,
+      "A_twin": 643.3,
+      "D_features": 97.5,
+      "checkpoint": 7.1,
+      "D1_score": 20.4,
+      "A_metrics": 8.5,
+      "D_metrics": 15.3
     },
-    "seconds_total": 793.5,
-    "peak_working_set_bytes_pass1": 9135546368,
-    "peak_working_set_bytes": 9135546368
+    "seconds_total": 823.8,
+    "peak_working_set_bytes_pass1": 9031204864,
+    "peak_working_set_bytes": 9031204864
   }
 }
