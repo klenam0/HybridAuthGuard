@@ -1,0 +1,50 @@
+{
+  "amendment": 10,
+  "description": "score = 1 if the event's IP appears in any attack-labelled dev_train row, else 0; all events of each half",
+  "label": "Is Attack IP or Is Account Takeover (Stream.truth)",
+  "dev_train_rows": 4055357,
+  "dev_train_attack_ips": 22095,
+  "metric_notes": {
+    "roc_auc": "sklearn roc_auc_score on the binary score (ties averaged)",
+    "pr_auc": "sklearn average_precision_score on the binary score",
+    "share_attack_events_ip_attack_in_dev_train": "equal to recall_score_1 by construction"
+  },
+  "lookup": {
+    "val_a": {
+      "events": 1183517,
+      "attack_events": 127155,
+      "base_rate": 0.1074382539498799,
+      "roc_auc": 0.9646091748600654,
+      "pr_auc": 0.9368089679477976,
+      "flagged_events": 118157,
+      "true_positives": 118155,
+      "precision_score_1": 0.9999830733684844,
+      "recall_score_1": 0.929220243010499,
+      "share_attack_events_ip_attack_in_dev_train": 0.929220243010499
+    },
+    "val_b": {
+      "events": 1153710,
+      "attack_events": 110465,
+      "base_rate": 0.09574763155385668,
+      "roc_auc": 0.9550400579369032,
+      "pr_auc": 0.9186897318084865,
+      "flagged_events": 100532,
+      "true_positives": 100532,
+      "precision_score_1": 1.0,
+      "recall_score_1": 0.9100801158738062,
+      "share_attack_events_ip_attack_in_dev_train": 0.9100801158738062
+    }
+  },
+  "s1_construction_a": {
+    "val_a": {
+      "roc_auc": 0.762999627767321,
+      "pr_auc": 0.19311065649982126,
+      "source": "phase4b_diag.json variants/a/val_a"
+    },
+    "val_b": {
+      "roc_auc": 0.750421331271785,
+      "pr_auc": 0.16748617966023807,
+      "source": "phase4b_diag.json variants/a/val_b"
+    }
+  }
+}
