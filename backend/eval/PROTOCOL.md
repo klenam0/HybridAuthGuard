@@ -931,4 +931,12 @@ changed, why, and what had already been seen.
    affected metric is rerun. A defect in the frozen system is reported,
    not fixed.
 
+10. 2026-10-17. Amendment 10 (post hoc, written after the test was scored;
+    dev data only; descriptive). A blocklist-lookup baseline: score = 1 if
+    the event's IP appears in any attack-labelled dev_train row, else 0.
+    Reported on val_a and val_b, all events: ROC-AUC (binary score, ties
+    averaged), PR-AUC, precision and recall of score = 1, and the share of
+    attack events whose IP was attack-labelled in dev_train. Compared with
+    S1 construction (a) on the same halves. No May data is read.
+
 LANL (second dataset): see eval/PROTOCOL_LANL.md (amendment LA1).
