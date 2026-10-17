@@ -316,7 +316,7 @@ If you reference this work, please cite it as:
 ```bibtex
 @misc{hybridauthguard-2026,
   author = {Deegbe Cephas Dotse Klenam},
-  title  = {Autonomous Cyber Threat Monitoring and Response System Using Agentic AI},
+  title  = {A Hybrid Rule-Based and Isolation Forest System for Automated Authentication Threat Monitoring and Response},
   year   = {2026},
   institution = {University of Ghana, Department of Computer Science},
   note   = {BSc Information Technology final-year project. Software: HybridAuthGuard v3.0.0},
