@@ -7,9 +7,9 @@ L2 result changed: `git diff lanl-l2 -- results/` shows only the new
 
 | commit | content |
 |---|---|
-| 7b381ff | Q2 numbers: `eval/lanl_l2b_stepup.py`, `results/lanl_l2b_stepup.json` (saved L2 arrays only) |
-| f3e1ceb | **Erratum LA4**, committed alone: "LANL erratum LA4: corrections to LA3's description, no procedure change" |
-| bd7a185 | Arithmetic fix in LA4.2: the sum is 39,518,854. I wrote 39,519,854 in f3e1ceb and corrected it in a separate commit rather than amending |
+| 789368c | Q2 numbers: `eval/lanl_l2b_stepup.py`, `results/lanl_l2b_stepup.json` (saved L2 arrays only) |
+| d380623 | **Erratum LA4**, committed alone: "LANL erratum LA4: corrections to LA3's description, no procedure change" |
+| 88d395d | Arithmetic fix in LA4.2: the sum is 39,518,854. I wrote 39,519,854 in d380623 and corrected it in a separate commit rather than amending |
 | (this commit) | this report |
 
 ## Q1. Twin bug provenance: independent of the RBA twin
@@ -17,7 +17,7 @@ L2 result changed: `git diff lanl-l2 -- results/` shows only the new
 **The bug.** It was in `eval/lanl_a.py`, `Twin._multi` (Multiple IP Login),
 in the step that maps the previous-success time of each (account, source
 computer) pair back to account-sorted order. It was fixed before
-`eval/lanl_a.py` was first committed (350097c, which added the file;
+`eval/lanl_a.py` was first committed (c708d53, which added the file;
 `git log --diff-filter=A`). The buggy version therefore exists in no commit.
 The before text below is from the L2 session's edit; the after text is the
 committed code at `eval/lanl_a.py:300-302`.

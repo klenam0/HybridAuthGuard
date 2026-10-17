@@ -6,13 +6,13 @@ so Step 4 did not run: no test lock, no guarded loader and no
 lanl_test_access.log. Every number below comes from `results/lanl_inspect.json`,
 `results/lanl_split.json` or the printed command output named next to it.
 
-Branch `lanl-l0` from `phase6-final` (16696a8). Not pushed or merged.
+Branch `lanl-l0` from `phase6-final` (0fb3567). Not pushed or merged.
 
 | commit | content |
 |---|---|
-| 33495e8 | Steps 0-1: `eval/lanl_inspect.py`, `eval/LANL_FILES.md`, `results/lanl_inspect.json` |
-| caee2e3 | Amendment LA1: `eval/PROTOCOL_LANL.md` and a one-line pointer at the end of `eval/PROTOCOL.md` (no code) |
-| a7f61a4 | Step 3: `eval/lanl_split.py`, `results/lanl_split.json` |
+| 7c604af | Steps 0-1: `eval/lanl_inspect.py`, `eval/LANL_FILES.md`, `results/lanl_inspect.json` |
+| a2bbb95 | Amendment LA1: `eval/PROTOCOL_LANL.md` and a one-line pointer at the end of `eval/PROTOCOL.md` (no code) |
+| cba99d9 | Step 3: `eval/lanl_split.py`, `results/lanl_split.json` |
 | (this commit) | this report |
 
 ## 1. File integrity (results/lanl_inspect.json)
@@ -146,12 +146,12 @@ Every number below comes from `results/lanl_split_la2.json`,
 
 | commit | content |
 |---|---|
-| 3a17909 | Amendment LA2 appended to `eval/PROTOCOL_LANL.md` (that file alone, no code) |
-| 66fd22a | `eval/lanl_split_la2.py`, `results/lanl_split_la2.json` |
-| 7ab96c8 | `eval/lanl_lock.py`, `eval/LANL_TEST_LOCK.json`, `eval/lanl_data.py`, empty `results/lanl_test_access.log` |
+| 540bd56 | Amendment LA2 appended to `eval/PROTOCOL_LANL.md` (that file alone, no code) |
+| 6c7bd5a | `eval/lanl_split_la2.py`, `results/lanl_split_la2.json` |
+| fa2870c | `eval/lanl_lock.py`, `eval/LANL_TEST_LOCK.json`, `eval/lanl_data.py`, empty `results/lanl_test_access.log` |
 | (this commit) | this section |
 
-LA2 (3a17909) was committed before `lanl_split_la2.py` existed. No script
+LA2 (540bd56) was committed before `lanl_split_la2.py` existed. No script
 computed an LA2 boundary before that commit. `lanl_split.py` and
 `lanl_split.json` were not changed.
 
@@ -257,6 +257,6 @@ auth.txt.gz was not read in this part. No script printed anything per day.
 - The access log records calls for the test split only, the same as RBA's
   `eval.datasets.load`. Development calls are not logged.
 
-All commits on `lanl-l0` since `phase6-final`: 33495e8, caee2e3, a7f61a4,
-dd97217, 3a17909, 66fd22a, 7ab96c8 and this report commit. Not pushed or merged.
+All commits on `lanl-l0` since `phase6-final`: 7c604af, a2bbb95, cba99d9,
+a7dc9b4, 540bd56, 6c7bd5a, fa2870c and this report commit. Not pushed or merged.
 Phase L1 has not been started.

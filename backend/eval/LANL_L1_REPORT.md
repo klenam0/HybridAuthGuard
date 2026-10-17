@@ -12,14 +12,14 @@ Every number below comes from a saved file or from printed output named next to 
 `results/lanl_l1_dev_checks.json` (dev checks), `results/lanl_l1_coverage.json`
 (coverage) and `eval/LANL_TEST_LOCK.json` (lock).
 
-Branch `lanl-l1` from `lanl-l0` (76214fd). Not pushed or merged.
+Branch `lanl-l1` from `lanl-l0` (e63a2ef). Not pushed or merged.
 
 | commit | group |
 |---|---|
-| 1bb2e00 | Documentation: `eval/LANL_FILES.md` (documentation URL, date read, field lists, note on failed events) |
-| 8060012 | Conversion code: `eval/lanl_convert.py`, smoke record `results/lanl_l1_smoke.json` |
-| 9da0f53 | Conversion output and checks: `results/lanl_l1_convert.json`, `eval/lanl_dev_checks.py` + `results/lanl_l1_dev_checks.json`, `eval/lanl_l1_coverage.py` + `results/lanl_l1_coverage.json`, the CONVERT line in `results/lanl_test_access.log` |
-| 9c2364d | Lock and loader: `eval/lanl_lock.py`, `eval/LANL_TEST_LOCK.json`, `eval/lanl_data.py` |
+| aa9d15a | Documentation: `eval/LANL_FILES.md` (documentation URL, date read, field lists, note on failed events) |
+| 40dc0f7 | Conversion code: `eval/lanl_convert.py`, smoke record `results/lanl_l1_smoke.json` |
+| a309c47 | Conversion output and checks: `results/lanl_l1_convert.json`, `eval/lanl_dev_checks.py` + `results/lanl_l1_dev_checks.json`, `eval/lanl_l1_coverage.py` + `results/lanl_l1_coverage.json`, the CONVERT line in `results/lanl_test_access.log` |
+| fdbc5de | Lock and loader: `eval/lanl_lock.py`, `eval/LANL_TEST_LOCK.json`, `eval/lanl_data.py` |
 | (this commit) | Report |
 
 ## 1. Documentation recorded

@@ -1,6 +1,6 @@
 # LANL phase L2 report
 
-**Outcome.** Amendment LA3 was committed on its own (9beca16) before any LANL
+**Outcome.** Amendment LA3 was committed on its own (e219327) before any LANL
 feature, score or metric code existed. Both parts ran on dev only; the test
 was not read.
 
@@ -24,15 +24,15 @@ Branch `lanl-l2` from `lanl-l1`. Not pushed or merged.
 
 | commit | group |
 |---|---|
-| 9beca16 | LA3 (`eval/PROTOCOL_LANL.md`, that file alone) |
-| a6443de | Step 2 checks: `eval/lanl_la3.py`, `eval/lanl_l2_checks.py`, `lanl_l2_checks*.json` |
-| 27e633a | D: `eval/lanl_d.py`, `eval/lanl_d_metrics.py`, `lanl_d_*.json` |
-| 350097c | A: `eval/lanl_a.py`, `eval/lanl_a_metrics.py`, `lanl_a_*.json` |
+| e219327 | LA3 (`eval/PROTOCOL_LANL.md`, that file alone) |
+| 8065683 | Step 2 checks: `eval/lanl_la3.py`, `eval/lanl_l2_checks.py`, `lanl_l2_checks*.json` |
+| d3ff215 | D: `eval/lanl_d.py`, `eval/lanl_d_metrics.py`, `lanl_d_*.json` |
+| c708d53 | A: `eval/lanl_a.py`, `eval/lanl_a_metrics.py`, `lanl_a_*.json` |
 | (this commit) | this report |
 
 D was committed before A because it finished first. Both were committed after
 LA3. No file in LA3 changed after any dev result was seen. The first LANL
-metric code, `eval/lanl_la3.py`, is in a6443de, which comes after 9beca16.
+metric code, `eval/lanl_la3.py`, is in 8065683, which comes after e219327.
 
 ## 1. Step 2: checks of LA3's inputs (lanl_l2_checks.json; dev only)
 

@@ -1,6 +1,6 @@
 # Methods facts (read-only fact check, 2026-10-15)
 
-Branch `lanl-l3` at 9c0cced. No code was changed and nothing was read through
+Branch `lanl-l3` at 00c9905. No code was changed and nothing was read through
 the evaluation loaders. Paths below are relative to `backend/` unless they
 start with `../` or are absolute.
 
@@ -131,7 +131,7 @@ method and file hash in `eval/DATASET_DESCRIPTION.md`, raw numbers in
 
 - Remote (`git remote -v`): `origin https://github.com/klenam0/HybridAuthGuard.git` (fetch and push).
 - `v3.0.0-frozen` is a **lightweight** tag (`git cat-file -t v3.0.0-frozen` → `commit`)
-  on `fc69d1ddbc6835b7a5cba424792ea8d4abef5431` (2026-10-14 07:36:09 +0000,
+  on `bb40c168c55d6e2bd9f8af2c3906b8c0fda9185f` (2026-10-14 07:36:09 +0000,
   "chore(freeze): Phase 5c.6 results/FREEZE.json ...").
   `git ls-remote --tags origin "v3.0.0-frozen*"` prints nothing: **the tag is
   local only, not on GitHub.**
@@ -141,7 +141,7 @@ method and file hash in `eval/DATASET_DESCRIPTION.md`, raw numbers in
 
 ## 5. Triage baseline T0, tier bars, alert retention
 
-Read-only, at 1799315. No code changed, no test output read, no metric
+Read-only, at 365e384. No code changed, no test output read, no metric
 computed.
 
 ### T0 as implemented
@@ -281,7 +281,7 @@ base rate (lines 841-843, 868).
 
 ## 6. Phase 6 figures: S1 TPR, val_b step-up cost, S5 timing
 
-Read-only, at aa1b05f. Only saved results JSON (and the saved stdout and
+Read-only, at 82eab63. Only saved results JSON (and the saved stdout and
 report in `C:\Users\Dell\audit_scratch\`) were read; nothing went through the
 evaluation loaders, no metric was computed, no code changed.
 

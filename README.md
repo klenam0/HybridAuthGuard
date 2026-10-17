@@ -7,6 +7,10 @@
 [![React](https://img.shields.io/badge/frontend-React-61DAFB.svg)](https://react.dev/)
 [![Status](https://img.shields.io/badge/status-research%20prototype-orange.svg)]()
 
+## Correction (October 2026)
+
+The Isolation Forest models released as v1.0.0-model and v2.0.0-model were fitted only on rows not labelled as attacks, so their reported detection results depend on the labels and do not measure label-free anomaly detection. Results for the current configuration come from the Phase 6 locked test report ([`backend/eval/PHASE6_REPORT.md`](backend/eval/PHASE6_REPORT.md)).
+
 A multi-agent system that detects and triages authentication attacks in a stream of login events, developed as a final-year BSc Information Technology research project in the Department of Computer Science, University of Ghana. It is a research prototype: responses are simulated and nothing is enforced.
 
 > **TL;DR** - Four agents (Monitoring → Detection → Analysis → Response) process login events in three stages:
@@ -315,7 +319,7 @@ If you reference this work, please cite it as:
   title  = {Autonomous Cyber Threat Monitoring and Response System Using Agentic AI},
   year   = {2026},
   institution = {University of Ghana, Department of Computer Science},
-  note   = {BSc Information Technology final-year project. Software: HybridAuthGuard v2.0.0},
+  note   = {BSc Information Technology final-year project. Software: HybridAuthGuard v3.0.0},
   howpublished = {\url{https://github.com/klenam0/HybridAuthGuard}}
 }
 ```

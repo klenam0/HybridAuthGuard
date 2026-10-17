@@ -293,7 +293,7 @@ larger for every scorer, so it is the one used.
    test.
 3. After seeing figure 2 fail, and before anything was committed or opened,
    the method switched to val_b with the cross-check off (147.2-147.4 B/row):
-   19.19-19.21 GB. This failed (commit c32e0d2).
+   19.19-19.21 GB. This failed (commit da64a07).
 4. Approved after that failure: this section's three-point fit and dev_all
    ratio, 10.79-10.91 GB. Each change came after the previous figure was seen
    to fail. All were made before any test access.
@@ -323,7 +323,7 @@ the CONVERT line.
 ## 1. The evaluation run: stopped in process 2 (D1) on a code assertion
 
 Run ID `L3-20261015T034342-14240`, started 2026-10-15T03:43:42 from commit
-6a59742 (`FINAL_EVAL=1 python -m eval.lanl_final`). Access-log lines (all with
+3536f72 (`FINAL_EVAL=1 python -m eval.lanl_final`). Access-log lines (all with
 this run ID):
 
 ```
@@ -378,7 +378,7 @@ infrastructure recovery.
   of every process 1 output was recorded and committed:
   `results/lanl_final_p1_hashes.txt`, 135 files (`lanl_final_a.json`,
   44 A day files, 44 D day files, 44 D1 score arrays, the checkpoint and
-  `p1.json`), commit 2707f9a. All 135 were re-verified unchanged after the
+  `p1.json`), commit b96b894. All 135 were re-verified unchanged after the
   dev checks.
 
 **Fix (exactly LA3.3).** In `load_split`, pairs whose row is outside the
@@ -430,7 +430,7 @@ same positives.
 **Row 10 resolved by LA5 (no code change).** Row 10's handling was not
 specified, so the work stopped before process 2 and reported. The approved
 resolution was a reporting rule, not code:
-- **LA5** (`eval/PROTOCOL_LANL.md`), committed alone as **1623ecd**. It was
+- **LA5** (`eval/PROTOCOL_LANL.md`), committed alone as **e255345**. It was
   written before any D test output existed: the work directory then held
   only process 1's files.
 - **The rule:** a zero-positive scope is reported as "undefined (0 positives

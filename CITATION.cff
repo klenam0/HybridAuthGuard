@@ -4,8 +4,8 @@ title: "Autonomous Cyber Threat Monitoring and Response System Using Agentic AI"
 authors:
   - family-names: "Deegbe"
     given-names: "Cephas Dotse Klenam"
-date-released: "2026-10-09"
-version: "2.0.0"
+date-released: "2026-10-17"
+version: "3.0.0"
 repository-code: "https://github.com/klenam0/HybridAuthGuard"
 license: MIT
 type: software
@@ -17,8 +17,12 @@ keywords:
   - mitre-attack
   - risk-based-authentication
 abstract: >
-  A multi-agent intrusion detection system combining rule-based logic,
-  Isolation Forest machine learning, and LLM-based alert enrichment,
-  applied to risk-based authentication threat detection. Developed as a
+  A multi-agent pipeline that detects and triages authentication attacks in a
+  stream of login events, evaluated on the RBA Dataset. The default
+  configuration uses eight windowed rule detectors, label-free incident triage
+  and capped simulated response tiers, with alerts mapped to MITRE ATT&CK and
+  optional explanations from a local LLM; it has no machine-learning detection
+  step. A legacy mode keeps the original rules and the Isolation Forest model,
+  whose training rows were filtered using the attack labels. Developed as a
   final-year BSc Information Technology research project at the University of
   Ghana.
