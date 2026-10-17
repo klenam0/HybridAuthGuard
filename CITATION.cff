@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "Autonomous Cyber Threat Monitoring and Response System Using Agentic AI"
+title: "HybridAuthGuard: Rule-Based Detection and Triage of Authentication Attacks"
 authors:
   - family-names: "Deegbe"
     given-names: "Cephas Dotse Klenam"
