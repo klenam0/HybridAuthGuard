@@ -1257,3 +1257,71 @@ the controls were seen.
 
 It does not revisit the failure of prediction 1 in 11.6. That failure stands
 as reported, and the consequence declared in 11.6 applies.
+
+### 11.8 Withdrawal of the scope condition, and the LA6.2 reading
+
+**Status: post hoc, disclosed.** Written on 6 November 2026 after LA6 ran.
+
+#### 11.8.1 Withdrawal of the scope condition in 11.1
+
+The scope condition in 11.1 stated three clauses, and 11.6 proposed a fourth,
+provisional clause on the row mass of the labelled entities. LA6.1 falsified
+the condition: a persistent entity label induced on 86 LANL red-team source
+users, removing 532,232 fitting rows or 2.86% of the fitting population,
+produced L between -0.190 and 0.077 across all six split-and-seed cases, with
+every interval containing 0, against a predicted value above 0.85.
+
+**The scope condition is withdrawn, not revised.** This work claims no
+general rule for when label-filtered fitting of pre-model artefacts produces
+leakage.
+
+**What replaces it is an observation, not a law.** On the authentication
+dataset the labelled entity is itself a key of the frequency maps, so
+filtering by the label removed 22,089 keys outright and those addresses
+scored as unseen when they returned. On the enterprise dataset, removing the
+rows of 86 labelled users changed 33 map entries and dropped one destination
+computer, because the map keys are computers shared across many users and
+remain populated from other users' traffic. This is reported with its
+measured perturbation counts as an observation about two datasets, and
+explicitly not as a condition that predicts occurrence.
+
+**Consequence for the paper.** The diagnostic is presented as a check that
+has to be run, because occurrence cannot be predicted from the shape of the
+label. The failure of LA6.1 is reported in full wherever the diagnostic is
+described, and is not omitted on the grounds that a later variant succeeded.
+
+#### 11.8.2 The LA6.2 reading
+
+LA6 contained two inconsistent definitions of failure: the prediction, which
+required the interval on L to contain 0 and its upper bound to fall below
+0.30, and the consequence clause in LA6.4, which defines failure as L being
+substantially above 0.
+
+The result: the upper bound was below 0.30 in all six cases, the largest
+being 0.0073; the interval contained 0 in five of six cases; and seed 43 on
+days 8 to 11 returned [0.0017, 0.0073].
+
+**Reading applied.** The prediction as worded failed in one of six cases and
+is reported as a failure. The consequence clause's trigger is not met, so the
+diagnostic is not withdrawn. **This reading was chosen after the result was
+seen and is disclosed as post hoc.** The inconsistency was in the amendment
+as written, not in the result.
+
+**Rule for future declarations.** A prediction of negligibility states a
+magnitude bound. It does not require an interval to cover zero, because a
+genuinely small perturbation produces a small non-zero effect that a precise
+estimator will correctly detect.
+
+#### 11.8.3 Deviations recorded from the LA6 run
+
+- The bootstrap user ordering was corrected after the first metrics run
+  failed to reproduce the stored D1 intervals. Point values were unchanged
+  and both verdicts were identical in both runs; every reported figure comes
+  from the corrected run.
+- The LA6 declaration commit was amended to restore a final line dropped by
+  the first append. This occurred before any code existed and before anything
+  was pushed. It is recorded because it touches the declaration-order claim.
+- Construction interpretation: known-value sets for source user and
+  destination computer were reported as perturbation counts rather than as
+  model inputs, which left construction (c) bit-identical to the stored D1
+  detector, as the identity checks confirm.
