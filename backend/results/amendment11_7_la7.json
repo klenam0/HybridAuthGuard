@@ -1,0 +1,2094 @@
+{
+  "I": {
+    "I1": {
+      "labelled_users": 86,
+      "labelled_users_in_vocab": 86,
+      "labelled_users_in_fitting_rows_days_0_7": 76,
+      "labelled_users_in_scoring_rows_days_8_13": 85,
+      "labelled_users_in_both_periods": 75,
+      "labelled_fitting_rows": 532232,
+      "reproduces_LA6_1": {
+        "86_users": true,
+        "75_in_both": true,
+        "76_in_fitting_rows": true,
+        "fitting_rows": true,
+        "stored_path": "lanl_la6_controls.json F1"
+      },
+      "la6_1_model_inputs": [
+        "hour_sin",
+        "hour_cos",
+        "src_freq",
+        "user_freq",
+        "dst_freq",
+        "fail_rate_30d",
+        "is_new_src"
+      ],
+      "la6_1_frequency_maps": [
+        "src (src_computer) -> src_freq, column 2",
+        "user (src_user) -> user_freq, column 3",
+        "dst (dst_computer) -> dst_freq, column 4"
+      ],
+      "la6_1_user_map_keys_absent_from_a": 76
+    },
+    "status": "NOT RUN (I2 to I5). Decision of the author on 2026-11-06 after the blocker below was reported; no LA7 code was written or run.",
+    "blocker": {
+      "finding": "LA7's single declared change (add a source-user frequency map as a model input) is already present in LA6.1: user_freq, the source-user frequency map, is model input column 3 of D1 and of LA6.1. LA7 as written is therefore the LA6.1 construction unchanged, and (c) would remain bit-identical to D1, contrary to LA7's declared consequence.",
+      "evidence": {
+        "la6_1_model_inputs": [
+          "hour_sin",
+          "hour_cos",
+          "src_freq",
+          "user_freq",
+          "dst_freq",
+          "fail_rate_30d",
+          "is_new_src"
+        ],
+        "la6_1_user_map_keys_absent_from_a": {
+          "value": 76,
+          "source": "results/lanl_la6_controls.json artefacts/F/user/keys_only_in_c"
+        },
+        "labelled_users_in_fitting_rows": {
+          "value": 76,
+          "source": "I/I1 (rebuilt); = lanl_la6_controls.json F1/labelled_users_in_days_0_7_filtered"
+        },
+        "la6_1_keys_dropped": {
+          "src": {
+            "value": 298,
+            "source": "results/lanl_la6_controls.json artefacts/F/src/keys_only_in_c"
+          },
+          "user": {
+            "value": 76,
+            "source": "results/lanl_la6_controls.json artefacts/F/user/keys_only_in_c"
+          },
+          "dst": {
+            "value": 280,
+            "source": "results/lanl_la6_controls.json artefacts/F/dst/keys_only_in_c"
+          }
+        },
+        "la6_1_rows_removed": {
+          "value": 532232,
+          "source": "results/lanl_la6_controls.json artefacts/F/rows_removed"
+        },
+        "other_source_user_artefact": "is_new_user (known-user set) would be constant on every fitting row, so it cannot enter a forest split (as is_new_src, constant in every LA6 fit: lanl_la6_controls.json fit/*/constant_features_on_fit_rows)"
+      },
+      "related_finding_11_8_1": {
+        "text": "11.8.1 attributes '33 map entries changed and one destination computer dropped' to LA6.1 (86 labelled users). Those figures are LA6.2's (true label).",
+        "la6_2_rows_removed": {
+          "value": 50,
+          "source": "artefacts/G/rows_removed"
+        },
+        "la6_2_shared_keys_count_differs": {
+          "src": 3,
+          "user": 7,
+          "dst": 23
+        },
+        "la6_2_dst_keys_dropped": 1,
+        "action": "none; per the author a correction amendment follows"
+      },
+      "missing": [
+        "I2 artefacts, constant features, perturbation counts, keys absent from (a) map, (c) vs D1",
+        "I3 ROC-AUC, PR-AUC, L, intervals",
+        "I4 LA7 predictions",
+        "I5 runtimes"
+      ]
+    }
+  },
+  "H": {
+    "protocol": "eval/PROTOCOL.md amendment 11.7.2 (declared after the 11.6 controls were seen; no prediction declared)",
+    "data": "datasets.load('dev'): val_a and val_b; no fitting",
+    "per_event_scores": {
+      "a": "-results/phase3_cache/ml_decision_v3.npy (Phase 3 forest, seed 42), val rows",
+      "a_prime": "results/amendment11_cache/matched_a_prime_draw{11,12,13}_seed42_val.npy"
+    },
+    "labels": {
+      "a": "Stream.truth (Is Attack IP or Is Account Takeover)",
+      "a_prime": "11.6 distribution-matched induced address set, rebuilt with amendment11_controls.matched_draw"
+    },
+    "bootstrap": "1000 resamples of source addresses with replacement, numpy Generator(PCG64(42)), the same resampled rows for (a) and every (a'); each scored against its own label; AUC ties averaged; difference AUC_a - AUC_a' recomputed per resample; 2.5/97.5 percentiles",
+    "label_rebuild_checks": {
+      "draw_11_induced_rows": {
+        "rebuilt": {
+          "dev_train": 367056,
+          "val_a": 108929,
+          "val_b": 98396
+        },
+        "stored": {
+          "dev_train": 367056,
+          "val_a": 108929,
+          "val_b": 98396
+        },
+        "stored_path": "amendment11_6_controls.json C2/draw_11/induced_rows",
+        "equal": true
+      },
+      "draw_12_induced_rows": {
+        "rebuilt": {
+          "dev_train": 363669,
+          "val_a": 108137,
+          "val_b": 96399
+        },
+        "stored": {
+          "dev_train": 363669,
+          "val_a": 108137,
+          "val_b": 96399
+        },
+        "stored_path": "amendment11_6_controls.json C2/draw_12/induced_rows",
+        "equal": true
+      },
+      "draw_13_induced_rows": {
+        "rebuilt": {
+          "dev_train": 374281,
+          "val_a": 105997,
+          "val_b": 97212
+        },
+        "stored": {
+          "dev_train": 374281,
+          "val_a": 105997,
+          "val_b": 97212
+        },
+        "stored_path": "amendment11_6_controls.json C2/draw_13/induced_rows",
+        "equal": true
+      }
+    },
+    "splits": {
+      "val_a": {
+        "events": 1183517,
+        "clusters": 348248,
+        "model_seed": 42,
+        "auc_a": {
+          "value": 0.762999627767321,
+          "source": "amendment11_6_controls.json real/halves/val_a/roc_auc_stored/a (= phase4b_diag.json variants/a/val_a/roc_auc)",
+          "recomputed_from_per_event_scores": 0.762999627767321,
+          "recomputed_equals_stored": true,
+          "interval": {
+            "low": 0.7496505177620156,
+            "high": 0.7749759675042339,
+            "valid_resamples": 1000
+          },
+          "interval_equals_stored_11_6": true,
+          "stored_interval_path": "amendment11_6_controls.json real/halves/val_a/interval/roc_auc_a"
+        },
+        "draw_11": {
+          "auc_a_prime": {
+            "value": 0.7292500101682221,
+            "source": "amendment11_6_controls.json draws/draw_11/val_a/per_model_seed/seed_42/a_prime/roc_auc",
+            "recomputed_from_per_event_scores": 0.7292500101682221,
+            "recomputed_equals_stored": true,
+            "interval": {
+              "low": 0.7170396291417527,
+              "high": 0.7413217503486502,
+              "valid_resamples": 1000
+            },
+            "interval_equals_stored_11_6": true
+          },
+          "difference_a_minus_a_prime": 0.03374961759909889,
+          "difference_interval": {
+            "low": 0.025319638453121285,
+            "high": 0.04243628443608322,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        },
+        "draw_12": {
+          "auc_a_prime": {
+            "value": 0.7248520477590753,
+            "source": "amendment11_6_controls.json draws/draw_12/val_a/per_model_seed/seed_42/a_prime/roc_auc",
+            "recomputed_from_per_event_scores": 0.7248520477590753,
+            "recomputed_equals_stored": true,
+            "interval": {
+              "low": 0.7115281454765894,
+              "high": 0.7379840186406766,
+              "valid_resamples": 1000
+            },
+            "interval_equals_stored_11_6": true
+          },
+          "difference_a_minus_a_prime": 0.038147580008245696,
+          "difference_interval": {
+            "low": 0.02936357430007542,
+            "high": 0.0466984387075994,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        },
+        "draw_13": {
+          "auc_a_prime": {
+            "value": 0.7231221273804145,
+            "source": "amendment11_6_controls.json draws/draw_13/val_a/per_model_seed/seed_42/a_prime/roc_auc",
+            "recomputed_from_per_event_scores": 0.7231221273804145,
+            "recomputed_equals_stored": true,
+            "interval": {
+              "low": 0.7102757112734116,
+              "high": 0.7353493378927609,
+              "valid_resamples": 1000
+            },
+            "interval_equals_stored_11_6": true
+          },
+          "difference_a_minus_a_prime": 0.03987750038690652,
+          "difference_interval": {
+            "low": 0.03305694475589224,
+            "high": 0.04608344661930493,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        }
+      },
+      "val_b": {
+        "events": 1153710,
+        "clusters": 345496,
+        "model_seed": 42,
+        "auc_a": {
+          "value": 0.750421331271785,
+          "source": "amendment11_6_controls.json real/halves/val_b/roc_auc_stored/a (= phase4b_diag.json variants/a/val_b/roc_auc)",
+          "recomputed_from_per_event_scores": 0.750421331271785,
+          "recomputed_equals_stored": true,
+          "interval": {
+            "low": 0.7358306653518014,
+            "high": 0.7633052724122404,
+            "valid_resamples": 1000
+          },
+          "interval_equals_stored_11_6": true,
+          "stored_interval_path": "amendment11_6_controls.json real/halves/val_b/interval/roc_auc_a"
+        },
+        "draw_11": {
+          "auc_a_prime": {
+            "value": 0.7032710813798777,
+            "source": "amendment11_6_controls.json draws/draw_11/val_b/per_model_seed/seed_42/a_prime/roc_auc",
+            "recomputed_from_per_event_scores": 0.7032710813798777,
+            "recomputed_equals_stored": true,
+            "interval": {
+              "low": 0.6900911479938056,
+              "high": 0.7159968070109818,
+              "valid_resamples": 1000
+            },
+            "interval_equals_stored_11_6": true
+          },
+          "difference_a_minus_a_prime": 0.0471502498919073,
+          "difference_interval": {
+            "low": 0.03607211498568382,
+            "high": 0.05761727468620961,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        },
+        "draw_12": {
+          "auc_a_prime": {
+            "value": 0.6998297292742648,
+            "source": "amendment11_6_controls.json draws/draw_12/val_b/per_model_seed/seed_42/a_prime/roc_auc",
+            "recomputed_from_per_event_scores": 0.6998297292742648,
+            "recomputed_equals_stored": true,
+            "interval": {
+              "low": 0.68489553972883,
+              "high": 0.7122569857782213,
+              "valid_resamples": 1000
+            },
+            "interval_equals_stored_11_6": true
+          },
+          "difference_a_minus_a_prime": 0.05059160199752022,
+          "difference_interval": {
+            "low": 0.041008198209100497,
+            "high": 0.060335721582056974,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        },
+        "draw_13": {
+          "auc_a_prime": {
+            "value": 0.700777514569204,
+            "source": "amendment11_6_controls.json draws/draw_13/val_b/per_model_seed/seed_42/a_prime/roc_auc",
+            "recomputed_from_per_event_scores": 0.700777514569204,
+            "recomputed_equals_stored": true,
+            "interval": {
+              "low": 0.6872464151031308,
+              "high": 0.7143091070097287,
+              "valid_resamples": 1000
+            },
+            "interval_equals_stored_11_6": true
+          },
+          "difference_a_minus_a_prime": 0.049643816702581,
+          "difference_interval": {
+            "low": 0.040018808232813716,
+            "high": 0.059618799832901345,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        }
+      }
+    },
+    "timings_seconds": {
+      "load dev stream (datasets.load('dev'))": 6.2,
+      "val_a: paired cluster bootstrap (348,248 addresses, 1000 resamples, 4 scorers)": 160.6,
+      "val_b: paired cluster bootstrap (345,496 addresses, 1000 resamples, 4 scorers)": 150.1,
+      "total": 326.4
+    }
+  },
+  "J": {
+    "rule": "copied from stored JSONs; no refit, no rescoring. RBA May rows are L = (AUC_a - AUC_c) / (AUC_a - 0.5) applied to stored AUCs, because no JSON stores May L",
+    "flag_11_7_1": "AUC_c < 0.5, or L > 1, or an interval bound on L > 1",
+    "domain_condition_11_2": "lower bound of the 95% interval on AUC_a (AUC_a' for the controls) > 0.55; 'valid_share' is true only where it is satisfied",
+    "rows": [
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": 42,
+        "L": 0.9850456188746078,
+        "L_interval": {
+          "low": 0.9359823493364369,
+          "high": 1.032443692081726
+        },
+        "auc_a": 0.762999627767321,
+        "auc_c": 0.5039329966694688,
+        "flag_11_7_1": [
+          "interval upper bound > 1"
+        ],
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "real/halves/val_a/L (interval: real/halves/val_a/interval/L; domain: real/halves/val_a/interval/domain_condition_ci_low_a_gt_0.55)",
+        "note": null
+      },
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": 42,
+        "L": 0.975813500712719,
+        "L_interval": {
+          "low": 0.9256319143826766,
+          "high": 1.0272112243266462
+        },
+        "auc_a": 0.750421331271785,
+        "auc_c": 0.506056815350325,
+        "flag_11_7_1": [
+          "interval upper bound > 1"
+        ],
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "real/halves/val_b/L (interval: real/halves/val_b/interval/L; domain: real/halves/val_b/interval/domain_condition_ci_low_a_gt_0.55)",
+        "note": null
+      },
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "May (all)",
+        "model_seed": 42,
+        "L": 0.9169410026646949,
+        "L_interval": null,
+        "auc_a": 0.7487062306072065,
+        "auc_c": 0.5206572901452777,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval: no stored May per-event scores)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": true,
+        "source_file": "results/phase6_s1.json",
+        "json_path": "variants/a/seed_42/all/roc_auc and variants/c/seed_42/all/roc_auc",
+        "note": null
+      },
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "May (all)",
+        "model_seed": 43,
+        "L": 0.9242510085506536,
+        "L_interval": null,
+        "auc_a": 0.741738379898951,
+        "auc_c": 0.5183114384719445,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval: no stored May per-event scores)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": true,
+        "source_file": "results/phase6_s1.json",
+        "json_path": "variants/a/seed_43/all/roc_auc and variants/c/seed_43/all/roc_auc",
+        "note": null
+      },
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "May (all)",
+        "model_seed": 44,
+        "L": 0.9200741734370332,
+        "L_interval": null,
+        "auc_a": 0.7477192716830735,
+        "auc_c": 0.5197991675448458,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval: no stored May per-event scores)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": true,
+        "source_file": "results/phase6_s1.json",
+        "json_path": "variants/a/seed_44/all/roc_auc and variants/c/seed_44/all/roc_auc",
+        "note": null
+      },
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "May (all)",
+        "model_seed": "mean of per-seed L",
+        "L": 0.920422061550794,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": true,
+        "source_file": "results/phase6_s1.json",
+        "json_path": "variants/{a,c}/seed_{42,43,44}/all/roc_auc",
+        "note": null
+      },
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "May (all)",
+        "model_seed": "L of seed-mean AUCs",
+        "L": 0.920386383593064,
+        "L_interval": null,
+        "auc_a": 0.7460546273964104,
+        "auc_c": 0.5195892987206894,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": true,
+        "source_file": "results/phase6_s1.json",
+        "json_path": "variants/a/over_seeds/all/roc_auc/mean and variants/c/over_seeds/all/roc_auc/mean",
+        "note": null
+      },
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "May (new_attackers)",
+        "model_seed": 42,
+        "L": -0.09394098646811898,
+        "L_interval": null,
+        "auc_a": 0.5744527288117948,
+        "auc_c": 0.5814468916016181,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval: no stored May per-event scores)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": true,
+        "source_file": "results/phase6_s1.json",
+        "json_path": "variants/a/seed_42/new_attackers/roc_auc and variants/c/seed_42/new_attackers/roc_auc",
+        "note": null
+      },
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "May (new_attackers)",
+        "model_seed": 43,
+        "L": -0.16072593865473445,
+        "L_interval": null,
+        "auc_a": 0.5695220780951218,
+        "auc_c": 0.580696079354188,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval: no stored May per-event scores)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": true,
+        "source_file": "results/phase6_s1.json",
+        "json_path": "variants/a/seed_43/new_attackers/roc_auc and variants/c/seed_43/new_attackers/roc_auc",
+        "note": null
+      },
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "May (new_attackers)",
+        "model_seed": 44,
+        "L": -0.07942305778577823,
+        "L_interval": null,
+        "auc_a": 0.5731617374452457,
+        "auc_c": 0.5789724663460674,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval: no stored May per-event scores)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": true,
+        "source_file": "results/phase6_s1.json",
+        "json_path": "variants/a/seed_44/new_attackers/roc_auc and variants/c/seed_44/new_attackers/roc_auc",
+        "note": null
+      },
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "May (new_attackers)",
+        "model_seed": "mean of per-seed L",
+        "L": -0.11136332763621055,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": true,
+        "source_file": "results/phase6_s1.json",
+        "json_path": "variants/{a,c}/seed_{42,43,44}/new_attackers/roc_auc",
+        "note": null
+      },
+      {
+        "label": "real attack label",
+        "dataset": "RBA",
+        "split": "May (new_attackers)",
+        "model_seed": "L of seed-mean AUCs",
+        "L": -0.1104323227637876,
+        "L_interval": null,
+        "auc_a": 0.5723788481173874,
+        "auc_c": 0.5803718124339579,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": true,
+        "source_file": "results/phase6_s1.json",
+        "json_path": "variants/a/over_seeds/new_attackers/roc_auc/mean and variants/c/over_seeds/new_attackers/roc_auc/mean",
+        "note": null
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "42 (draw_1)",
+        "L": 1.2962087500264936,
+        "L_interval": null,
+        "auc_a": 0.5874744418789176,
+        "auc_c": 0.47408930491178064,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_1/val_a/per_model_seed/seed_42/L (domain: control/draws/draw_1/val_a/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "43 (draw_1)",
+        "L": 1.3043578863901304,
+        "L_interval": null,
+        "auc_a": 0.5874451973420401,
+        "auc_c": 0.4733853645620088,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_1/val_a/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "44 (draw_1)",
+        "L": 1.2606302698328287,
+        "L_interval": null,
+        "auc_a": 0.5979441006631171,
+        "auc_c": 0.47447280261563807,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_1/val_a/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "mean over seeds (draw_1)",
+        "L": 1.2870656354164842,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_1/val_a/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "42 (draw_1)",
+        "L": 1.458019649386749,
+        "L_interval": null,
+        "auc_a": 0.564026723504027,
+        "auc_c": 0.4706745025493032,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not satisfied",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_1/val_b/per_model_seed/seed_42/L (domain: control/draws/draw_1/val_b/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "43 (draw_1)",
+        "L": 1.480000252488919,
+        "L_interval": null,
+        "auc_a": 0.5635628249991388,
+        "auc_c": 0.4694898279515044,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_1/val_b/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "44 (draw_1)",
+        "L": 1.397571572661307,
+        "L_interval": null,
+        "auc_a": 0.5733614109726343,
+        "auc_c": 0.47083358846695733,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_1/val_b/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "mean over seeds (draw_1)",
+        "L": 1.4451971581789917,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_1/val_b/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "42 (draw_2)",
+        "L": 0.9023681619444642,
+        "L_interval": null,
+        "auc_a": 0.6078185018929992,
+        "auc_c": 0.5105265185162078,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_2/val_a/per_model_seed/seed_42/L (domain: control/draws/draw_2/val_a/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "43 (draw_2)",
+        "L": 0.9228227317401753,
+        "L_interval": null,
+        "auc_a": 0.6122692900492099,
+        "auc_c": 0.5086646371154679,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_2/val_a/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "44 (draw_2)",
+        "L": 0.910625887939627,
+        "L_interval": null,
+        "auc_a": 0.6125511944372168,
+        "auc_c": 0.5100591630641607,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_2/val_a/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "mean over seeds (draw_2)",
+        "L": 0.9119389272080888,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_2/val_a/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "42 (draw_2)",
+        "L": 0.9078699344832453,
+        "L_interval": null,
+        "auc_a": 0.5852971678567181,
+        "auc_c": 0.5078584336630331,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_2/val_b/per_model_seed/seed_42/L (domain: control/draws/draw_2/val_b/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "43 (draw_2)",
+        "L": 0.9425931886822608,
+        "L_interval": null,
+        "auc_a": 0.5897217773281311,
+        "auc_c": 0.5051506411421682,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_2/val_b/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "44 (draw_2)",
+        "L": 0.9179116217928338,
+        "L_interval": null,
+        "auc_a": 0.5897449093068836,
+        "auc_c": 0.5073670140573513,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_2/val_b/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "mean over seeds (draw_2)",
+        "L": 0.92279158165278,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_2/val_b/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "42 (draw_3)",
+        "L": 1.2872560280147447,
+        "L_interval": null,
+        "auc_a": 0.5961977213132982,
+        "auc_c": 0.4723666246714726,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_3/val_a/per_model_seed/seed_42/L (domain: control/draws/draw_3/val_a/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "43 (draw_3)",
+        "L": 1.297078784841013,
+        "L_interval": null,
+        "auc_a": 0.5949357080567296,
+        "auc_c": 0.4717966152124856,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_3/val_a/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "44 (draw_3)",
+        "L": 1.2714952760872544,
+        "L_interval": null,
+        "auc_a": 0.60165939262106,
+        "auc_c": 0.4723999551334827,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_3/val_a/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "mean over seeds (draw_3)",
+        "L": 1.2852766963143374,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_3/val_a/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "42 (draw_3)",
+        "L": 1.4040103413364822,
+        "L_interval": null,
+        "auc_a": 0.5716816951154383,
+        "auc_c": 0.4710398538888341,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_3/val_b/per_model_seed/seed_42/L (domain: control/draws/draw_3/val_b/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "43 (draw_3)",
+        "L": 1.4323987642712728,
+        "L_interval": null,
+        "auc_a": 0.5702816476048862,
+        "auc_c": 0.46961030242469814,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_3/val_b/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "44 (draw_3)",
+        "L": 1.3840471739533953,
+        "L_interval": null,
+        "auc_a": 0.5767721961991177,
+        "auc_c": 0.47051585501153326,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_3/val_b/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "mean over seeds (draw_3)",
+        "L": 1.406818759853717,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/draws/draw_3/val_b/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "mean over draws and seeds",
+        "L": 1.16142708631297,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/over_draws/val_a/L_mean_over_draws",
+        "note": null
+      },
+      {
+        "label": "11.4 count-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "mean over draws and seeds",
+        "L": 1.2582691665618295,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_controls.json",
+        "json_path": "control/over_draws/val_b/L_mean_over_draws",
+        "note": null
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "42 (draw_11)",
+        "L": 0.9635277296009894,
+        "L_interval": null,
+        "auc_a": 0.7292500101682221,
+        "auc_c": 0.5083612683598313,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_11/val_a/per_model_seed/seed_42/L (domain: draws/draw_11/val_a/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "43 (draw_11)",
+        "L": 0.9812581212839637,
+        "L_interval": null,
+        "auc_a": 0.7214164625400363,
+        "auc_c": 0.5041497604866592,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_11/val_a/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "44 (draw_11)",
+        "L": 0.9672735822569023,
+        "L_interval": null,
+        "auc_a": 0.7213142624843094,
+        "auc_c": 0.5072428230065671,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_11/val_a/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "mean over seeds (draw_11)",
+        "L": 0.9706864777139518,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_11/val_a/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "42 (draw_11)",
+        "L": 0.9444069835053107,
+        "L_interval": null,
+        "auc_a": 0.7032710813798777,
+        "auc_c": 0.5113004525800449,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_11/val_b/per_model_seed/seed_42/L (domain: draws/draw_11/val_b/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "43 (draw_11)",
+        "L": 0.9607871308935699,
+        "L_interval": null,
+        "auc_a": 0.6954245007397241,
+        "auc_c": 0.5076631553676962,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_11/val_b/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "44 (draw_11)",
+        "L": 0.9472783565970532,
+        "L_interval": null,
+        "auc_a": 0.6955795802781675,
+        "auc_c": 0.5103112768883236,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_11/val_b/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "mean over seeds (draw_11)",
+        "L": 0.9508241569986446,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_11/val_b/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "42 (draw_12)",
+        "L": 1.13572823998943,
+        "L_interval": null,
+        "auc_a": 0.7248520477590753,
+        "auc_c": 0.4694812272996415,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_12/val_a/per_model_seed/seed_42/L (domain: draws/draw_12/val_a/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "43 (draw_12)",
+        "L": 1.1648921923423856,
+        "L_interval": null,
+        "auc_a": 0.7133910242732753,
+        "auc_c": 0.4648134861813924,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_12/val_a/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "44 (draw_12)",
+        "L": 1.1463729718232671,
+        "L_interval": null,
+        "auc_a": 0.718453410691482,
+        "auc_c": 0.4680243250721591,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_12/val_a/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "mean over seeds (draw_12)",
+        "L": 1.1489978013850275,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_12/val_a/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "42 (draw_12)",
+        "L": 1.1238889660164142,
+        "L_interval": null,
+        "auc_a": 0.6998297292742648,
+        "auc_c": 0.47524330146087135,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_12/val_b/per_model_seed/seed_42/L (domain: draws/draw_12/val_b/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "43 (draw_12)",
+        "L": 1.1535024245980936,
+        "L_interval": null,
+        "auc_a": 0.6895940033374384,
+        "auc_c": 0.4708968607984442,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_12/val_b/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "44 (draw_12)",
+        "L": 1.1326032012910319,
+        "L_interval": null,
+        "auc_a": 0.6940602378970069,
+        "auc_c": 0.4742669912115577,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_12/val_b/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "mean over seeds (draw_12)",
+        "L": 1.136664863968513,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_12/val_b/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "42 (draw_13)",
+        "L": 1.175271220993033,
+        "L_interval": null,
+        "auc_a": 0.7231221273804145,
+        "auc_c": 0.46089311230347174,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_13/val_a/per_model_seed/seed_42/L (domain: draws/draw_13/val_a/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "43 (draw_13)",
+        "L": 1.1893504179341488,
+        "L_interval": null,
+        "auc_a": 0.7302805185780655,
+        "auc_c": 0.45639628756515077,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_13/val_a/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "44 (draw_13)",
+        "L": 1.1730436275488956,
+        "L_interval": null,
+        "auc_a": 0.7314362459108676,
+        "auc_c": 0.4599514324612852,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_13/val_a/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "mean over seeds (draw_13)",
+        "L": 1.1792217554920257,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_13/val_a/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "42 (draw_13)",
+        "L": 1.1346184969083095,
+        "L_interval": null,
+        "auc_a": 0.700777514569204,
+        "auc_c": 0.47297163277570753,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_13/val_b/per_model_seed/seed_42/L (domain: draws/draw_13/val_b/interval_seed_42/a_prime_roc_auc/low)",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "43 (draw_13)",
+        "L": 1.150312505672614,
+        "L_interval": null,
+        "auc_a": 0.7074718021788462,
+        "auc_c": 0.46881439355808474,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_13/val_b/per_model_seed/seed_43/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "44 (draw_13)",
+        "L": 1.1325612154664795,
+        "L_interval": null,
+        "auc_a": 0.7083813829650348,
+        "auc_c": 0.47237671059356906,
+        "flag_11_7_1": [
+          "AUC_c < 0.5",
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (interval computed at model seed 42 only)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_13/val_b/per_model_seed/seed_44/L",
+        "note": "no interval on L was declared for this control"
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "mean over seeds (draw_13)",
+        "L": 1.1391640726824674,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "draws/draw_13/val_b/L_mean_over_model_seeds",
+        "note": null
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_a",
+        "model_seed": "mean over draws and seeds",
+        "L": 1.0996353448636684,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "over_draws/val_a/L_mean_over_draws",
+        "note": null
+      },
+      {
+        "label": "11.6 distribution-matched random persistent address label",
+        "dataset": "RBA",
+        "split": "val_b",
+        "model_seed": "mean over draws and seeds",
+        "L": 1.0755510312165415,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": [
+          "L > 1"
+        ],
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/amendment11_6_controls.json",
+        "json_path": "over_draws/val_b/L_mean_over_draws",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_8_11",
+        "model_seed": 42,
+        "L": -0.10555849278790352,
+        "L_interval": {
+          "low": -0.4741668999948444,
+          "high": 0.7712688141994961
+        },
+        "auc_a": 0.6927508434213223,
+        "auc_c": 0.7130973319364743,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_8_11/per_seed/seed_42/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_8_11",
+        "model_seed": 43,
+        "L": -0.1131463428954832,
+        "L_interval": {
+          "low": -0.4750747453381666,
+          "high": 0.7634767125566603
+        },
+        "auc_a": 0.6923817460712388,
+        "auc_c": 0.714149037079047,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_8_11/per_seed/seed_43/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_8_11",
+        "model_seed": 44,
+        "L": -0.189817748320177,
+        "L_interval": {
+          "low": -0.5770989431098822,
+          "high": 0.7155193463037424
+        },
+        "auc_a": 0.6812453418662664,
+        "auc_c": 0.7156489245528418,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_8_11/per_seed/seed_44/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_8_11",
+        "model_seed": "L_mean_over_seeds",
+        "L": -0.13617419466785458,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_8_11/L_mean_over_seeds",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_8_11",
+        "model_seed": "L_of_seed_mean_aucs_secondary",
+        "L": -0.13509947682099613,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_8_11/L_of_seed_mean_aucs_secondary",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_12_13",
+        "model_seed": 42,
+        "L": 0.07738531621955692,
+        "L_interval": {
+          "low": -0.3057087118976807,
+          "high": 0.6854235964674588
+        },
+        "auc_a": 0.725214742730798,
+        "auc_c": 0.707786428647269,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_12_13/per_seed/seed_42/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_12_13",
+        "model_seed": 43,
+        "L": 0.0650501690080084,
+        "L_interval": {
+          "low": -0.3077157251225034,
+          "high": 0.6560226412097464
+        },
+        "auc_a": 0.724765364174637,
+        "auc_c": 0.7101443392479303,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_12_13/per_seed/seed_43/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_12_13",
+        "model_seed": 44,
+        "L": 0.007919480751991075,
+        "L_interval": {
+          "low": -0.42407384359369976,
+          "high": 0.6430956860029995
+        },
+        "auc_a": 0.7112285939764827,
+        "auc_c": 0.7095557731922159,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_12_13/per_seed/seed_44/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_12_13",
+        "model_seed": "L_mean_over_seeds",
+        "L": 0.05011832199318547,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_12_13/L_mean_over_seeds",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_12_13",
+        "model_seed": "L_of_seed_mean_aucs_secondary",
+        "L": 0.051000780463905215,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_12_13/L_of_seed_mean_aucs_secondary",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_8_13",
+        "model_seed": 42,
+        "L": -0.020499643143061675,
+        "L_interval": {
+          "low": -0.3796878674665268,
+          "high": 0.7345349686614857
+        },
+        "auc_a": 0.7069861491295095,
+        "auc_c": 0.711229291322221,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_8_13/per_seed/seed_42/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_8_13",
+        "model_seed": 43,
+        "L": -0.029950886923501955,
+        "L_interval": {
+          "low": -0.3920524850499637,
+          "high": 0.7248173557538563
+        },
+        "auc_a": 0.7066001581042006,
+        "auc_c": 0.7127880160779572,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_8_13/per_seed/seed_43/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_8_13",
+        "model_seed": 44,
+        "L": -0.09733808910015163,
+        "L_interval": {
+          "low": -0.5033902051250276,
+          "high": 0.6854359521564759
+        },
+        "auc_a": 0.6945341901794758,
+        "auc_c": 0.7134697765161915,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_8_13/per_seed/seed_44/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_8_13",
+        "model_seed": "L_mean_over_seeds",
+        "L": -0.049262873055571754,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_8_13/L_mean_over_seeds",
+        "note": null
+      },
+      {
+        "label": "LA6.1 induced persistent source-user label (86 red-team users)",
+        "dataset": "LANL",
+        "split": "days_8_13",
+        "model_seed": "L_of_seed_mean_aucs_secondary",
+        "L": -0.04829073617499084,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "F/days_8_13/L_of_seed_mean_aucs_secondary",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_8_11",
+        "model_seed": 42,
+        "L": 0.00037328429165495213,
+        "L_interval": {
+          "low": -0.0026093285021603807,
+          "high": 0.0030537573112912175
+        },
+        "auc_a": 0.9799196846016038,
+        "auc_c": 0.9797405381220861,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_8_11/per_seed/seed_42/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_8_11",
+        "model_seed": 43,
+        "L": 0.004140245177475023,
+        "L_interval": {
+          "low": 0.001712803383447431,
+          "high": 0.00733244724253113
+        },
+        "auc_a": 0.9729408844090909,
+        "auc_c": 0.9709827931931854,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_8_11/per_seed/seed_43/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_8_11",
+        "model_seed": 44,
+        "L": -0.0007224927773274426,
+        "L_interval": {
+          "low": -0.0037486809854104107,
+          "high": 0.002449546813112324
+        },
+        "auc_a": 0.9746573486250133,
+        "auc_c": 0.9750002851311003,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_8_11/per_seed/seed_44/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_8_11",
+        "model_seed": "L_mean_over_seeds",
+        "L": 0.0012636788972675108,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_8_11/L_mean_over_seeds",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_8_11",
+        "model_seed": "L_of_seed_mean_aucs_secondary",
+        "L": 0.00125693777091653,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_8_11/L_of_seed_mean_aucs_secondary",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_12_13",
+        "model_seed": 42,
+        "L": -0.002167483635620607,
+        "L_interval": {
+          "low": -0.007929467554970412,
+          "high": 0.0008139473571752499
+        },
+        "auc_a": 0.9797563295481738,
+        "auc_c": 0.9807961935415549,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_12_13/per_seed/seed_42/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_12_13",
+        "model_seed": 43,
+        "L": 0.0009836099181308791,
+        "L_interval": {
+          "low": -0.001099346756450291,
+          "high": 0.0033500099939728005
+        },
+        "auc_a": 0.9761791222129845,
+        "auc_c": 0.975710747705569,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_12_13/per_seed/seed_43/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_12_13",
+        "model_seed": 44,
+        "L": 0.00018877195711851304,
+        "L_interval": {
+          "low": -0.001556376917770082,
+          "high": 0.0018260177704089897
+        },
+        "auc_a": 0.9771265387160067,
+        "auc_c": 0.9770364706055001,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_12_13/per_seed/seed_44/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_12_13",
+        "model_seed": "L_mean_over_seeds",
+        "L": -0.00033170058679040493,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_12_13/L_mean_over_seeds",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_12_13",
+        "model_seed": "L_of_seed_mean_aucs_secondary",
+        "L": -0.0003359389744883592,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_12_13/L_of_seed_mean_aucs_secondary",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_8_13",
+        "model_seed": 42,
+        "L": 7.743998606618128e-05,
+        "L_interval": {
+          "low": -0.0027509274978141287,
+          "high": 0.002671176039960858
+        },
+        "auc_a": 0.9793481627433229,
+        "auc_c": 0.9793110420282792,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_8_13/per_seed/seed_42/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_8_13",
+        "model_seed": 43,
+        "L": 0.0031479644125657104,
+        "L_interval": {
+          "low": 0.0012221402312955715,
+          "high": 0.005690816297243302
+        },
+        "auc_a": 0.9734092938020041,
+        "auc_c": 0.9719190181925376,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_8_13/per_seed/seed_43/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_8_13",
+        "model_seed": 44,
+        "L": -0.0003558004183614646,
+        "L_interval": {
+          "low": -0.002109860049895978,
+          "high": 0.0010395980626263675
+        },
+        "auc_a": 0.97474262416817,
+        "auc_c": 0.9749115377924631,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "satisfied",
+        "valid_share": true,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_8_13/per_seed/seed_44/L (interval: .../L_ci95)",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_8_13",
+        "model_seed": "L_mean_over_seeds",
+        "L": 0.0009565346600901424,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_8_13/L_mean_over_seeds",
+        "note": null
+      },
+      {
+        "label": "LA6.2 true red-team label (negative control)",
+        "dataset": "LANL",
+        "split": "days_8_13",
+        "model_seed": "L_of_seed_mean_aucs_secondary",
+        "L": 0.0009516515750652478,
+        "L_interval": null,
+        "auc_a": null,
+        "auc_c": null,
+        "flag_11_7_1": null,
+        "domain_condition_11_2": "not evaluable (no interval on the aggregate)",
+        "valid_share": false,
+        "derived_from_stored_aucs_not_a_stored_L": false,
+        "source_file": "results/lanl_la6_controls.json",
+        "json_path": "G/days_8_13/L_of_seed_mean_aucs_secondary",
+        "note": null
+      },
+      {
+        "label": "LA7 (induced source-user label, source-user map added)",
+        "dataset": "LANL",
+        "L": "MISSING",
+        "note": "Task I not run: see AMENDMENT11_7_LA7_REPORT.md, Task I"
+      }
+    ]
+  }
+}
