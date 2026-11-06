@@ -87,10 +87,13 @@ this order is my choice.
 | 12 | **none** | 22,095 | 0.08967619866758957 | 363,669 | **0** | yes |
 | 13 | **none** | 22,095 | 0.09229298431679381 | 374,281 | **0** | yes |
 
-The fallback was never used. Every bin's pool held at least the number of
-addresses required. The tightest was 101–500, which needed 855 of its 2,296
-(37%). The
-addresses in each bin match the real set exactly in all three draws. Sources:
+No shortfall occurred in any bin of any draw (`C2/draw_d/shortfalls` is
+empty for all three), so the declared fallback was never used and no address
+was moved between bins. In every bin the non-attack pool held more addresses
+than the real set required. The highest required share was in bin 101–500,
+which needed 855 of its 2,296 addresses (0.3724). Bin 51–100 needed 394 of
+1,286 (0.3064). Every other bin needed less than 0.12 of its pool. Each
+draw's addresses per bin equal the real set's exactly. Sources:
 `C2/draw_d/{shortfalls,achieved_addresses,achieved_row_share,intersection_with_real_attack_set}`.
 
 Rows per address, induced set against the real set (`C2/draw_d/induced_distribution/rows_per_address`):
@@ -354,9 +357,11 @@ stored again under `E` with each source path.
 
 ---
 
-## Code note
+## Disclosed deviation: Task D code fix
 
-The `real` stage had been committed in `96e8b50` but never run. On its first
+This is a code change made after the stage was committed and before its
+first successful run. The `real` stage had been committed in `96e8b50` but
+never run. On its first
 run it failed before computing anything, with
 `AttributeError: module 'eval.phase3_rules' has no attribute 'load_json'`.
 I changed it to `P3B.load_json`, the loader `amendment10_lookup.py` uses, and
