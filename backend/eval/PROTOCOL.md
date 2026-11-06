@@ -940,3 +940,174 @@ changed, why, and what had already been seen.
     S1 construction (a) on the same halves. No May data is read.
 
 LANL (second dataset): see eval/PROTOCOL_LANL.md (amendment LA1).
+
+## Amendment 11. Entity-label leakage diagnostic
+
+**Status: post hoc, disclosed.** Written on 6 November 2026, after every
+result in the manuscript existed. It introduces no selection, changes no
+reported number, and is not used to choose any detector, setting, score or
+tier rate. It requires no new read of any locked period: it operates on
+stored outputs and on development rows only.
+
+**Purpose.** To state, as a procedure others can apply, the method by which
+the leakage reported in the manuscript was located and measured.
+
+**Scope condition.** The procedure applies where the evaluation label
+attaches to a persistent entity rather than to an individual event. Leakage
+through label-filtered fitting of pre-model artefacts is expected to be
+severe when all three of the following hold: the label attaches to a
+persistent entity; that entity recurs across the fitting and scoring
+boundary; and the labelled entity's rows are almost entirely labelled.
+
+### 11.1 Procedure
+
+**Step 1. Entity-lookup reference.** For the entity the label marks, score
+an entity 1 if it appears in any positively-labelled row of the warm-up
+period and 0 otherwise. Report ROC-AUC and PR-AUC on each scored period,
+with the precision and recall of the score-1 set. This reference reads
+warm-up labels. It is neither a deployable detector nor a comparison
+baseline, and it is reported as a measurement of what the label rewards.
+Already computed for the first dataset under amendment 10.
+
+**Step 2. Fitted-artefact audit.** Enumerate every artefact fitted before
+the model: frequency and count maps, known-value sets, vocabularies,
+encoders, scalers and thresholds. For each, record the row set it was fitted
+on and whether that row set was selected using the label. Report the number
+of code sites affected. Checking that no label column is passed as a feature
+does not discharge this step, and in the case reported here it did not.
+
+**Step 3. Three-construction rebuild.** Rebuild the detector in three
+constructions, all fitted on warm-up rows only and scored on each later
+period, over at least three model seeds where the model is stochastic:
+
+- (a) the original construction, as deployed;
+- (b) pre-model artefacts fitted on all rows, model fitted on
+  label-selected rows;
+- (c) fully label-free, artefacts and model both fitted on all rows.
+
+Report for each construction which features are constant on every fitted
+row, since a feature constant at fit time cannot carry the leakage however
+much it appears to.
+
+**Step 4. Label-attributable share.** Defined in 11.2.
+
+### 11.2 The statistic
+
+For a construction v, the above-chance ranking share is
+
+    share_v = (AUC_v - 0.5) / (AUC_a - 0.5)
+
+and the label-attributable share of the original construction is
+
+    L = (AUC_a - AUC_c) / (AUC_a - 0.5)
+
+which equals 1 - share_c by algebra.
+
+**Estimator.** L is computed per model seed and reported as the mean of the
+per-seed values. The ratio of the seed-mean AUCs is reported alongside it as
+a secondary figure, and the two are not interchangeable.
+
+**Domain of validity.** L is reported only where the lower bound of the
+interval on AUC_a exceeds 0.55. Below that the denominator is small and the
+statistic is unstable. The new-attacker stratum of the first dataset's
+locked test month is the worked example of that failure and is reported as
+such: there AUC_a lies between 0.5695 and 0.5745, the shares exceed 1 and L
+is negative, because construction (c) ranks that stratum better than
+construction (a). Where the condition fails, the three AUCs are reported
+without the ratio.
+
+**Interval.** 95% percentile bootstrap over 1,000 resamples clustered by the
+labelled entity, using a numpy Generator(PCG64) seeded at 42, recomputing
+both AUCs on each resample from stored per-event scores. If per-event scores
+are not available for all three constructions, the interval is reported as
+missing and the point values are given with the per-seed range; this is
+recorded as a limitation rather than omitted.
+
+### 11.3 Reporting rule
+
+Report the previously-unlabelled stratum separately from the aggregate
+whenever the label marks an entity, because the aggregate is dominated by
+entities the label already carried and every detector scores 1.000 on
+returning entities by construction.
+
+### 11.4 Validation control: random persistent entity label
+
+**Purpose.** To test whether the construction in step 3(a) manufactures
+ranking from a persistent entity label that carries no attack signal at all.
+
+**Scope.** RBA development data only: `dev_train`, `val_a` and `val_b`. The
+induced label is applied to those three splits and to no other period. The
+locked May test month and every month from June 2020 onward are not read
+under this amendment.
+
+**The induced label.**
+
+- Entity: source address.
+- From `dev_train`, let A be the set of distinct addresses carrying at least
+  one attack-labelled row and N the set carrying none. Report the size of
+  each and the share A/(A+N).
+- Draw uniformly at random without replacement a subset S of N with the same
+  cardinality as A. Three independent draws, using a numpy Generator(PCG64)
+  seeded at 1, 2 and 3.
+- Set the induced label to 1 on every row of every address in S, across
+  `dev_train`, `val_a` and `val_b`, and 0 on every other row. Confirm and
+  report that the intersection of S and A is empty.
+- Because S is drawn from addresses carrying no attack-labelled row, the
+  induced label carries no attack signal by construction.
+
+**Constructions.** (a') and (c') exactly as step 3, with the induced label
+substituted for the attack label, fitted on `dev_train` only, with the same
+model settings as the existing S1 construction and model seeds 42, 43 and 44.
+
+**Quantities.** Per draw and per model seed, on `val_a` and `val_b`
+separately, scored against the induced label: ROC-AUC and PR-AUC for (a')
+and (c'), the induced-label event base rate, and L.
+
+**L for this control.** L = (AUC_a' - AUC_c') / (AUC_a' - 0.5), computed per
+draw and model seed, averaged over the three model seeds within each draw,
+and reported per draw. The mean over the three draws is a secondary figure.
+
+**Intervals for this control.** 95% percentile bootstrap, 1,000 resamples,
+clustered by source address, numpy Generator(PCG64) seeded at 42, computed
+for AUC_a' and AUC_c' at model seed 42 for each draw. Three intervals per
+split rather than nine, declared here to bound compute.
+
+**Entity-lookup reference.** Step 1 applied to the induced label: score an
+address 1 if it appears in any induced-label row of `dev_train`. Report
+ROC-AUC, PR-AUC, and the precision and recall of the score-1 set.
+
+**Fit-time absence count.** Report the size of the known-address set built
+from all `dev_train` rows minus the size of the set built from rows whose
+induced label is 0. The real-label value of that same quantity is 22,089,
+recorded in `PHASE4B_REPORT.md` as 947,226 minus 925,137; that derivation is
+to be verified in that file and reported alongside. It is a different
+quantity from `dev_train_attack_ips` = 22,095 in
+`results/amendment10_lookup.json`, which counts addresses with any
+attack-labelled row. The induced-label figure must be computed by the same
+code path as the real-label figure.
+
+**Declared predictions.** Evaluated on `val_a` and `val_b` separately, and
+holding only if they hold for all three draws on both splits:
+
+1. the lower bound of the interval on AUC_a' exceeds 0.60;
+2. the interval on AUC_c' contains 0.50;
+3. L, averaged over the three model seeds within a draw, exceeds 0.85.
+
+Any prediction that fails is reported as a failure, and the scope condition
+in 11.1 is revised or withdrawn rather than restated.
+
+### 11.5 Prior exposure and authorised inputs
+
+Recorded because this amendment is post hoc.
+
+- Before it was written, the real-label ranking shares of 11.2 had been
+  computed from stored outputs in `backend/eval/FEASIBILITY_AUDIT.md` on
+  6 November 2026, including L = 0.9850456188746078 on `val_a` and the
+  per-seed and seed-mean values on the May test month. The `val_b` value for
+  construction (c) had not been read.
+- Nothing had been computed on any induced or random label.
+- `results/phase4b_confirm.json` is authorised as an input for the `val_b`
+  construction (c) ROC-AUC, which lay outside the three inputs used by the
+  feasibility audit.
+- No new read of the locked May test month, or of any month from June 2020
+  onward, is permitted under this amendment.
