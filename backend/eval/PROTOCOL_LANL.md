@@ -199,3 +199,56 @@ If it fails, meaning L is substantially above 0 where the label marks events
 and the labelled rows are a negligible share of the fitting population, then
 L does not measure what amendment 11 claims, and the diagnostic is reported
 as a procedure without a validated summary statistic.
+
+## LA7. Mechanism localisation on the enterprise dataset
+
+**Status: post hoc, disclosed.** Declared on 6 November 2026, after LA6.1
+failed and after its perturbation counts were inspected. Confined to
+development days 0 to 13. **No read of the locked test period, days 14 to
+57.**
+
+**This is not a second positive control and must never be reported as one.**
+LA6.1 tested whether the mechanism reproduces on a second dataset under the
+same construction, and it failed. LA7 tests a different construction, chosen
+after that failure in order to examine a cause visible in LA6.1's measured
+perturbation counts. Wherever LA7 appears in any report or in the manuscript,
+LA6.1's failure appears with it, and LA7 is never described as a retry of
+LA6.1 or as superseding it.
+
+**What is being tested.** Whether the mechanism requires the labelled entity
+to be a key of a fitted artefact that the model relies on.
+
+**Design.** Population, splits, constructions and the induced label are
+exactly as LA6.1: the same 86 red-team source users, labelled persistently
+across every row. One change only: a frequency map keyed on source user is
+added as a model input feature, so that the labelled entity is itself a key
+of a relied-upon artefact. Model seeds 42, 43 and 44. Report the number of
+keys absent from the construction (a) map.
+
+**Consequence of that change, declared here.** Adding a source-user frequency
+map moves the detector away from the stored D1 scorer, so construction (c)
+will no longer be bit-identical to D1. That is expected and is reported, and
+it is the reason LA7 does not test what LA6.1 tested.
+
+**Declared predictions.** On both scoring splits and for all three model
+seeds:
+
+1. L exceeds 0.50;
+2. the lower bound of the interval on AUC_a exceeds the upper bound of the
+   interval on AUC_c, so the two constructions are distinguishable;
+3. the number of keys absent from the construction (a) map equals the number
+   of labelled users present in the fitting rows.
+
+The bar in prediction 1 is deliberately modest, because the induced label
+covers only 86 users and the feature set differs from LA6.1's.
+
+**Declared consequences.** If the predictions hold, the paper reports that
+the mechanism requires the labelled entity to be a key of a relied-upon
+fitted artefact, as a localisation supported by one dataset and one induced
+label, and continues to claim no general rule. If they fail, no mechanism
+localisation is claimed, and the paper reports LA6.1 and LA7 both as
+failures.
+
+**Runtime contingency.** As LA6.3: if a single construction-and-seed fit and
+scoring exceeds 90 minutes of wall clock, reduce to model seed 42 alone and
+disclose the reduction, the measured runtime and the figures affected.
