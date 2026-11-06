@@ -1325,3 +1325,131 @@ estimator will correctly detect.
   destination computer were reported as perturbation counts rather than as
   model inputs, which left construction (c) bit-identical to the stored D1
   detector, as the identity checks confirm.
+
+### 11.9 Corrections to 11.8, withdrawal of LA7, and an artefact-absence measurement
+
+**Status: post hoc, disclosed.** Written on 6 November 2026 after Tasks H, I
+and J of the preceding run.
+
+#### 11.9.1 Correction to 11.8.1
+
+Amendment 11.8.1 states that on the enterprise dataset, removing the rows of
+86 labelled users changed 33 map entries and dropped one destination
+computer. **Those figures are wrong.** They are LA6.2's, from the true-label
+negative control in which 50 matched rows were removed. They are not LA6.1's.
+
+The correct LA6.1 figures, from `results/lanl_la6_controls.json`: the
+source-user frequency map, which is keyed on users and is a model input,
+lacked all 76 labelled users present in the fitting rows
+(`artefacts/F/user/keys_only_in_c` equal to 76). The source-computer and
+destination-computer maps, which are keyed on computers rather than on the
+labelled entity, lost 298 and 280 keys respectively, those being the
+computers appearing only in labelled users' rows; computers shared with
+unlabelled users remained.
+
+The explanation 11.8.1 attached to its figures is therefore **withdrawn**.
+The labelled entity was removed from the artefact keyed on it, and no leakage
+followed.
+
+11.8.1's withdrawal of the scope condition in 11.1 **stands**. Only its
+explanatory sentences are corrected here.
+
+#### 11.9.2 Withdrawal of LA7, unrun
+
+LA7 declared a single change to LA6.1: add a frequency map keyed on source
+user as a model input, so that the labelled entity would itself be a key of a
+relied-upon artefact. That map was already a model input in the D1 scorer and
+in LA6.1, as the feature `user_freq`, and the construction (a) map already
+lacked all 76 labelled users present in the fitting rows. LA7 as written was
+therefore identical to LA6.1, and its declared expectation that construction
+(c) would cease to be bit-identical to the stored D1 detector was false.
+
+**LA7 is withdrawn without being run.** It remains in `PROTOCOL_LANL.md` at
+commit `eb6937b` and is not removed or reverted, because a declaration made
+and then withdrawn is itself part of the evidence this protocol exists to
+preserve. The amendment register records it as declared and withdrawn unrun.
+
+LA7's hypothesis was that the mechanism **requires** the labelled entity to
+be a key of a relied-upon fitted artefact. LA6.1 shows that this condition
+being met was **not sufficient** for leakage. It does not show the condition
+unnecessary, and no claim either way is made.
+
+#### 11.9.3 The cause of the non-reproduction is not established
+
+No explanation is claimed for why the mechanism did not reproduce on the
+enterprise dataset. The result is reported, and its cause is reported as
+unknown.
+
+#### 11.9.4 Artefact-absence measurement, descriptive
+
+**Purpose.** To establish whether the information the mechanism would need is
+present in the fitted artefacts, on both datasets.
+
+**No prediction is declared, and the reason is recorded.** Revision 1 of this
+amendment declared that the indicator's area would exceed 0.90 on the
+authentication source-address artefact and fall below 0.70 on the enterprise
+source-user artefact. That prediction is **withdrawn before commit**, on two
+grounds. First, stored output already indicates the enterprise value: all 86
+labelled users are absent from the construction (a) source-user map, 76
+having been removed and 10 never appearing in the fitting rows, so the
+indicator is 1 on every induced-positive row and its recall against the
+induced label is 1 by construction, while the stored LA6.1 entity-lookup
+reference reached 0.99991 and 0.99997. A prediction made with that in hand
+would restate seen data. Second, revision 1 described the authentication side
+as a consistency check against the amendment 10 lookup, which it is not: the
+lookup flags addresses present in attack-labelled warm-up rows, whereas the
+absence indicator flags addresses absent from the construction (a) artefact,
+which includes every address never seen in the warm-up period at all, benign
+or otherwise. The two are different indicators and the authentication value
+may be well below 0.9646 because of benign address churn.
+
+**Definition.** For each fitted artefact keyed on an entity, define on each
+scored row an absence indicator equal to 1 if that row's key for the artefact
+is absent from the construction (a) artefact, and 0 otherwise. Report, per
+artefact and per scored split: the ROC-AUC and PR-AUC of that single
+indicator against the label; the share of scored rows with the indicator set;
+and the precision and recall of the indicator-set rows.
+
+**Artefacts measured.** Authentication: the source-address frequency map, the
+known-address set, and the country and device-type frequency maps where they
+exist as fitted artefacts of construction (a). Enterprise: the
+source-computer, source-user and destination-computer frequency maps. Where
+two artefacts share the same key their indicators are identical; that is
+reported once, with both artefacts named, rather than as two results.
+
+**Labels.** On the enterprise dataset the indicator is reported against both
+the true event-level red-team label and the LA6.1 induced label, with the
+induced label primary, since it is the label whose mechanism is under
+examination. On the authentication dataset the real attack label is used.
+
+**No model is fitted.** Only frequency maps and known-value sets are
+rebuilt. No scaler is fitted and no forest is trained. The enterprise maps
+were not saved under LA6.1 and are rebuilt deterministically from the per-day
+codes; before any indicator is computed, the rebuilt maps are checked against
+the stored key counts of 298, 76 and 280, and a mismatch stops the task.
+
+**Scope.** Both datasets, development splits only. No new read of either
+locked period.
+
+**What the paper will say.** If the indicator is strongly predictive on both
+datasets while L is high on only one, the paper reports that the availability
+of this information in the artefacts does not predict whether the mechanism
+occurs, which strengthens the case that the full check has to be run. If the
+ordering is the reverse of L's, the paper reports that. In neither case is an
+explanation for the enterprise non-reproduction claimed, and 11.9.3 stands.
+
+#### 11.9.5 Reporting rules arising from the consolidated table
+
+- The May value of L is derived by arithmetic from the stored areas in
+  `results/phase6_s1.json`. It is not stored in any file, carries no
+  interval, and the domain condition of 11.2 cannot be checked for it. Every
+  appearance of it is labelled as derived and interval-free.
+- The flag of 11.7.1 applies to 38 of the 95 rows of the consolidated table.
+  It is therefore a common condition and is explained in the main text
+  wherever L is introduced, not relegated to a caption or footnote.
+- One row fails the domain condition of 11.2: the 11.4 count-matched
+  control, draw 1, `val_b`, model seed 42, with a lower bound on AUC_a' of
+  0.5411. L for that row is not reported as a valid share.
+- Intervals in the controls exist at model seed 42 only, so the domain
+  condition cannot be checked for seeds 43 and 44, and those rows are
+  reported with that limitation stated.
