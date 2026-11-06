@@ -1111,3 +1111,95 @@ Recorded because this amendment is post hoc.
   feasibility audit.
 - No new read of the locked May test month, or of any month from June 2020
   onward, is permitted under this amendment.
+
+### 11.6 Validation control: distribution-matched random label
+
+**Status: post hoc, disclosed.** Written on 6 November 2026, after the 11.4
+control was run and two of its three declared predictions failed. Those
+results are recorded under prior exposure below.
+
+**Purpose.** To determine whether the weakness of the 11.4 control is
+explained by the row mass of the labelled entities rather than by the
+mechanism itself failing. Under 11.4 the induced label matched the real
+attack label on address count, 22,095, but not on the share of rows those
+addresses carry, and most non-attacking addresses carry very few rows.
+Removing a small number of rows perturbs the frequency maps only slightly,
+which is the artefact the control was meant to exercise.
+
+**Scope.** RBA development data only: `dev_train`, `val_a` and `val_b`. The
+induced label is applied to those three splits and to no other period. The
+locked May test month and every month from June 2020 onward are not read
+under this amendment.
+
+**The induced label.**
+
+- Entity: source address.
+- Bin every `dev_train` address by its row count in `dev_train`, using the
+  declared bins 1, 2, 3 to 5, 6 to 10, 11 to 20, 21 to 50, 51 to 100, 101 to
+  500, and 501 or more.
+- For the real attack-labelled address set, report the number of addresses in
+  each bin, and the share of `dev_train` rows that set carries. Call that
+  share p.
+- Draw, from the non-attack addresses in each bin, the same number of
+  addresses as the real set holds in that bin, uniformly at random without
+  replacement. Three independent draws, using a numpy Generator(PCG64) seeded
+  at 11, 12 and 13.
+- **Declared fallback.** If a bin holds fewer non-attack addresses than
+  required, take all available and make the shortfall up from the next lower
+  bin, repeating downward as needed. Report every shortfall, the bin it
+  occurred in and the number of addresses moved.
+- Set the induced label to 1 on every row of every drawn address, across
+  `dev_train`, `val_a` and `val_b`, and 0 on every other row. Confirm and
+  report that the intersection with the real attack-labelled set is empty.
+- Report the achieved induced-label share of `dev_train` rows against p, the
+  achieved address count against 22,095, and the rows-per-address
+  distribution of both sets.
+
+**Constructions, quantities, L and intervals.** Exactly as 11.4, with model
+seeds 42, 43 and 44 and the bootstrap specification of 11.4 unchanged.
+
+**Declared predictions.** Evaluated on `val_a` and `val_b` separately, and
+holding only if they hold for all three draws on both splits:
+
+1. the lower bound of the interval on AUC_a' exceeds 0.70;
+2. L, averaged over the three model seeds within a draw, exceeds 0.85.
+
+**No prediction is declared for AUC_c'.** The 11.4 control showed that its
+position relative to 0.50 depends on how typical the drawn addresses are
+relative to the average development row, and a distribution-matched draw
+changes that in a direction this amendment has no basis to predict in
+advance. AUC_c' is reported with its interval and no pass or fail attached.
+
+**Stop condition.** If the lower bound of the interval on AUC_c' exceeds
+0.60, stop and report. A label-free construction ranking a random label well
+above chance would indicate that the draw is selecting on a property the
+model observes, which is a fault in the control rather than a finding.
+Failures of predictions 1 or 2 are substantive: report them and continue.
+
+**Consequences, declared in advance.** If prediction 1 holds, the scope
+condition in 11.1 gains a fourth clause, that the labelled entities must
+carry a substantial share of rows, and the condition ceases to be
+provisional. If prediction 1 fails while prediction 2 holds, then part of the
+original construction's ranking came from genuine differences in the
+behaviour of attacking addresses rather than from the filter, the paper must
+report that, and L is presented as a decomposition of the apparent ranking
+rather than as a measure of leakage alone.
+
+**Limitation of the entity-lookup reference under induced labels.** Under
+both 11.4 and 11.6 the induced label is defined over `dev_train` addresses,
+so every induced-positive address appears in `dev_train` and the reference of
+11.1 step 1 scores 1.0 on every measure by construction. It therefore carries
+no information for an induced label, has no new-entity analogue, and is
+reported only for the real label.
+
+**Prior exposure.** Recorded because this amendment is post hoc. The 11.4
+control was run on 6 November 2026 and reported: prediction 1 failed on all
+six draw-and-split cases, with AUC_a' lower bounds of 0.541 to 0.575;
+prediction 2 failed on draws 1 and 3 on both splits, with AUC_c' intervals of
+about 0.454 to 0.493, and held on draw 2; prediction 3 held on all six, with
+L between 0.912 and 1.445. The rebuilt constructions were bit-identical to
+the cached originals, the induced-label fit-time absence count was 22,095 per
+draw against the real-label 22,089, and the entity-lookup reference on the
+induced label was 1.0 throughout. The construction (c) ROC-AUC for `val_b`,
+0.506056815350325, was observed in `results/phase4b_confirm.json` while
+reading code before the stop, and is authorised as an input under 11.5.
