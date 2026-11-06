@@ -91,3 +91,111 @@ LA4.9 Q2 (step-up versus U). U = 200 was a selection constraint on the val_a mea
 ## LA5 (clarification; written before any D test output; no code or measure change)
 
 LA5 (clarification; written before any D test output; no code or measure change). A scope (all users, new-user stratum, returning-user stratum) with zero positives in D's filtered population is reported as: ROC-AUC, PR-AUC and lift 'undefined (0 positives in the filtered population)'; top-k and all-red-team lines as exact counts (0 caught of N events, of M users), with no interval. If the all-users scope has zero positives, the LA3.8 verdict for every scorer is 'not evaluable', not 'does not work'. For strata, this changes no verdict (LA3.8 uses the all-users scope).
+
+
+## LA6. Second-dataset controls for the entity-label leakage diagnostic
+
+**Status: post hoc, disclosed.** Declared on 6 November 2026, after the LANL
+locked test results existed and after the RBA controls of amendments 11.4 and
+11.6 were run. **Confined to development days 0 to 13. No read of the locked
+test period, days 14 to 57.** Nothing here selects any detector, scorer or
+setting.
+
+**Purpose.** Amendment 11 defines a statistic L that has so far come out high
+on the real RBA blocklist label and high on a random persistent label with no
+attack content. It has not been shown capable of coming out low. LA6.2
+supplies that test. LA6.1 confirms on a second dataset that the mechanism
+reproduces where the conditions hold.
+
+**Relation to the scope condition in 11.1.** On RBA all three conditions
+hold: only 8 of 29,776 attacking addresses ever carry a non-attack event. On
+LANL with true event-level labels the third fails: 103 positive rows in
+110,018,263 filtered rows on the test period. LA6 tests both sides.
+
+**Population and splits.** The scorer-track filtered population declared in
+LA3, so the controls are comparable with the D-track scorers. Fit on days 0
+to 7. Score days 8 to 13, reported for days 8 to 11 and days 12 to 13
+separately as well as combined.
+
+**Constructions.** As 11.1 step 3, built to mirror the RBA construction's
+artefact structure using LANL's available fields: frequency maps and
+known-value sets over source user, source computer and destination computer,
+with any RBA artefact having no LANL counterpart dropped. Report exactly
+which artefacts were built, which fields each covers, and which features are
+constant on every fitted row. Model settings as the existing S1 construction,
+model seeds 42, 43 and 44.
+
+**Artefact perturbation count.** For each control, report the number of
+entries that differ between the (a) and (c) frequency maps and between their
+known-value sets. This measures the input to the mechanism directly and is
+reported alongside every L.
+
+**Statistic.** L as 11.2, with the estimator and the domain of validity of
+11.2 applied. Where AUC_c falls below 0.5, L exceeds 1 and is reported with
+that flag rather than clamped, as the RBA controls required.
+
+**Intervals.** Per LA2: 95% bootstrap over 1,000 resamples clustered by
+red-team user where a scope holds at least 20 distinct red-team users, exact
+counts otherwise. Both scoring splits hold at least 20.
+
+### LA6.1 Positive control, induced entity label
+
+Entity: source user, not source computer. **Stated reason:** the red-team
+strata hold only two to three source computers per split, so a
+computer-level induced label would carry too few entities to measure. Source
+users number 7, 45 and 50 across the three development splits, which is
+still small, and the entity count is reported with every figure so that the
+thinness is visible.
+
+A source user is labelled attack if it appears as the source user of any
+red-team event anywhere in days 0 to 13. The label is constant over time and
+applied to every row of that user, mimicking a blocklist built from history.
+
+Report the quantities above, plus the number of induced-attack source users
+appearing in both days 0 to 7 and days 8 to 13, the fit-time absence count
+as defined in 11.4, and the entity-lookup reference of 11.1 step 1. Unlike
+the RBA controls, the induced label here is defined over the whole
+development range rather than over the fitting period alone, so some labelled
+users do not appear in the fitting rows and the reference is not degenerate.
+
+**Declared prediction.** L exceeds 0.85 on both scoring splits for all three
+model seeds, and the entity-lookup reference reaches a ROC-AUC above 0.90.
+
+### LA6.2 Negative control, true event labels
+
+The same constructions against the true event-level red-team labels,
+removing only the matched positive rows from the fitting rows.
+
+**Declared prediction.** On both scoring splits and for all three model
+seeds, the interval on L contains 0 and its upper bound is below 0.30. The
+reasoning declared in advance: removing of the order of 50 matched rows from
+a fitting population of roughly 18.6 million changes the fitted artefacts
+negligibly, so the two constructions should rank almost identically.
+
+The domain condition of 11.2 is expected to be satisfied, since the
+label-free scorer reached a ROC-AUC of 0.980 and 0.981 on these development
+splits under LA3. If the lower bound on AUC_a falls below 0.55, L is not
+reported and the three AUCs are reported without it.
+
+### LA6.3 Contingency on runtime, declared in advance
+
+If a single construction-and-seed fit and scoring exceeds 90 minutes of wall
+clock, reduce both controls to model seed 42 alone and disclose the
+reduction, the measured runtime and which figures it affects. No other
+reduction is permitted without a further amendment.
+
+### LA6.4 Reporting
+
+Both predictions are declared here, before any metric is computed. A failure
+of either is reported as a failure, and the scope condition in 11.1 is
+revised or withdrawn rather than restated. The induced label of LA6.1 is
+synthetic, so a successful positive control demonstrates the mechanism and
+does not discover it in the wild; that limitation is reported with the
+result, together with the entity counts.
+
+**Consequences, declared in advance.** If LA6.2's prediction holds, L is
+shown to discriminate and the diagnostic of amendment 11 stands as a method.
+If it fails, meaning L is substantially above 0 where the label marks events
+and the labelled rows are a negligible share of the fitting population, then
+L does not measure what amendment 11 claims, and the diagnostic is reported
+as a procedure without a validated summary statistic.
