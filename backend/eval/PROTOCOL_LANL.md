@@ -252,3 +252,12 @@ failures.
 **Runtime contingency.** As LA6.3: if a single construction-and-seed fit and
 scoring exceeds 90 minutes of wall clock, reduce to model seed 42 alone and
 disclose the reduction, the measured runtime and the figures affected.
+
+## LA8. Artefact-absence measurement on the enterprise dataset
+
+**Status: declared 6 November 2026.** The artefact-absence measurement
+declared in `PROTOCOL.md` amendment 11.9.4 applies to this dataset on
+development days 0 to 13, using the construction (a) artefacts built under
+LA6.1 and rebuilt as 11.9.4 specifies. The measurement is descriptive and no
+prediction is declared for it. No read of the locked test period, days 14 to
+57. No model is fitted.
