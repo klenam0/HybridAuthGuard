@@ -89,3 +89,5 @@ backend/results/phase5_cache/
 backend/results/phase5b_cache/
 backend/results/phase5c_cache/
 backend/results/phase6_cache/
+# Amendment 11 per-event scores (backend/eval/amendment11_controls.py)
+backend/results/amendment11_cache/
