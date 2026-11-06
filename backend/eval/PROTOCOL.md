@@ -1203,3 +1203,57 @@ draw against the real-label 22,089, and the entity-lookup reference on the
 induced label was 1.0 throughout. The construction (c) ROC-AUC for `val_b`,
 0.506056815350325, was observed in `results/phase4b_confirm.json` while
 reading code before the stop, and is authorised as an input under 11.5.
+
+### 11.7 Second domain clause for L, and a declared contrast test
+
+**Status: post hoc, disclosed.** Written on 6 November 2026, after the 11.4
+and 11.6 controls and after LA6. Its contents were decided by their results.
+
+#### 11.7.1 Second domain clause
+
+Amendment 11.2 bounds L only from below, through the condition that the
+lower bound on AUC_a exceeds 0.55. It does not bound it from above. Where
+AUC_c falls below 0.5 the ratio exceeds 1, and a quantity presented as a
+share of above-chance ranking cannot coherently exceed 1.
+
+This arose in practice. In the 11.6 control, draws 12 and 13 returned L above
+1 for that reason, and the real-label intervals are [0.9360, 1.0324] on
+`val_a` and [0.9256, 1.0272] on `val_b`, both of which cross 1.
+
+**Rule.** L is reported unclamped. Wherever AUC_c falls below 0.5, or an
+interval bound on L exceeds 1, the figure carries an explicit flag and is
+read as: all of the above-chance ranking is attributable to the label filter,
+and in addition the label-free construction ranks below chance. L is never
+silently clamped to 1, and an interval crossing 1 is reported as it stands
+rather than truncated.
+
+#### 11.7.2 Declared contrast test
+
+The prediction in 11.6 compared the lower bound of AUC_a' against an absolute
+value of 0.70, chosen by the authors. The question actually at issue is
+whether a distribution-matched random label reaches the same ranking as the
+real label on the same split, which is a contrast and not a threshold. That
+test was never declared and is therefore not reported as a result of the
+earlier controls.
+
+**Test.** On `val_a` and `val_b` separately, compare AUC_a for the real
+attack label against AUC_a' for each distribution-matched random draw of
+11.6, using a 95% percentile bootstrap on the difference, 1,000 resamples,
+clustered by source address, numpy Generator(PCG64) seeded at 42, computed at
+model seed 42, with both constructions scored on the same resampled rows.
+
+**Reported quantity.** The difference AUC_a minus AUC_a' with its interval,
+per draw and split. That difference is the estimate of how much of the
+original construction's ranking is not reproducible by a label with no attack
+content.
+
+**No prediction is declared.** The 11.6 result makes the direction known and
+the magnitude small, so a prediction now would be a restatement of seen data
+rather than a declaration. The quantity is reported with its interval and no
+pass or fail attached, and the paper states that this test was declared after
+the controls were seen.
+
+#### 11.7.3 What this does not do
+
+It does not revisit the failure of prediction 1 in 11.6. That failure stands
+as reported, and the consequence declared in 11.6 applies.
