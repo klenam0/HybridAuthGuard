@@ -1,0 +1,640 @@
+{
+  "K": {
+    "protocol": "eval/PROTOCOL.md amendment 11.9.4 (descriptive; no prediction)",
+    "data": "datasets.load('dev'): maps from non-attack dev_train rows; indicators on val_a and val_b",
+    "label": "Stream.truth (Is Attack IP or Is Account Takeover)",
+    "construction_a": "ml/train_from_dataset.fit_frequency_maps on eval.phase4b.frame(S, ~truth[:n_train]); no scaler, no forest",
+    "key_count_check": {
+      "rebuilt": {
+        "map_rows": 3672966,
+        "ip_freq_map_keys": 925137,
+        "user_freq_map_keys": 985535,
+        "country_freq_map_keys": 218,
+        "device_freq_map_keys": 6,
+        "known_ips_set": 925137,
+        "known_countries_set": 218
+      },
+      "stored": {
+        "map_rows": 3672966,
+        "ip_freq_map_keys": 925137,
+        "user_freq_map_keys": 985535,
+        "country_freq_map_keys": 218,
+        "device_freq_map_keys": 6,
+        "known_ips_set": 925137,
+        "known_countries_set": 218
+      },
+      "stored_path": "amendment11_controls.json control/real_construction_a_seed42/{map_rows,fitted_artefacts/*}",
+      "equal": true
+    },
+    "K1_artefacts": {
+      "ip_freq_map": {
+        "key_field": "source address (IP Address, stripped)",
+        "model_input": "ip_freq",
+        "listed_in_11_9_4": true
+      },
+      "known_ips_set": {
+        "key_field": "source address (IP Address)",
+        "model_input": "is_new_ip",
+        "listed_in_11_9_4": true
+      },
+      "user_freq_map": {
+        "key_field": "account (User ID)",
+        "model_input": "user_freq",
+        "listed_in_11_9_4": false
+      },
+      "country_freq_map": {
+        "key_field": "country (Country, missing -> 'XX', stripped)",
+        "model_input": "country_freq",
+        "listed_in_11_9_4": true
+      },
+      "known_countries_set": {
+        "key_field": "country (Country, missing -> 'XX')",
+        "model_input": "is_new_country",
+        "listed_in_11_9_4": false
+      },
+      "device_freq_map": {
+        "key_field": "device type (Device Type, missing -> 'Unknown', stripped)",
+        "model_input": "device_freq",
+        "listed_in_11_9_4": true
+      }
+    },
+    "indicator_groups_identical_on_scored_rows": [
+      [
+        "ip_freq_map",
+        "known_ips_set"
+      ],
+      [
+        "user_freq_map"
+      ],
+      [
+        "country_freq_map",
+        "known_countries_set"
+      ],
+      [
+        "device_freq_map"
+      ]
+    ],
+    "K2": {
+      "ip_freq_map + known_ips_set": {
+        "artefacts": [
+          "ip_freq_map",
+          "known_ips_set"
+        ],
+        "key_fields": [
+          "source address (IP Address, stripped)",
+          "source address (IP Address)"
+        ],
+        "listed_in_11_9_4": [
+          true,
+          true
+        ],
+        "val_a": {
+          "rows": 1183517,
+          "positive_rows": 127155,
+          "base_rate": 0.1074382539498799,
+          "roc_auc": 0.8344363448932567,
+          "pr_auc": 0.26660474988221505,
+          "indicator_set_rows": 476936,
+          "share_of_rows_indicator_set": 0.40298195970146605,
+          "true_positive_rows": 127154,
+          "precision_indicator_set": 0.2666060016438264,
+          "recall_indicator_set": 0.9999921355825567
+        },
+        "val_b": {
+          "rows": 1153710,
+          "positive_rows": 110465,
+          "base_rate": 0.09574763155385668,
+          "roc_auc": 0.8223212188891391,
+          "pr_auc": 0.22956628358860326,
+          "indicator_set_rows": 481190,
+          "share_of_rows_indicator_set": 0.41708054883809625,
+          "true_positive_rows": 110465,
+          "precision_indicator_set": 0.22956628358860326,
+          "recall_indicator_set": 1.0
+        }
+      },
+      "user_freq_map": {
+        "artefacts": [
+          "user_freq_map"
+        ],
+        "key_fields": [
+          "account (User ID)"
+        ],
+        "listed_in_11_9_4": [
+          false
+        ],
+        "val_a": {
+          "rows": 1183517,
+          "positive_rows": 127155,
+          "base_rate": 0.1074382539498799,
+          "roc_auc": 0.5468085519485351,
+          "pr_auc": 0.11854206243365317,
+          "indicator_set_rows": 417524,
+          "share_of_rows_indicator_set": 0.35278242729086273,
+          "true_positive_rows": 55483,
+          "precision_indicator_set": 0.13288577423094242,
+          "recall_indicator_set": 0.4363414730053871
+        },
+        "val_b": {
+          "rows": 1153710,
+          "positive_rows": 110465,
+          "base_rate": 0.09574763155385668,
+          "roc_auc": 0.5451571504235861,
+          "pr_auc": 0.10529322758641081,
+          "indicator_set_rows": 426806,
+          "share_of_rows_indicator_set": 0.3699421865113417,
+          "true_positive_rows": 49887,
+          "precision_indicator_set": 0.11688448615998838,
+          "recall_indicator_set": 0.45160910695695466
+        }
+      },
+      "country_freq_map + known_countries_set": {
+        "artefacts": [
+          "country_freq_map",
+          "known_countries_set"
+        ],
+        "key_fields": [
+          "country (Country, missing -> 'XX', stripped)",
+          "country (Country, missing -> 'XX')"
+        ],
+        "listed_in_11_9_4": [
+          true,
+          false
+        ],
+        "val_a": {
+          "rows": 1183517,
+          "positive_rows": 127155,
+          "base_rate": 0.1074382539498799,
+          "roc_auc": 0.49999905335481587,
+          "pr_auc": 0.1074382539498799,
+          "indicator_set_rows": 2,
+          "share_of_rows_indicator_set": 1.68987855687751e-06,
+          "true_positive_rows": 0,
+          "precision_indicator_set": 0.0,
+          "recall_indicator_set": 0.0
+        },
+        "val_b": {
+          "rows": 1153710,
+          "positive_rows": 110465,
+          "base_rate": 0.09574763155385668,
+          "roc_auc": 0.4999995207261957,
+          "pr_auc": 0.09574763155385668,
+          "indicator_set_rows": 1,
+          "share_of_rows_indicator_set": 8.667689454022241e-07,
+          "true_positive_rows": 0,
+          "precision_indicator_set": 0.0,
+          "recall_indicator_set": 0.0
+        }
+      },
+      "device_freq_map": {
+        "artefacts": [
+          "device_freq_map"
+        ],
+        "key_fields": [
+          "device type (Device Type, missing -> 'Unknown', stripped)"
+        ],
+        "listed_in_11_9_4": [
+          true
+        ],
+        "val_a": {
+          "rows": 1183517,
+          "positive_rows": 127155,
+          "base_rate": 0.1074382539498799,
+          "roc_auc": 0.5,
+          "pr_auc": 0.1074382539498799,
+          "indicator_set_rows": 0,
+          "share_of_rows_indicator_set": 0.0,
+          "true_positive_rows": 0,
+          "precision_indicator_set": null,
+          "recall_indicator_set": 0.0
+        },
+        "val_b": {
+          "rows": 1153710,
+          "positive_rows": 110465,
+          "base_rate": 0.09574763155385668,
+          "roc_auc": 0.5,
+          "pr_auc": 0.09574763155385668,
+          "indicator_set_rows": 0,
+          "share_of_rows_indicator_set": 0.0,
+          "true_positive_rows": 0,
+          "precision_indicator_set": null,
+          "recall_indicator_set": 0.0
+        }
+      }
+    },
+    "timings_seconds": {
+      "load dev stream (datasets.load('dev'))": 6.6,
+      "construction (a) maps and known sets (no scaler, no forest)": 13.2,
+      "total": 24.7
+    }
+  },
+  "L": {
+    "L1_key_count_check": {
+      "src": {
+        "keys_only_in_c_rebuilt": 298,
+        "declared": 298,
+        "stored": 298,
+        "stored_path": "lanl_la6_controls.json artefacts/F/src/keys_only_in_c",
+        "map_keys_a_rebuilt": 11194,
+        "map_keys_a_stored": 11194,
+        "equal": true
+      },
+      "user": {
+        "keys_only_in_c_rebuilt": 76,
+        "declared": 76,
+        "stored": 76,
+        "stored_path": "lanl_la6_controls.json artefacts/F/user/keys_only_in_c",
+        "map_keys_a_rebuilt": 11994,
+        "map_keys_a_stored": 11994,
+        "equal": true
+      },
+      "dst": {
+        "keys_only_in_c_rebuilt": 280,
+        "declared": 280,
+        "stored": 280,
+        "stored_path": "lanl_la6_controls.json artefacts/F/dst/keys_only_in_c",
+        "map_keys_a_rebuilt": 2444,
+        "map_keys_a_stored": 2444,
+        "equal": true
+      },
+      "fitting_rows_a": {
+        "rebuilt": 18093778,
+        "stored": 18093778,
+        "equal": true
+      }
+    },
+    "protocol": "eval/PROTOCOL_LANL.md LA8 under eval/PROTOCOL.md amendment 11.9.4 (descriptive)",
+    "data": "LANL dev: maps rebuilt from days 0-7 per-day codes (eval.lanl_la6.fit_counts, label 'F'); indicators on days 8-11 and 12-13; no day from 14 read; no model fitted",
+    "labels": {
+      "induced_label_primary": "LA6.1: every row of the 86 red-team source users",
+      "true_redteam_label": "event-level red-team label (D feature files, y)"
+    },
+    "artefact_note": "is_new_src is built from the known-source-computer set, which has the same keys as the source-computer frequency map, so its indicator is identical and is reported once",
+    "L2": {
+      "days_8_11": {
+        "src": {
+          "artefact": "source-computer frequency map (src_computer) -> src_freq; also the known-source-computer set -> is_new_src (same keys)",
+          "induced_label_primary": {
+            "rows": 8569072,
+            "positive_rows": 241698,
+            "base_rate": 0.02820585472966034,
+            "roc_auc": 0.7792778273974976,
+            "pr_auc": 0.39832641282303755,
+            "indicator_set_rows": 200705,
+            "share_of_rows_indicator_set": 0.023422022828142885,
+            "true_positive_rows": 136855,
+            "precision_indicator_set": 0.6818714033033557,
+            "recall_indicator_set": 0.5662231379655603
+          },
+          "true_redteam_label": {
+            "rows": 8569072,
+            "positive_rows": 266,
+            "base_rate": 3.10418677775143e-05,
+            "roc_auc": 0.4976874130395114,
+            "pr_auc": 3.0926648167964466e-05,
+            "indicator_set_rows": 200705,
+            "share_of_rows_indicator_set": 0.023422022828142885,
+            "true_positive_rows": 5,
+            "precision_indicator_set": 2.4912184549463142e-05,
+            "recall_indicator_set": 0.018796992481203006
+          }
+        },
+        "user": {
+          "artefact": "source-user frequency map (src_user) -> user_freq",
+          "induced_label_primary": {
+            "rows": 8569072,
+            "positive_rows": 241698,
+            "base_rate": 0.02820585472966034,
+            "roc_auc": 0.9984713668438574,
+            "pr_auc": 0.90470397556493,
+            "indicator_set_rows": 267157,
+            "share_of_rows_indicator_set": 0.031176888232471382,
+            "true_positive_rows": 241698,
+            "precision_indicator_set": 0.90470397556493,
+            "recall_indicator_set": 1.0
+          },
+          "true_redteam_label": {
+            "rows": 8569072,
+            "positive_rows": 266,
+            "base_rate": 3.10418677775143e-05,
+            "roc_auc": 0.9844265933900243,
+            "pr_auc": 0.0009956692132341656,
+            "indicator_set_rows": 267157,
+            "share_of_rows_indicator_set": 0.031176888232471382,
+            "true_positive_rows": 266,
+            "precision_indicator_set": 0.0009956692132341656,
+            "recall_indicator_set": 1.0
+          }
+        },
+        "dst": {
+          "artefact": "destination-computer frequency map (dst_computer) -> dst_freq",
+          "induced_label_primary": {
+            "rows": 8569072,
+            "positive_rows": 241698,
+            "base_rate": 0.02820585472966034,
+            "roc_auc": 0.5422384467262575,
+            "pr_auc": 0.10583981068134336,
+            "indicator_set_rows": 21627,
+            "share_of_rows_indicator_set": 0.0025238438888131646,
+            "true_positive_rows": 20452,
+            "precision_indicator_set": 0.9456697646460442,
+            "recall_indicator_set": 0.08461799435659377
+          },
+          "true_redteam_label": {
+            "rows": 8569072,
+            "positive_rows": 266,
+            "base_rate": 3.10418677775143e-05,
+            "roc_auc": 0.7412267691925858,
+            "pr_auc": 0.0029086751277896724,
+            "indicator_set_rows": 21627,
+            "share_of_rows_indicator_set": 0.0025238438888131646,
+            "true_positive_rows": 129,
+            "precision_indicator_set": 0.005964766264391732,
+            "recall_indicator_set": 0.4849624060150376
+          }
+        }
+      },
+      "days_12_13": {
+        "src": {
+          "artefact": "source-computer frequency map (src_computer) -> src_freq; also the known-source-computer set -> is_new_src (same keys)",
+          "induced_label_primary": {
+            "rows": 6383434,
+            "positive_rows": 168990,
+            "base_rate": 0.02647321175404962,
+            "roc_auc": 0.787926745726944,
+            "pr_auc": 0.291417001929674,
+            "indicator_set_rows": 212355,
+            "share_of_rows_indicator_set": 0.03326657720593649,
+            "true_positive_rows": 100359,
+            "precision_indicator_set": 0.4726001271455817,
+            "recall_indicator_set": 0.5938753772412568
+          },
+          "true_redteam_label": {
+            "rows": 6383434,
+            "positive_rows": 282,
+            "base_rate": 4.4176849012616096e-05,
+            "roc_auc": 0.4957778723944686,
+            "pr_auc": 4.3898507672909806e-05,
+            "indicator_set_rows": 212355,
+            "share_of_rows_indicator_set": 0.03326657720593649,
+            "true_positive_rows": 7,
+            "precision_indicator_set": 3.2963669327305694e-05,
+            "recall_indicator_set": 0.024822695035460994
+          }
+        },
+        "user": {
+          "artefact": "source-user frequency map (src_user) -> user_freq",
+          "induced_label_primary": {
+            "rows": 6383434,
+            "positive_rows": 168990,
+            "base_rate": 0.02647321175404962,
+            "roc_auc": 0.9960934558264585,
+            "pr_auc": 0.7768083698010517,
+            "indicator_set_rows": 217544,
+            "share_of_rows_indicator_set": 0.03407946255886722,
+            "true_positive_rows": 168990,
+            "precision_indicator_set": 0.7768083698010517,
+            "recall_indicator_set": 1.0
+          },
+          "true_redteam_label": {
+            "rows": 6383434,
+            "positive_rows": 282,
+            "base_rate": 4.4176849012616096e-05,
+            "roc_auc": 0.9829816053260207,
+            "pr_auc": 0.0012962894862648476,
+            "indicator_set_rows": 217544,
+            "share_of_rows_indicator_set": 0.03407946255886722,
+            "true_positive_rows": 282,
+            "precision_indicator_set": 0.0012962894862648476,
+            "recall_indicator_set": 1.0
+          }
+        },
+        "dst": {
+          "artefact": "destination-computer frequency map (dst_computer) -> dst_freq",
+          "induced_label_primary": {
+            "rows": 6383434,
+            "positive_rows": 168990,
+            "base_rate": 0.02647321175404962,
+            "roc_auc": 0.5320490978865547,
+            "pr_auc": 0.07764238041223188,
+            "indicator_set_rows": 13289,
+            "share_of_rows_indicator_set": 0.0020817948458462954,
+            "true_positive_rows": 10897,
+            "precision_indicator_set": 0.8200015050041387,
+            "recall_indicator_set": 0.06448310550920172
+          },
+          "true_redteam_label": {
+            "rows": 6383434,
+            "positive_rows": 282,
+            "base_rate": 4.4176849012616096e-05,
+            "roc_auc": 0.6142123750702804,
+            "pr_auc": 0.0011614131225144665,
+            "indicator_set_rows": 13289,
+            "share_of_rows_indicator_set": 0.0020817948458462954,
+            "true_positive_rows": 65,
+            "precision_indicator_set": 0.00489126345097449,
+            "recall_indicator_set": 0.23049645390070922
+          }
+        }
+      }
+    },
+    "seconds": {
+      "rebuild_and_check": 1.1,
+      "total": 28.7
+    }
+  },
+  "M": {
+    "quantity": "(AUC_a - AUC_a') / (AUC_a - 0.5); descriptive, not declared in advance, no pass or fail",
+    "bootstrap": "rerun of the Task H specification (eval.amendment11_7_la7.paired_bootstrap): 1,000 resamples of source addresses, Generator(PCG64(42)), the same resampled rows for numerator and denominator; share recomputed per resample; 2.5/97.5 percentiles",
+    "splits": {
+      "val_a": {
+        "clusters": 348248,
+        "auc_a": {
+          "value": 0.762999627767321,
+          "source": "amendment11_7_la7.json H/splits/val_a/auc_a/value"
+        },
+        "draw_11": {
+          "auc_a_prime": {
+            "value": 0.7292500101682221,
+            "source": "amendment11_7_la7.json H/splits/val_a/draw_11/auc_a_prime/value"
+          },
+          "difference": {
+            "value": 0.03374961759909889,
+            "source": "amendment11_7_la7.json H/splits/val_a/draw_11/difference_a_minus_a_prime"
+          },
+          "difference_interval_rerun": {
+            "low": 0.025319638453121285,
+            "high": 0.04243628443608322,
+            "valid_resamples": 1000
+          },
+          "difference_interval_task_H": {
+            "low": 0.025319638453121285,
+            "high": 0.04243628443608322,
+            "valid_resamples": 1000
+          },
+          "difference_interval_reproduces": true,
+          "share": 0.1283257238255774,
+          "share_interval": {
+            "low": 0.09760252165439029,
+            "high": 0.15767307823030302,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        },
+        "draw_12": {
+          "auc_a_prime": {
+            "value": 0.7248520477590753,
+            "source": "amendment11_7_la7.json H/splits/val_a/draw_12/auc_a_prime/value"
+          },
+          "difference": {
+            "value": 0.038147580008245696,
+            "source": "amendment11_7_la7.json H/splits/val_a/draw_12/difference_a_minus_a_prime"
+          },
+          "difference_interval_rerun": {
+            "low": 0.02936357430007542,
+            "high": 0.0466984387075994,
+            "valid_resamples": 1000
+          },
+          "difference_interval_task_H": {
+            "low": 0.02936357430007542,
+            "high": 0.0466984387075994,
+            "valid_resamples": 1000
+          },
+          "difference_interval_reproduces": true,
+          "share": 0.14504803802230218,
+          "share_interval": {
+            "low": 0.11290074530013557,
+            "high": 0.17585469224065264,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        },
+        "draw_13": {
+          "auc_a_prime": {
+            "value": 0.7231221273804145,
+            "source": "amendment11_7_la7.json H/splits/val_a/draw_13/auc_a_prime/value"
+          },
+          "difference": {
+            "value": 0.03987750038690652,
+            "source": "amendment11_7_la7.json H/splits/val_a/draw_13/difference_a_minus_a_prime"
+          },
+          "difference_interval_rerun": {
+            "low": 0.03305694475589224,
+            "high": 0.04608344661930493,
+            "valid_resamples": 1000
+          },
+          "difference_interval_task_H": {
+            "low": 0.03305694475589224,
+            "high": 0.04608344661930493,
+            "valid_resamples": 1000
+          },
+          "difference_interval_reproduces": true,
+          "share": 0.15162569135720083,
+          "share_interval": {
+            "low": 0.12784827662480608,
+            "high": 0.17447622101897162,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        }
+      },
+      "val_b": {
+        "clusters": 345496,
+        "auc_a": {
+          "value": 0.750421331271785,
+          "source": "amendment11_7_la7.json H/splits/val_b/auc_a/value"
+        },
+        "draw_11": {
+          "auc_a_prime": {
+            "value": 0.7032710813798777,
+            "source": "amendment11_7_la7.json H/splits/val_b/draw_11/auc_a_prime/value"
+          },
+          "difference": {
+            "value": 0.0471502498919073,
+            "source": "amendment11_7_la7.json H/splits/val_b/draw_11/difference_a_minus_a_prime"
+          },
+          "difference_interval_rerun": {
+            "low": 0.03607211498568382,
+            "high": 0.05761727468620961,
+            "valid_resamples": 1000
+          },
+          "difference_interval_task_H": {
+            "low": 0.03607211498568382,
+            "high": 0.05761727468620961,
+            "valid_resamples": 1000
+          },
+          "difference_interval_reproduces": true,
+          "share": 0.18828368035762347,
+          "share_interval": {
+            "low": 0.14649589608689692,
+            "high": 0.22670370278423635,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        },
+        "draw_12": {
+          "auc_a_prime": {
+            "value": 0.6998297292742648,
+            "source": "amendment11_7_la7.json H/splits/val_b/draw_12/auc_a_prime/value"
+          },
+          "difference": {
+            "value": 0.05059160199752022,
+            "source": "amendment11_7_la7.json H/splits/val_b/draw_12/difference_a_minus_a_prime"
+          },
+          "difference_interval_rerun": {
+            "low": 0.041008198209100497,
+            "high": 0.060335721582056974,
+            "valid_resamples": 1000
+          },
+          "difference_interval_task_H": {
+            "low": 0.041008198209100497,
+            "high": 0.060335721582056974,
+            "valid_resamples": 1000
+          },
+          "difference_interval_reproduces": true,
+          "share": 0.20202592862431756,
+          "share_interval": {
+            "low": 0.16678969303544058,
+            "high": 0.23882317652723944,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        },
+        "draw_13": {
+          "auc_a_prime": {
+            "value": 0.700777514569204,
+            "source": "amendment11_7_la7.json H/splits/val_b/draw_13/auc_a_prime/value"
+          },
+          "difference": {
+            "value": 0.049643816702581,
+            "source": "amendment11_7_la7.json H/splits/val_b/draw_13/difference_a_minus_a_prime"
+          },
+          "difference_interval_rerun": {
+            "low": 0.040018808232813716,
+            "high": 0.059618799832901345,
+            "valid_resamples": 1000
+          },
+          "difference_interval_task_H": {
+            "low": 0.040018808232813716,
+            "high": 0.059618799832901345,
+            "valid_resamples": 1000
+          },
+          "difference_interval_reproduces": true,
+          "share": 0.1982411659999604,
+          "share_interval": {
+            "low": 0.16354036703326166,
+            "high": 0.23690161838926108,
+            "valid_resamples": 1000
+          },
+          "prediction": null
+        }
+      }
+    },
+    "timings_seconds": {
+      "load dev stream (datasets.load('dev'))": 5.6,
+      "val_a: paired cluster bootstrap rerun (348,248 addresses)": 159.5,
+      "val_b: paired cluster bootstrap rerun (345,496 addresses)": 153.2,
+      "total": 320.1
+    }
+  }
+}
