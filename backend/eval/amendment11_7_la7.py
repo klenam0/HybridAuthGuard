@@ -1,7 +1,7 @@
 # backend/eval/amendment11_7_la7.py
 """
-Amendment 11.7 (eval/PROTOCOL.md; post hoc, disclosed), Task H of
-CLAUDE_CODE_PROMPT_D.md, and Task J (the consolidated table of every L).
+Amendment 11.7 (eval/PROTOCOL.md; post hoc, disclosed), Task H,
+and Task J (the consolidated table of every L).
 
   python -m eval.amendment11_7_la7 contrast   Task H: AUC_a (real label, real
                                               construction (a)) minus AUC_a'

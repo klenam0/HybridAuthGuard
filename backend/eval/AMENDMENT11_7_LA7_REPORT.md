@@ -1,7 +1,7 @@
 # Amendment 11.7 contrast test, LA7 status, and every L to date
 
 Written 2026-11-06. Governed by `eval/PROTOCOL.md` amendments 11.1 to 11.8
-and `eval/PROTOCOL_LANL.md` LA6 and LA7. Prompt: `eval/CLAUDE_CODE_PROMPT_D.md`.
+and `eval/PROTOCOL_LANL.md` LA6 and LA7.
 
 Script: `eval/amendment11_7_la7.py`, with stages `contrast` (Task H), `label`
 (Task I1) and `table` (Task J). Values: `results/amendment11_7_la7.json`.
@@ -38,9 +38,9 @@ frozen file was modified. The only new code is `eval/amendment11_7_la7.py`.
 
 ## Step 0
 
-Each amendment was appended verbatim from `CLAUDE_CODE_PROMPT_D.md` and
+Each amendment was appended verbatim from the drafting document and
 committed on its own. After each append, the tail of the file was compared
-byte for byte (`cmp`) with the text extracted from the prompt, and each
+byte for byte (`cmp`) with the text as drafted, and each
 matched exactly.
 
 | Commit | File | Text |

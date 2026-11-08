@@ -294,7 +294,7 @@ The live stats' `avg_event_time_ms` (2,895.8) is wall time divided by events, in
 ## Bug-policy entries
 
 1. **S1 memory (evaluation code; uses no test result).**
-   - **What happened.** The first S1 run (and S2, run in parallel) was stopped by Claude Code because the machine ran critically low on memory. S1 was then scoring all 6,392,584 dev events at once for the declared variant (a)/42 check against Phase 3's cached decisions, while S2's feature pass held about 2M events of state.
+   - **What happened.** The first S1 run (and S2, run in parallel) was stopped because the machine ran critically low on memory. S1 was then scoring all 6,392,584 dev events at once for the declared variant (a)/42 check against Phase 3's cached decisions, while S2's feature pass held about 2M events of state.
    - **What changed** (55e08db, `eval/phase6_secondary.py`): that dev check now scores the dev events in 1M-row chunks and concatenates the results. The arithmetic is unchanged (`score_samples` is row-wise), and nothing is chosen from any result.
    - **Rerun.** S1, then S2, then S3, strictly one at a time, with free memory checked before each: 13.7 GB before S1, 17.6 GB before S2, 17.9 GB before S3.
    - **Before and after values.** The only May value computed before the stop, variant (a) seed 42 (ROC-AUC 0.7487, PR-AUC 0.1633, TPR 0.0030; new attackers 0.5745 / 0.0094 / 0.0009), is **reproduced exactly** by the rerun. The check passes (bit-identical, max |diff| 0). No other S1–S3 value existed before the stop.

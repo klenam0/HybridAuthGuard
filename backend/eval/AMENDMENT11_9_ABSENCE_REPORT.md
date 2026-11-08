@@ -1,9 +1,8 @@
 # Amendment 11.9 and LA8: the artefact-absence measurement, and the Task H share
 
 Written 2026-11-07. Governed by `eval/PROTOCOL.md` amendments 11.1 to 11.9,
-`eval/PROTOCOL_LANL.md` LA6, LA7 (as withdrawn by 11.9.2) and LA8. Prompt:
-`eval/CLAUDE_CODE_PROMPT_E_REV2.md`. Nothing from the superseded
-`CLAUDE_CODE_PROMPT_E.md` was committed.
+`eval/PROTOCOL_LANL.md` LA6, LA7 (as withdrawn by 11.9.2) and LA8. Nothing from the superseded first
+version of the drafting document was committed.
 
 Script: `eval/amendment11_9_absence.py`, with stages `rba` (Task K), `lanl`
 (Task L) and `share` (Task M). Values: `results/amendment11_9_absence.json`.
@@ -35,9 +34,9 @@ JSON paths are relative to that file unless another file is named.
 
 ## Step 0
 
-Each amendment was appended verbatim from `CLAUDE_CODE_PROMPT_E_REV2.md` and
+Each amendment was appended verbatim from the drafting document and
 committed on its own. After each append, the tail of the file was compared
-byte for byte (`cmp`) with the text extracted from the prompt, and each
+byte for byte (`cmp`) with the text as drafted, and each
 matched exactly.
 
 | Commit | File | Text |

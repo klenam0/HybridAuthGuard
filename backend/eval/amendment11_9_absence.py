@@ -1,7 +1,7 @@
 # backend/eval/amendment11_9_absence.py
 """
 Amendment 11.9.4 (eval/PROTOCOL.md) and LANL LA8: the artefact-absence
-measurement, descriptive (no prediction). Task M of CLAUDE_CODE_PROMPT_E_REV2.md:
+measurement, descriptive (no prediction). Task M:
 the share (AUC_a - AUC_a') / (AUC_a - 0.5) of the Task H contrast.
 
   python -m eval.amendment11_9_absence rba     Task K (RBA dev: val_a, val_b)
