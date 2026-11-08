@@ -265,3 +265,125 @@ Output: `fig6_s1_roc_auc.tif`, 4780 x 2329 px at 900 dpi = 13.49 cm x 6.57 cm; p
 | (c) May, seed 43 | per-seed (not plotted) | 0.5183114384719445 | `phase6_s1.json` | `variants/c/seed_43/all/roc_auc` |
 | (c) May, seed 44 | per-seed (not plotted) | 0.5197991675448458 | `phase6_s1.json` | `variants/c/seed_44/all/roc_auc` |
 
+## Figure 6 (v2): leakage replication, constructions (A) and label controls (B)
+
+Replacement for Figure 6, two panels, drawn from stored results only; nothing is
+fitted or recomputed. Every value is plotted as stored.
+
+Panel A: the same values and sources as Figure 6 (`fig6_s1_roc_auc.tif`); the
+script asserts each one equals the value Figure 6 recorded in this run.
+val_a and val_b bars: single fits at seed 42, no interval. May bars: mean over
+seeds 42, 43, 44; the error bar is the minimum to maximum over the three seeds,
+a range, not a confidence interval. Bars labelled to 3 decimals.
+
+Panel B: construction (a), the leaky one, scored on val_a and val_b against
+(1) the real attack label, (2) a count-matched random address label (amendment
+11.4, sampling seeds 1, 2, 3) and (3) a distribution-matched random address
+label (amendment 11.6, sampling seeds 11, 12, 13). One mark per draw, draws left
+to right in sampling-seed order; draws are not averaged. Points are the stored
+point areas at model seed 42 (not interval bounds). Error bars are the stored
+95% percentile intervals, 1000 resamples of source addresses (address-clustered
+bootstrap, PCG64(42)); these exist at model seed 42 only and do not cover
+variation over model seeds 43 and 44 (stored, not plotted, listed below).
+Real-label point: `phase4b_diag.json`, the same value as panel A, val_a and
+val_b (a); `amendment11_6_controls.json real/halves/*/roc_auc_stored/a` records
+the same value and source. Its interval is in `amendment11_6_controls.json`.
+
+Both panels: dashed line at 0.5, a reference (chance), not data.
+
+Suggested caption: Figure 6. Area under the receiver operating characteristic
+curve of the leakage replication. (A) The three constructions over all events on
+val_a, val_b (single fits, seed 42, no interval) and the May test month (mean of
+seeds 42 to 44; the bar shows the minimum and maximum across seeds, not a
+confidence interval). (B) Construction (a) on val_a and val_b scored against the
+real attack label and against three count-matched and three distribution-matched
+random address labels, one mark per draw. Points are single fits at model seed
+42; error bars are 95% address-clustered bootstrap intervals, available at model
+seed 42 only, so they do not reflect variation across model seeds. Dashed line:
+0.5.
+Output: `fig6_v2_constructions_and_controls.tif`, 5308 x 5090 px at 900 dpi = 14.98 cm x 14.37 cm; preview `fig6_v2_constructions_and_controls_preview.png`.
+
+| Plotted item | Role | Value | File | JSON path |
+|---|---|---|---|---|
+| A: (a) val_a | bar | 0.762999627767321 | `phase4b_diag.json` | `variants/a/val_a/roc_auc` |
+| A: (a) val_b | bar | 0.750421331271785 | `phase4b_diag.json` | `variants/a/val_b/roc_auc` |
+| A: (a) May | bar (seed mean) | 0.7460546273964104 | `phase6_s1.json` | `variants/a/over_seeds/all/roc_auc/mean` |
+| A: (a) May | range low (seed min) | 0.741738379898951 | `phase6_s1.json` | `variants/a/over_seeds/all/roc_auc/min` |
+| A: (a) May | range high (seed max) | 0.7487062306072065 | `phase6_s1.json` | `variants/a/over_seeds/all/roc_auc/max` |
+| A: (b) val_a | bar | 0.5531101898878288 | `phase4b_diag.json` | `variants/b/val_a/roc_auc` |
+| A: (b) val_b | bar | 0.5552088718116418 | `phase4b_diag.json` | `variants/b/val_b/roc_auc` |
+| A: (b) May | bar (seed mean) | 0.571670082238041 | `phase6_s1.json` | `variants/b/over_seeds/all/roc_auc/mean` |
+| A: (b) May | range low (seed min) | 0.5687845737407811 | `phase6_s1.json` | `variants/b/over_seeds/all/roc_auc/min` |
+| A: (b) May | range high (seed max) | 0.5761743650777634 | `phase6_s1.json` | `variants/b/over_seeds/all/roc_auc/max` |
+| A: (c) val_a | bar | 0.5039329966694688 | `phase4b_diag.json` | `variants/c/val_a/roc_auc` |
+| A: (c) val_b | bar | 0.506056815350325 | `phase4b_confirm.json` | `d1_c_val_b/roc_auc` |
+| A: (c) May | bar (seed mean) | 0.5195892987206894 | `phase6_s1.json` | `variants/c/over_seeds/all/roc_auc/mean` |
+| A: (c) May | range low (seed min) | 0.5183114384719445 | `phase6_s1.json` | `variants/c/over_seeds/all/roc_auc/min` |
+| A: (c) May | range high (seed max) | 0.5206572901452777 | `phase6_s1.json` | `variants/c/over_seeds/all/roc_auc/max` |
+| B: real label, val_a | point (seed 42) | 0.762999627767321 | `phase4b_diag.json` | `variants/a/val_a/roc_auc` |
+| B: real label, val_a | 95% CI low (seed 42) | 0.7496505177620156 | `amendment11_6_controls.json` | `real/halves/val_a/interval/roc_auc_a/low` |
+| B: real label, val_a | 95% CI high (seed 42) | 0.7749759675042339 | `amendment11_6_controls.json` | `real/halves/val_a/interval/roc_auc_a/high` |
+| B: count-matched, draw_1, val_a | point (seed 42) | 0.5874744418789176 | `amendment11_controls.json` | `control/draws/draw_1/val_a/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: count-matched, draw_1, val_a | 95% CI low (seed 42) | 0.5642238351884369 | `amendment11_controls.json` | `control/draws/draw_1/val_a/interval_seed_42/a_prime_roc_auc/low` |
+| B: count-matched, draw_1, val_a | 95% CI high (seed 42) | 0.6092443878579016 | `amendment11_controls.json` | `control/draws/draw_1/val_a/interval_seed_42/a_prime_roc_auc/high` |
+| B: count-matched, draw_1, val_a | seed 43 point (not plotted) | 0.5874451973420401 | `amendment11_controls.json` | `control/draws/draw_1/val_a/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: count-matched, draw_1, val_a | seed 44 point (not plotted) | 0.5979441006631171 | `amendment11_controls.json` | `control/draws/draw_1/val_a/per_model_seed/seed_44/a_prime/roc_auc` |
+| B: count-matched, draw_2, val_a | point (seed 42) | 0.6078185018929992 | `amendment11_controls.json` | `control/draws/draw_2/val_a/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: count-matched, draw_2, val_a | 95% CI low (seed 42) | 0.5736562949805777 | `amendment11_controls.json` | `control/draws/draw_2/val_a/interval_seed_42/a_prime_roc_auc/low` |
+| B: count-matched, draw_2, val_a | 95% CI high (seed 42) | 0.6395766879204565 | `amendment11_controls.json` | `control/draws/draw_2/val_a/interval_seed_42/a_prime_roc_auc/high` |
+| B: count-matched, draw_2, val_a | seed 43 point (not plotted) | 0.6122692900492099 | `amendment11_controls.json` | `control/draws/draw_2/val_a/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: count-matched, draw_2, val_a | seed 44 point (not plotted) | 0.6125511944372168 | `amendment11_controls.json` | `control/draws/draw_2/val_a/per_model_seed/seed_44/a_prime/roc_auc` |
+| B: count-matched, draw_3, val_a | point (seed 42) | 0.5961977213132982 | `amendment11_controls.json` | `control/draws/draw_3/val_a/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: count-matched, draw_3, val_a | 95% CI low (seed 42) | 0.5746500327031364 | `amendment11_controls.json` | `control/draws/draw_3/val_a/interval_seed_42/a_prime_roc_auc/low` |
+| B: count-matched, draw_3, val_a | 95% CI high (seed 42) | 0.6159346619636497 | `amendment11_controls.json` | `control/draws/draw_3/val_a/interval_seed_42/a_prime_roc_auc/high` |
+| B: count-matched, draw_3, val_a | seed 43 point (not plotted) | 0.5949357080567296 | `amendment11_controls.json` | `control/draws/draw_3/val_a/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: count-matched, draw_3, val_a | seed 44 point (not plotted) | 0.60165939262106 | `amendment11_controls.json` | `control/draws/draw_3/val_a/per_model_seed/seed_44/a_prime/roc_auc` |
+| B: distribution-matched, draw_11, val_a | point (seed 42) | 0.7292500101682221 | `amendment11_6_controls.json` | `draws/draw_11/val_a/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: distribution-matched, draw_11, val_a | 95% CI low (seed 42) | 0.7170396291417527 | `amendment11_6_controls.json` | `draws/draw_11/val_a/interval_seed_42/a_prime_roc_auc/low` |
+| B: distribution-matched, draw_11, val_a | 95% CI high (seed 42) | 0.7413217503486502 | `amendment11_6_controls.json` | `draws/draw_11/val_a/interval_seed_42/a_prime_roc_auc/high` |
+| B: distribution-matched, draw_11, val_a | seed 43 point (not plotted) | 0.7214164625400363 | `amendment11_6_controls.json` | `draws/draw_11/val_a/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: distribution-matched, draw_11, val_a | seed 44 point (not plotted) | 0.7213142624843094 | `amendment11_6_controls.json` | `draws/draw_11/val_a/per_model_seed/seed_44/a_prime/roc_auc` |
+| B: distribution-matched, draw_12, val_a | point (seed 42) | 0.7248520477590753 | `amendment11_6_controls.json` | `draws/draw_12/val_a/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: distribution-matched, draw_12, val_a | 95% CI low (seed 42) | 0.7115281454765894 | `amendment11_6_controls.json` | `draws/draw_12/val_a/interval_seed_42/a_prime_roc_auc/low` |
+| B: distribution-matched, draw_12, val_a | 95% CI high (seed 42) | 0.7379840186406766 | `amendment11_6_controls.json` | `draws/draw_12/val_a/interval_seed_42/a_prime_roc_auc/high` |
+| B: distribution-matched, draw_12, val_a | seed 43 point (not plotted) | 0.7133910242732753 | `amendment11_6_controls.json` | `draws/draw_12/val_a/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: distribution-matched, draw_12, val_a | seed 44 point (not plotted) | 0.718453410691482 | `amendment11_6_controls.json` | `draws/draw_12/val_a/per_model_seed/seed_44/a_prime/roc_auc` |
+| B: distribution-matched, draw_13, val_a | point (seed 42) | 0.7231221273804145 | `amendment11_6_controls.json` | `draws/draw_13/val_a/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: distribution-matched, draw_13, val_a | 95% CI low (seed 42) | 0.7102757112734116 | `amendment11_6_controls.json` | `draws/draw_13/val_a/interval_seed_42/a_prime_roc_auc/low` |
+| B: distribution-matched, draw_13, val_a | 95% CI high (seed 42) | 0.7353493378927609 | `amendment11_6_controls.json` | `draws/draw_13/val_a/interval_seed_42/a_prime_roc_auc/high` |
+| B: distribution-matched, draw_13, val_a | seed 43 point (not plotted) | 0.7302805185780655 | `amendment11_6_controls.json` | `draws/draw_13/val_a/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: distribution-matched, draw_13, val_a | seed 44 point (not plotted) | 0.7314362459108676 | `amendment11_6_controls.json` | `draws/draw_13/val_a/per_model_seed/seed_44/a_prime/roc_auc` |
+| B: real label, val_b | point (seed 42) | 0.750421331271785 | `phase4b_diag.json` | `variants/a/val_b/roc_auc` |
+| B: real label, val_b | 95% CI low (seed 42) | 0.7358306653518014 | `amendment11_6_controls.json` | `real/halves/val_b/interval/roc_auc_a/low` |
+| B: real label, val_b | 95% CI high (seed 42) | 0.7633052724122404 | `amendment11_6_controls.json` | `real/halves/val_b/interval/roc_auc_a/high` |
+| B: count-matched, draw_1, val_b | point (seed 42) | 0.564026723504027 | `amendment11_controls.json` | `control/draws/draw_1/val_b/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: count-matched, draw_1, val_b | 95% CI low (seed 42) | 0.5411034175924692 | `amendment11_controls.json` | `control/draws/draw_1/val_b/interval_seed_42/a_prime_roc_auc/low` |
+| B: count-matched, draw_1, val_b | 95% CI high (seed 42) | 0.5848314568150381 | `amendment11_controls.json` | `control/draws/draw_1/val_b/interval_seed_42/a_prime_roc_auc/high` |
+| B: count-matched, draw_1, val_b | seed 43 point (not plotted) | 0.5635628249991388 | `amendment11_controls.json` | `control/draws/draw_1/val_b/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: count-matched, draw_1, val_b | seed 44 point (not plotted) | 0.5733614109726343 | `amendment11_controls.json` | `control/draws/draw_1/val_b/per_model_seed/seed_44/a_prime/roc_auc` |
+| B: count-matched, draw_2, val_b | point (seed 42) | 0.5852971678567181 | `amendment11_controls.json` | `control/draws/draw_2/val_b/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: count-matched, draw_2, val_b | 95% CI low (seed 42) | 0.5559721055929253 | `amendment11_controls.json` | `control/draws/draw_2/val_b/interval_seed_42/a_prime_roc_auc/low` |
+| B: count-matched, draw_2, val_b | 95% CI high (seed 42) | 0.6122071997117015 | `amendment11_controls.json` | `control/draws/draw_2/val_b/interval_seed_42/a_prime_roc_auc/high` |
+| B: count-matched, draw_2, val_b | seed 43 point (not plotted) | 0.5897217773281311 | `amendment11_controls.json` | `control/draws/draw_2/val_b/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: count-matched, draw_2, val_b | seed 44 point (not plotted) | 0.5897449093068836 | `amendment11_controls.json` | `control/draws/draw_2/val_b/per_model_seed/seed_44/a_prime/roc_auc` |
+| B: count-matched, draw_3, val_b | point (seed 42) | 0.5716816951154383 | `amendment11_controls.json` | `control/draws/draw_3/val_b/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: count-matched, draw_3, val_b | 95% CI low (seed 42) | 0.5507893719984853 | `amendment11_controls.json` | `control/draws/draw_3/val_b/interval_seed_42/a_prime_roc_auc/low` |
+| B: count-matched, draw_3, val_b | 95% CI high (seed 42) | 0.5916589813570511 | `amendment11_controls.json` | `control/draws/draw_3/val_b/interval_seed_42/a_prime_roc_auc/high` |
+| B: count-matched, draw_3, val_b | seed 43 point (not plotted) | 0.5702816476048862 | `amendment11_controls.json` | `control/draws/draw_3/val_b/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: count-matched, draw_3, val_b | seed 44 point (not plotted) | 0.5767721961991177 | `amendment11_controls.json` | `control/draws/draw_3/val_b/per_model_seed/seed_44/a_prime/roc_auc` |
+| B: distribution-matched, draw_11, val_b | point (seed 42) | 0.7032710813798777 | `amendment11_6_controls.json` | `draws/draw_11/val_b/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: distribution-matched, draw_11, val_b | 95% CI low (seed 42) | 0.6900911479938056 | `amendment11_6_controls.json` | `draws/draw_11/val_b/interval_seed_42/a_prime_roc_auc/low` |
+| B: distribution-matched, draw_11, val_b | 95% CI high (seed 42) | 0.7159968070109818 | `amendment11_6_controls.json` | `draws/draw_11/val_b/interval_seed_42/a_prime_roc_auc/high` |
+| B: distribution-matched, draw_11, val_b | seed 43 point (not plotted) | 0.6954245007397241 | `amendment11_6_controls.json` | `draws/draw_11/val_b/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: distribution-matched, draw_11, val_b | seed 44 point (not plotted) | 0.6955795802781675 | `amendment11_6_controls.json` | `draws/draw_11/val_b/per_model_seed/seed_44/a_prime/roc_auc` |
+| B: distribution-matched, draw_12, val_b | point (seed 42) | 0.6998297292742648 | `amendment11_6_controls.json` | `draws/draw_12/val_b/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: distribution-matched, draw_12, val_b | 95% CI low (seed 42) | 0.68489553972883 | `amendment11_6_controls.json` | `draws/draw_12/val_b/interval_seed_42/a_prime_roc_auc/low` |
+| B: distribution-matched, draw_12, val_b | 95% CI high (seed 42) | 0.7122569857782213 | `amendment11_6_controls.json` | `draws/draw_12/val_b/interval_seed_42/a_prime_roc_auc/high` |
+| B: distribution-matched, draw_12, val_b | seed 43 point (not plotted) | 0.6895940033374384 | `amendment11_6_controls.json` | `draws/draw_12/val_b/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: distribution-matched, draw_12, val_b | seed 44 point (not plotted) | 0.6940602378970069 | `amendment11_6_controls.json` | `draws/draw_12/val_b/per_model_seed/seed_44/a_prime/roc_auc` |
+| B: distribution-matched, draw_13, val_b | point (seed 42) | 0.700777514569204 | `amendment11_6_controls.json` | `draws/draw_13/val_b/per_model_seed/seed_42/a_prime/roc_auc` |
+| B: distribution-matched, draw_13, val_b | 95% CI low (seed 42) | 0.6872464151031308 | `amendment11_6_controls.json` | `draws/draw_13/val_b/interval_seed_42/a_prime_roc_auc/low` |
+| B: distribution-matched, draw_13, val_b | 95% CI high (seed 42) | 0.7143091070097287 | `amendment11_6_controls.json` | `draws/draw_13/val_b/interval_seed_42/a_prime_roc_auc/high` |
+| B: distribution-matched, draw_13, val_b | seed 43 point (not plotted) | 0.7074718021788462 | `amendment11_6_controls.json` | `draws/draw_13/val_b/per_model_seed/seed_43/a_prime/roc_auc` |
+| B: distribution-matched, draw_13, val_b | seed 44 point (not plotted) | 0.7083813829650348 | `amendment11_6_controls.json` | `draws/draw_13/val_b/per_model_seed/seed_44/a_prime/roc_auc` |
+

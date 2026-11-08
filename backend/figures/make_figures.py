@@ -4,6 +4,7 @@ the frozen system (figures/diagrams.py; every box is traced to a file:line
 at the v3.0.0-frozen tag). Figures 3-6 are drawn from saved results only.
 
 Reads (never writes) results/phase6_primary.json, results/phase6_s1.json,
+results/amendment11_controls.json, results/amendment11_6_controls.json,
 results/phase4b_diag.json and results/phase4b_confirm.json. No metric is
 computed here: every plotted number is read from a JSON path, and the same
 values and paths are written to FIGURE_DATA.md next to the figures.
@@ -351,6 +352,167 @@ def figure6(L, S1, DIAG, CONF):
     save(fig, "fig6_s1_roc_auc", L.sections[-1]["notes"])
 
 
+# ── Figure 6 v2: (A) the three constructions, (B) real vs random labels ─────
+
+AUC_LABEL = "Area under the receiver operating\ncharacteristic curve"
+# Greyscale line art: series differ by fill, hatch and marker shape only.
+MONO = {"font.size": 8, "axes.titlesize": 8, "axes.labelsize": 8, "xtick.labelsize": 8,
+        "ytick.labelsize": 8, "legend.fontsize": 8, "font.family": "Arial"}
+
+
+def figure6_v2(L, S1, DIAG, CONF, C11, C116, OLD6):
+    """OLD6: the {(label, role): value} rows Figure 6 recorded this run; panel A
+    must equal them."""
+    L.section("Figure 6 (v2): leakage replication, constructions (A) and label controls (B)", [
+        "Replacement for Figure 6, two panels, drawn from stored results only; nothing is",
+        "fitted or recomputed. Every value is plotted as stored.",
+        "",
+        "Panel A: the same values and sources as Figure 6 (`fig6_s1_roc_auc.tif`); the",
+        "script asserts each one equals the value Figure 6 recorded in this run.",
+        "val_a and val_b bars: single fits at seed 42, no interval. May bars: mean over",
+        "seeds 42, 43, 44; the error bar is the minimum to maximum over the three seeds,",
+        "a range, not a confidence interval. Bars labelled to 3 decimals.",
+        "",
+        "Panel B: construction (a), the leaky one, scored on val_a and val_b against",
+        "(1) the real attack label, (2) a count-matched random address label (amendment",
+        "11.4, sampling seeds 1, 2, 3) and (3) a distribution-matched random address",
+        "label (amendment 11.6, sampling seeds 11, 12, 13). One mark per draw, draws left",
+        "to right in sampling-seed order; draws are not averaged. Points are the stored",
+        "point areas at model seed 42 (not interval bounds). Error bars are the stored",
+        "95% percentile intervals, 1000 resamples of source addresses (address-clustered",
+        "bootstrap, PCG64(42)); these exist at model seed 42 only and do not cover",
+        "variation over model seeds 43 and 44 (stored, not plotted, listed below).",
+        "Real-label point: `phase4b_diag.json`, the same value as panel A, val_a and",
+        "val_b (a); `amendment11_6_controls.json real/halves/*/roc_auc_stored/a` records",
+        "the same value and source. Its interval is in `amendment11_6_controls.json`.",
+        "",
+        "Both panels: dashed line at 0.5, a reference (chance), not data.",
+        "",
+        "Suggested caption: Figure 6. Area under the receiver operating characteristic",
+        "curve of the leakage replication. (A) The three constructions over all events on",
+        "val_a, val_b (single fits, seed 42, no interval) and the May test month (mean of",
+        "seeds 42 to 44; the bar shows the minimum and maximum across seeds, not a",
+        "confidence interval). (B) Construction (a) on val_a and val_b scored against the",
+        "real attack label and against three count-matched and three distribution-matched",
+        "random address labels, one mark per draw. Points are single fits at model seed",
+        "42; error bars are 95% address-clustered bootstrap intervals, available at model",
+        "seed 42 only, so they do not reflect variation across model seeds. Dashed line:",
+        "0.5.",
+    ])
+    with plt.rc_context(MONO):
+        fig, (axA, axB) = plt.subplots(2, 1, figsize=(15.4 * CM, 15.5 * CM),
+                                       gridspec_kw={"height_ratios": [1, 1], "hspace": 0.5})
+        fig.subplots_adjust(left=0.12, right=0.99)
+
+        # ── panel A ──
+        variants = ("a", "b", "c")
+        names = {"a": "(a) maps and fit:\nnon-attack rows",
+                 "b": "(b) maps: all rows;\nfit: non-attack rows",
+                 "c": "(c) maps and fit:\nall rows (label-free)"}
+        styles = (dict(facecolor="white", hatch=None),
+                  dict(facecolor="white", hatch="////"),
+                  dict(facecolor="#b3b3b3", hatch=None))
+        labels = ("val_a (seed 42)", "val_b (seed 42)",
+                  "May test month (mean of seeds 42 to 44;\nbar: minimum to maximum)")
+        w = 0.26
+        for j, v in enumerate(variants):
+            va = L.row(f"A: ({v}) val_a", "phase4b_diag.json", DIAG,
+                       f"variants/{v}/val_a/roc_auc", "bar")
+            if v == "c":
+                vb = L.row(f"A: ({v}) val_b", "phase4b_confirm.json", CONF,
+                           "d1_c_val_b/roc_auc", "bar")
+            else:
+                vb = L.row(f"A: ({v}) val_b", "phase4b_diag.json", DIAG,
+                           f"variants/{v}/val_b/roc_auc", "bar")
+            p = f"variants/{v}/over_seeds/all/roc_auc"
+            mm = L.row(f"A: ({v}) May", "phase6_s1.json", S1, f"{p}/mean", "bar (seed mean)")
+            mn = L.row(f"A: ({v}) May", "phase6_s1.json", S1, f"{p}/min", "range low (seed min)")
+            mx = L.row(f"A: ({v}) May", "phase6_s1.json", S1, f"{p}/max", "range high (seed max)")
+            for got, key in ((va, (f"({v}) val_a", "bar")), (vb, (f"({v}) val_b", "bar")),
+                             (mm, (f"({v}) May", "bar (seed mean)")),
+                             (mn, (f"({v}) May", "range low (seed min)")),
+                             (mx, (f"({v}) May", "range high (seed max)"))):
+                assert got == OLD6[key], (key, got, OLD6[key])
+            for k, val in enumerate((va, vb, mm)):
+                x = j + (k - 1) * w
+                axA.bar(x, val, width=w - 0.03, label=labels[k] if j == 0 else None,
+                        edgecolor="black", linewidth=0.6, **styles[k])
+                top = val
+                if k == 2:
+                    axA.errorbar(x, val, yerr=[[val - mn], [mx - val]], fmt="none", **ERR)
+                    top = mx
+                axA.text(x, top + 0.012, f"{val:.3f}", ha="center", va="bottom")
+        axA.axhline(0.5, color="black", linestyle=(0, (4, 3)), linewidth=0.7, zorder=0)
+        axA.set_xticks(range(len(variants)), [names[v] for v in variants])
+        axA.tick_params(axis="x", length=0)
+        axA.set_xlim(-0.5, 2.5)
+        axA.set_ylim(0, 1.0)
+        axA.set_ylabel(AUC_LABEL)
+        axA.legend(loc="upper right", ncol=1, handletextpad=0.5, borderaxespad=0.1)
+
+        # ── panel B ──
+        groups = (
+            ("Real attack\nlabel", "o", "black", "phase4b_diag.json", DIAG, None),
+            ("Count-matched\nrandom label\n(draws 1, 2, 3)", "s", "white",
+             "amendment11_controls.json", C11,
+             ("control/draws", ("draw_1", "draw_2", "draw_3"))),
+            ("Distribution-\nmatched random\nlabel (draws\n11, 12, 13)", "^", "#808080",
+             "amendment11_6_controls.json", C116,
+             ("draws", ("draw_11", "draw_12", "draw_13"))),
+        )
+        kind = {"amendment11_controls.json": "count-matched",
+                "amendment11_6_controls.json": "distribution-matched"}
+        ticks, ticklabels = [], []
+        for h, half in enumerate(("val_a", "val_b")):
+            for g, (gname, marker, face, src, doc, draws) in enumerate(groups):
+                xc = h * 4.6 + g * 1.4
+                ticks.append(xc)
+                ticklabels.append(gname)
+                if draws is None:
+                    pts = [(None, xc,
+                            L.row(f"B: real label, {half}", src, doc,
+                                  f"variants/a/{half}/roc_auc", "point (seed 42)"),
+                            L.row(f"B: real label, {half}", "amendment11_6_controls.json", C116,
+                                  f"real/halves/{half}/interval/roc_auc_a/low", "95% CI low (seed 42)"),
+                            L.row(f"B: real label, {half}", "amendment11_6_controls.json", C116,
+                                  f"real/halves/{half}/interval/roc_auc_a/high", "95% CI high (seed 42)"))]
+                    assert get(C116, f"real/halves/{half}/roc_auc_stored/a/value") == pts[0][2]
+                    assert get(C116, f"real/halves/{half}/model_seed") == 42
+                else:
+                    root, names_ = draws
+                    pts = []
+                    for d, dr in enumerate(names_):
+                        base = f"{root}/{dr}/{half}"
+                        lab = f"B: {kind[src]}, {dr}, {half}"
+                        assert get(doc, f"{base}/interval_seed_42/model_seed") == 42
+                        pt = L.row(lab, src, doc, f"{base}/per_model_seed/seed_42/a_prime/roc_auc",
+                                   "point (seed 42)")
+                        lo = L.row(lab, src, doc, f"{base}/interval_seed_42/a_prime_roc_auc/low",
+                                   "95% CI low (seed 42)")
+                        hi = L.row(lab, src, doc, f"{base}/interval_seed_42/a_prime_roc_auc/high",
+                                   "95% CI high (seed 42)")
+                        for s in (43, 44):
+                            L.row(lab, src, doc, f"{base}/per_model_seed/seed_{s}/a_prime/roc_auc",
+                                  f"seed {s} point (not plotted)")
+                        pts.append((dr, xc + (d - 1) * 0.24, pt, lo, hi))
+                for _, x, pt, lo, hi in pts:
+                    axB.errorbar(x, pt, yerr=[[pt - lo], [hi - pt]], fmt=marker, ms=5,
+                                 mfc=face, mec="black", mew=0.7, **ERR)
+            axB.text(h * 4.6 + 1.4, -0.40, half, transform=axB.get_xaxis_transform(),
+                     ha="center", va="top", fontweight="bold")
+        axB.axhline(0.5, color="black", linestyle=(0, (4, 3)), linewidth=0.7, zorder=0)
+        axB.set_xticks(ticks, ticklabels)
+        axB.tick_params(axis="x", length=0)
+        axB.set_xlim(-0.6, 4.6 + 2.8 + 0.6)
+        axB.set_ylim(0.4, 0.85)
+        axB.set_ylabel(AUC_LABEL)
+
+        for ax, letter in ((axA, "A"), (axB, "B")):
+            ax.text(-0.11, 1.0, letter, transform=ax.transAxes, ha="left", va="bottom",
+                    fontweight="bold")
+        save(fig, "fig6_v2_constructions_and_controls", L.sections[-1]["notes"])
+
+
 def main():
     P = load("phase6_primary.json")
     S1 = load("phase6_s1.json")
@@ -361,7 +523,8 @@ def main():
     global WRITE
     stems = {"1": FIG1_STEM, "2": FIG2_STEM,
              "3": "fig3_detector_precision_new_vs_returning", "4": "fig4_budget_curve_T2_vs_T0",
-             "5": "fig5_stepup_precision", "6": "fig6_s1_roc_auc"}
+             "5": "fig5_stepup_precision", "6": "fig6_s1_roc_auc",
+             "6v2": "fig6_v2_constructions_and_controls"}
     WRITE = {stems[k] for k in sys.argv[1:]} if sys.argv[1:] else None
     L = Ledger()
     figure1(L, save)
@@ -370,6 +533,9 @@ def main():
     figure4(L, P)
     figure5(L, P)
     figure6(L, S1, DIAG, CONF)
+    old6 = {(lab, role): v for lab, role, v, _, _ in L.sections[-1]["rows"]}
+    figure6_v2(L, S1, DIAG, CONF, load("amendment11_controls.json"),
+               load("amendment11_6_controls.json"), old6)
     (HERE / "FIGURE_DATA.md").write_text(L.markdown() + "\n", encoding="utf-8")
 
 
